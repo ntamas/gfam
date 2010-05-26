@@ -1,0 +1,6 @@
+*.pyc
+.*.swp
+data/*
+work/*
+*.egg-info
+domain_architectures.zip
