@@ -1,0 +1,5 @@
+TODO:
+
+- make domain overlap size limit configurable
+- refactor everything to use a proper config file
+- make the phases configurable

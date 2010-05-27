@@ -8,7 +8,8 @@ from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything
 
 class BlastFilterApp(CommandLineApp):
-    """Usage: %prog [options] [result_file]
+    """\
+    Usage: %prog [options] [result_file]
 
     Filters the given BLAST result file (which must be in tabular
     format) and drops matches not satisfying the criteria given

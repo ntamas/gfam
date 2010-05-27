@@ -8,7 +8,8 @@ from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything, Sequence, UniversalSet
 
 class CoverageApp(CommandLineApp):
-    """Usage: %prog [options] [file]
+    """\
+    Usage: %prog [options] [file]
 
     Calculates the overall coverage of each sequence in the given
     InterPro assignment file"""

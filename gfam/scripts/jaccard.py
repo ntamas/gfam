@@ -8,7 +8,8 @@ from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything
 
 class JaccardSimilarityApp(CommandLineApp):
-    """Usage: %prog [options] [input_file]
+    """\
+    Usage: %prog [options] [input_file]
 
     Calculates the Jaccard similarity of gene pairs from an input
     file. It is assumed that each gene is linked to itself.

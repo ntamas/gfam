@@ -3,10 +3,11 @@
 
 GO_TREE_FILE=data/gene_ontology.obo
 
-TAIR_DOMAINS_FILE=data/tair9_iprscan1_0323_no_seg_no_coil.out.gz
-TAIR_SEQUENCES_FILE=data/TAIR9_pep_20090619_representative_gene_model.txt
+TAIR_DOMAINS_FILE=data/a.thaliana/tair9_iprscan1_0323_no_seg_no_coil.out.gz
+TAIR_SEQUENCES_FILE=data/a.thaliana/TAIR9_pep_20090619_representative_gene_model.txt
 
 INTERPRO_NAMES_FILE=data/names.dat
+INTERPRO_PARENT_CHILD_FILE=data/ParentChildTreeFile.txt
 INTERPRO_GO_MAPPING_FILE=data/interpro2go
 
 BLAST_DIR=/home/local/tamas/src/blast/current/bin
@@ -73,11 +74,11 @@ work/coverage_comparison.txt: $(TAIR_DOMAINS_FILE) work/filtered_assignments.txt
 	$(PYTHON) -m gfam.scripts.coverage -x "$(IGNORED_SOURCES)" --gene-ids work/gene_ids.txt work/filtered_assignments.txt | sort >work/coverage_selected.txt
 	join -j 1 -t ' ' work/coverage_all.txt work/coverage_selected.txt | sed -e 's/ /\t/g' >$@
 
-work/filtered_assignments.txt: $(TAIR_DOMAINS_FILE) work/gene_ids.txt bin/assignment_source_filter.py data/ParentChildTreeFile.txt
-	zcat $< | bin/assignment_source_filter.py -x "$(IGNORED_SOURCES)" -e "$(INTERPRO_ASSIGNMENT_E_VALUE_THRESHOLDS)" -i data/ParentChildTreeFile.txt --gene-ids work/gene_ids.txt >$@
+work/filtered_assignments.txt: $(TAIR_DOMAINS_FILE) $(INTERPRO_PARENT_CHILD_FILE) work/gene_ids.txt bin/assignment_source_filter.py
+	$(PYTHON) -m gfam.scripts.assignment_source_filter -x "$(IGNORED_SOURCES)" -e "$(INTERPRO_ASSIGNMENT_E_VALUE_THRESHOLDS)" -i $(INTERPRO_PARENT_CHILD_FILE) --gene-ids work/gene_ids.txt $< >$@
 
-work/unassigned_fragments.tab: work/filtered_assignments.txt $(TAIR_SEQUENCES_FILE) bin/find_unassigned.py
-	bin/find_unassigned.py -l $(MINIMUM_SEQ_LENGTH) -f $(MINIMUM_DOMAIN_CANDIDATE_LENGTH) -S $(TAIR_SEQUENCES_FILE) <$< >$@
+work/unassigned_fragments.tab: work/filtered_assignments.txt $(TAIR_SEQUENCES_FILE)
+	$(PYTHON) -m gfam.scripts.find_unassigned -l $(MINIMUM_SEQ_LENGTH) -f $(MINIMUM_DOMAIN_CANDIDATE_LENGTH) -S $(TAIR_SEQUENCES_FILE) <$< >$@
 
 work/unassigned_fragments.ffa: work/unassigned_fragments.tab $(TAIR_SEQUENCES_FILE)
 	$(PYTHON) -m gfam.scripts.seqslicer -i $< $(TAIR_SEQUENCES_FILE) >$@
@@ -98,7 +99,7 @@ work/relevant_matches_cca.tab: work/relevant_matches_jaccard.tab
 	$(SCPS) -m cca --param epsilon=$(MINIMUM_JACCARD_SIMILARITY) -f plain_compressed $< >$@
 
 work/domain_architectures.tab: work/filtered_assignments.txt bin/find_domain_architecture.py work/relevant_matches_cca.tab $(TAIR_SEQUENCES_FILE) $(INTERPRO_NAMES_FILE)
-	bin/find_domain_architecture.py -n $(INTERPRO_NAMES_FILE) -i data/ParentChildTreeFile.txt -d work/domain_architecture_details.txt -S $(TAIR_SEQUENCES_FILE) -s $(MINIMUM_NOVEL_DOMAIN_SIZE) - work/relevant_matches_cca.tab <$< >$@
+	$(PYTHON) -m gfam.scripts.find_domain_arch -n $(INTERPRO_NAMES_FILE) -i $(INTERPRO_PARENT_CHILD_FILE) -d work/domain_architecture_details.txt -S $(TAIR_SEQUENCES_FILE) -s $(MINIMUM_NOVEL_DOMAIN_SIZE) $< work/relevant_matches_cca.tab >$@
 
 work/overrepresentation_analysis.txt: work/domain_architectures.tab $(GO_TREE_FILE) $(INTERPRO_GO_MAPPING_FILE)
 	$(PYTHON) -m gfam.scripts.overrep $(GO_TREE_FILE) $(INTERPRO_GO_MAPPING_FILE) $< >$@

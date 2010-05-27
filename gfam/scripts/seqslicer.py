@@ -10,7 +10,8 @@ from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything
 
 class SeqSlicerApp(CommandLineApp):
-    """Usage: %prog [options] [slice_file] sequences_file
+    """\
+    Usage: %prog [options] [slice_file] sequences_file
 
     Given a sequence database in FASTA format and a list of regions
     to be sliced from those sequences, generates another FASTA file
