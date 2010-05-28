@@ -7,6 +7,11 @@ from gfam.interpro import AssignmentParser
 from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything, Sequence, UniversalSet
 
+__author__  = "Tamas Nepusz"
+__email__   = "tamas@cs.rhul.ac.uk"
+__copyright__ = "Copyright (c) 2010, Tamas Nepusz"
+__license__ = "GPL"
+
 class CoverageApp(CommandLineApp):
     """\
     Usage: %prog [options] [file]

@@ -11,6 +11,11 @@ from gfam.interpro import InterPro2GOMapping
 from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything
 
+__author__  = "Tamas Nepusz"
+__email__   = "tamas@cs.rhul.ac.uk"
+__copyright__ = "Copyright (c) 2010, Tamas Nepusz"
+__license__ = "GPL"
+
 class OverrepresentationAnalysisApp(CommandLineApp):
     """\
     Usage: %prog [options] [go_tree_file] [go_mapping_file] [input_file]

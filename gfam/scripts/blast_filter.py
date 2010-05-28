@@ -7,6 +7,11 @@ from gfam.blast import BlastFilter
 from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything
 
+__author__  = "Tamas Nepusz"
+__email__   = "tamas@cs.rhul.ac.uk"
+__copyright__ = "Copyright (c) 2010, Tamas Nepusz"
+__license__ = "GPL"
+
 class BlastFilterApp(CommandLineApp):
     """\
     Usage: %prog [options] [result_file]

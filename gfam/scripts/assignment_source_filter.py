@@ -10,6 +10,11 @@ from gfam.interpro import AssignmentParser, InterPro
 from gfam.scripts import CommandLineApp
 from gfam.utils import EValueFilter, UniversalSet, Sequence, open_anything
 
+__author__  = "Tamas Nepusz"
+__email__   = "tamas@cs.rhul.ac.uk"
+__copyright__ = "Copyright (c) 2010, Tamas Nepusz"
+__license__ = "GPL"
+
 class AssignmentSourceFilterApp(CommandLineApp):
     """\
     Usage: %prog [options] [assignment_file]

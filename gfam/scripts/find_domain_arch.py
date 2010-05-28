@@ -14,6 +14,11 @@ from gfam.scripts import CommandLineApp
 from gfam.scripts.find_unassigned import FindUnassignedApp
 from gfam.utils import Sequence
 
+__author__  = "Tamas Nepusz"
+__email__   = "tamas@cs.rhul.ac.uk"
+__copyright__ = "Copyright (c) 2010, Tamas Nepusz"
+__license__ = "GPL"
+
 class FindDomainArchitectureApp(CommandLineApp):
     """\
     Usage: %prog [options] interpro_file clustering_file

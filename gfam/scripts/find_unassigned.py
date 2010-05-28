@@ -13,6 +13,11 @@ from gfam.interpro import AssignmentReader
 from gfam.scripts import CommandLineApp
 from gfam.utils import Sequence, open_anything
 
+__author__  = "Tamas Nepusz"
+__email__   = "tamas@cs.rhul.ac.uk"
+__copyright__ = "Copyright (c) 2010, Tamas Nepusz"
+__license__ = "GPL"
+
 class FindUnassignedApp(CommandLineApp):
     """\
     Usage: %prog [options]
