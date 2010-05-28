@@ -11,6 +11,7 @@ __all__ = ["Assignment", "EValueFilter", "open_anything", \
 import bz2
 import gzip
 import sys
+import urllib2
 
 from collections import namedtuple
 
@@ -293,12 +294,18 @@ class Sequence(object):
 def open_anything(fname, *args, **kwds):
     """Opens the given file. The file may be given as a file object
     or a filename. If the filename ends in .bz2 or .gz, it will
-    automatically be decompressed on the fly. A single dash in
-    place of the filename means the standard input."""
+    automatically be decompressed on the fly. If the filename starts
+    with ``http://``, ``https://`` or ``ftp://`` and there is no
+    other argument given, the remote URL will be opened for reading.
+    A single dash in place of the filename means the standard input.
+    """
     if isinstance(fname, file):
         infile = fname
     elif fname == "-":
         infile = sys.stdin
+    elif (fname.startswith("http://") or fname.startswith("ftp://") or \
+         fname.startswith("https://")) and not kwds and not args:
+        infile = urllib2.urlopen(fname)
     elif fname[-4:] == ".bz2":
         infile = bz2.BZ2File(fname, *args, **kwds)
     elif fname[-3:] == ".gz":

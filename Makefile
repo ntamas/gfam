@@ -7,8 +7,8 @@ TAIR_DOMAINS_FILE=data/a.thaliana/tair9_iprscan1_0323_no_seg_no_coil.out.gz
 TAIR_SEQUENCES_FILE=data/a.thaliana/TAIR9_pep_20090619_representative_gene_model.txt
 
 INTERPRO_NAMES_FILE=data/names.dat
-INTERPRO_PARENT_CHILD_FILE=data/ParentChildTreeFile.txt
-INTERPRO_GO_MAPPING_FILE=data/interpro2go
+INTERPRO_PARENT_CHILD_FILE=ftp://ftp.ebi.ac.uk/pub/databases/interpro/ParentChildTreeFile.txt
+INTERPRO_GO_MAPPING_FILE=http://www.geneontology.org/external2go/interpro2go
 
 BLAST_DIR=/home/local/tamas/src/blast/current/bin
 SCPS_DIR=/home/local/tamas/bzr/clusterix/build/src/ui/cmdline
@@ -98,7 +98,7 @@ work/relevant_matches_jaccard.tab: work/relevant_matches.blast
 work/relevant_matches_cca.tab: work/relevant_matches_jaccard.tab
 	$(SCPS) -m cca --param epsilon=$(MINIMUM_JACCARD_SIMILARITY) -f plain_compressed $< >$@
 
-work/domain_architectures.tab: work/filtered_assignments.txt bin/find_domain_architecture.py work/relevant_matches_cca.tab $(TAIR_SEQUENCES_FILE) $(INTERPRO_NAMES_FILE)
+work/domain_architectures.tab: work/filtered_assignments.txt
 	$(PYTHON) -m gfam.scripts.find_domain_arch -n $(INTERPRO_NAMES_FILE) -i $(INTERPRO_PARENT_CHILD_FILE) -d work/domain_architecture_details.txt -S $(TAIR_SEQUENCES_FILE) -s $(MINIMUM_NOVEL_DOMAIN_SIZE) $< work/relevant_matches_cca.tab >$@
 
 work/overrepresentation_analysis.txt: work/domain_architectures.tab $(GO_TREE_FILE) $(INTERPRO_GO_MAPPING_FILE)
