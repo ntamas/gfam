@@ -2,10 +2,10 @@
 Classes and utilities commonly used in GFam command line scripts
 """
 
-import logging
-import optparse
-
+from gfam.config import ConfigurableOptionParser
 from textwrap import dedent
+
+import logging
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -24,7 +24,7 @@ class CommandLineApp(object):
     def create_parser(self):
         """Creates a command line parser for the application"""
         doc = self.__class__.__doc__
-        parser = optparse.OptionParser(usage=dedent(doc).strip())
+        parser = ConfigurableOptionParser(usage=dedent(doc).strip())
         parser.add_option("-v", "--verbose", dest="verbose",
                 action="store_true", help="verbose logging")
         return parser

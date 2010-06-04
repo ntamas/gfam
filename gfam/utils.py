@@ -1,4 +1,4 @@
-"""Common routines and utility classes for HyFam"""
+"""Common routines and utility classes for GFam"""
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
