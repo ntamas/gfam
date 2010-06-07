@@ -63,6 +63,10 @@ class FindDomainArchitectureApp(CommandLineApp):
                 help="use the given FILE to assign InterPro IDs to names",
                 config_key="file.mapping.interpro2name",
                 default=None)
+        parser.add_option("-r", "--seq-id-regexp", metavar="REGEXP",
+                help="remap sequence IDs using REGEXP",
+                config_key="sequence_id_regexp",
+                dest="sequence_id_regexp")
         return parser
 
     def run_real(self):
@@ -117,6 +121,7 @@ class FindDomainArchitectureApp(CommandLineApp):
 
     def process_interpro_file(self, interpro_file):
         unassigned_app = FindUnassignedApp()
+        unassigned_app.set_sequence_id_regexp(self.options.sequence_id_regexp)
         unassigned_app.process_sequences_file(self.options.sequences_file)
         unassigned_app.process_infile(interpro_file)
         self.seqcat = unassigned_app.seqcat

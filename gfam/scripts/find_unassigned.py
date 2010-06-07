@@ -66,6 +66,7 @@ class FindUnassignedApp(CommandLineApp):
         return parser
 
     def run_real(self):
+        self.set_sequence_id_regexp(self.options.sequence_id_regexp)
         self.process_sequences_file(self.options.sequences_file)
 
         for infile in (self.args or ["-"]):
@@ -77,7 +78,7 @@ class FindUnassignedApp(CommandLineApp):
         self.seq_ids_to_length = {}
         parser = fasta.Parser(open_anything(fname))
         parser = fasta.regexp_remapper(parser,
-                self.options.sequence_id_regexp,
+                self.sequence_id_regexp
         )
         for seq in parser:
             self.seq_ids_to_length[seq.id] = len(seq.seq)
@@ -103,6 +104,9 @@ class FindUnassignedApp(CommandLineApp):
                 print "%s\t%d\t%d" % (seqID, start, end)
         for seqID in set(self.seq_ids_to_length.keys()) - set(self.seqcat.keys()):
             print "%s\t1\t%d" % (seqID, self.seq_ids_to_length[seqID])
+
+    def set_sequence_id_regexp(self, regexp):
+        self.sequence_id_regexp = regexp
 
 
 if __name__ == "__main__":
