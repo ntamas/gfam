@@ -91,8 +91,6 @@ class Writer(object):
     def write(self, seq_record):
         if seq_record.description:
             print ">%s" % seq_record.description
-        elif seq_record.name:
-            print ">%s|%s" % (seq_record.id, seq_record.name)
         else:
             print ">%s" % (seq_record.id, )
         print "\n".join(self.wrapper.wrap(seq_record.seq))

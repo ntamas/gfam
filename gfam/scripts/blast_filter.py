@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import optparse
 import sys
 
 from gfam.blast import BlastFilter
