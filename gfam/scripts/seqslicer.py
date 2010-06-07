@@ -58,6 +58,7 @@ class SeqSlicerApp(CommandLineApp):
 
     def load_sequences(self, seq_file):
         """Loads the sequences from the given sequence file in FASTA format"""
+        self.log.info("Loading sequences from %s..." % seq_file)
         self.seqs = fasta.Parser.to_dict(open_anything(seq_file))
 
     def run_real(self):
@@ -78,6 +79,8 @@ class SeqSlicerApp(CommandLineApp):
 
     def process_file(self, slice_file):
         """Processes the given slice file"""
+        self.log.info("Processing input file: %s..." % slice_file)
+
         writer = fasta.Writer(sys.stdout)
 
         for line in open_anything(slice_file):

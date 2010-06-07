@@ -40,13 +40,13 @@ class CommandLineApp(object):
         logging.basicConfig(level=logging.DEBUG, format="%(message)s")
         return log
 
-    def run(self):
+    def run(self, args=None):
         """Runs the application. This method processes the command line using the
         command line parser and as such, it should not be overridden in child
         classes unless you know what you are doing. If you want to implement
         the actual logic of your application, override `run_real` instead."""
         self.parser = self.create_parser()
-        self.options, self.args = self.parser.parse_args()
+        self.options, self.args = self.parser.parse_args(args)
 
         if self.options.verbose:
             self.log.setLevel(logging.INFO)

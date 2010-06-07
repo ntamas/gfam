@@ -21,7 +21,7 @@ class ExtractGeneIDsApp(CommandLineApp):
     def run_real(self):
         """Runs the application"""
         if not self.args:
-            infiles = [sys.stdin]
+            infiles = ["-"]
         else:
             infiles = self.args
 
@@ -30,12 +30,9 @@ class ExtractGeneIDsApp(CommandLineApp):
 
     def process_file(self, filename):
         """Processes the given input file"""
+        self.log.info("Processing %s..." % filename)
         for seq in fasta.Parser(open_anything(filename)):
             print seq.id
-
-
-def run(parameters):
-    print "Running, yay"
 
 
 if __name__ == "__main__":
