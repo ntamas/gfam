@@ -67,7 +67,7 @@ coverage: work/coverage_comparison.txt
 overrep: work/overrepresentation_analysis.txt
 
 work/gene_ids.txt: $(TAIR_SEQUENCES_FILE)
-	grep "^>" $< | cut -d ' ' -f 1 | tr -d '>' >$@
+	$(PYTHON) -m gfam.scripts.extract_gene_ids $< >$@
 
 work/filtered_assignments.txt: $(TAIR_DOMAINS_FILE) $(INTERPRO_PARENT_CHILD_FILE) work/gene_ids.txt bin/assignment_source_filter.py
 	$(PYTHON) -m gfam.scripts.assignment_source_filter -c $(CONFIG_FILE) $< >$@
