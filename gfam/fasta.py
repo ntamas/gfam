@@ -89,8 +89,13 @@ class Writer(object):
         self.wrapper = TextWrapper(width=70)
 
     def write(self, seq_record):
-        print ">%s" % seq_record.description
-        print self.wrapper.wrap(seq_record.seq)
+        if seq_record.description:
+            print ">%s" % seq_record.description
+        elif seq_record.name:
+            print ">%s|%s" % (seq_record.id, seq_record.name)
+        else:
+            print ">%s" % (seq_record.id, )
+        print "\n".join(self.wrapper.wrap(seq_record.seq))
 
 
 def test():
