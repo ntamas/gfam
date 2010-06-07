@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
-import optparse
 import sys
 
-from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
 from collections import defaultdict
 from gfam.interpro import AssignmentParser, InterPro
 from gfam.scripts import CommandLineApp
@@ -49,18 +46,22 @@ class AssignmentSourceFilterApp(CommandLineApp):
         parser.add_option("-x", "--exclude", dest="ignored",
                 metavar="SOURCE",
                 help="add SOURCE to the list of ignored sources",
+                config_key="analysis:iprscan_filter/untrusted_sources",
                 action="append", default=[])
         parser.add_option("-e", "--e-value", dest="max_e",
                 metavar="THRESHOLD",
                 help="E-value THRESHOLD to filter assignments",
+                config_key="analysis:iprscan_filter/e_value_thresholds",
                 default="inf")
         parser.add_option("-i", "--interpro-file", dest="interpro_file",
                 metavar="FILE",
                 help="use the InterPro parent-child FILE to remap IDs",
+                config_key="analysis:iprscan_filter/interpro_parent_child_mapping",
                 default=None)
         parser.add_option("-g", "--gene-ids", dest="gene_id_file",
                 metavar="FILE", help="only consider those IDs which "+
                    "are present in the list in the given FILE",
+                config_key="generated/file.valid_gene_ids",
                 default=None)
         return parser
 
@@ -83,8 +84,8 @@ class AssignmentSourceFilterApp(CommandLineApp):
             self.valid_sequence_ids = UniversalSet()
 
         self.ignored = set()
-        for t in self.options.ignored:
-            parts = t.split()
+        for ignored_source in self.options.ignored:
+            parts = ignored_source.split()
             self.ignored.update(parts)
 
         if not self.args:

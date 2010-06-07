@@ -8,7 +8,7 @@ import bisect
 import optparse
 import sys
 
-from Bio import SeqIO
+from gfam import fasta
 from gfam.interpro import AssignmentReader
 from gfam.scripts import CommandLineApp
 from gfam.utils import Sequence, open_anything
@@ -47,14 +47,17 @@ class FindUnassignedApp(CommandLineApp):
         parser.add_option("-l", "--min-length", dest="min_length",
                 metavar="LENGTH",
                 help="minimum sequence LENGTH needed for a sequence in order to include its fragments in the output",
+                config_key="analysis:find_unassigned/min_seq_length",
                 default=0, type=int)
         parser.add_option("-f", "--min-fragment-length", dest="min_fragment_length",
                 metavar="LENGTH",
                 help="minimum fragment LENGTH needed in the output",
+                config_key="analysis:find_unassigned/min_fragment_length",
                 default=0, type=int)
         parser.add_option("-S", "--sequences",
                 dest="sequences_file", metavar="FILE",
                 help="FASTA file containing all the sequences of the representative gene model",
+                config_key="analysis:find_unassigned/sequences_file",
                 default=None)
         return parser
 
@@ -68,7 +71,7 @@ class FindUnassignedApp(CommandLineApp):
 
     def process_sequences_file(self, fname):
         self.seq_ids_to_length = {}
-        for seq in SeqIO.parse(open_anything(fname), "fasta"):
+        for seq in fasta.Parser(open_anything(fname)):
             self.seq_ids_to_length[seq.id] = len(seq.seq)
 
     def process_infile(self, fname):

@@ -34,7 +34,7 @@ class ConfigurableOption(Option):
         the value of this option."""
         if self.config_key is None:
             return None, None
-        parts = self.config_key.split(".", 1)
+        parts = self.config_key.split("/", 1)
         if len(parts) == 1:
             return "DEFAULT", parts[0]
         if not parts[0]:
@@ -71,8 +71,8 @@ class ConfigurableOptionParser(OptionParser):
     command line, this option parser will try to look up the corresponding
     configuration key in the given configuration file.
 
-    Configuration keys must be specified in dotted format (i.e.
-    ``section.item``).
+    Configuration keys must be specified in slashed format (i.e.
+    ``section/item``).
     """
 
     def __init__(self, *args, **kwds):

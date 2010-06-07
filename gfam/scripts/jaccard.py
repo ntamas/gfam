@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import optparse
 import sys
 
 from collections import defaultdict
@@ -37,12 +36,15 @@ class JaccardSimilarityApp(CommandLineApp):
         parser = super(JaccardSimilarityApp, self).create_parser()
         parser.add_option("-n", "--no-loops", dest="add_loops",
                 action="store_false", default=True,
+                config_key="analysis:jaccard/assume_loops",
                 help="don't assume that a protein is connected to itself")
         parser.add_option("-l", "--only-linked", dest="only_linked",
                 action="store_true", default=False,
+                config_key="analysis:jaccard/only_linked",
                 help="report only those pairs that are linked in the input file")
         parser.add_option("-m", "--min-similarity", dest="min_similarity",
                 default=0, type=float, metavar="VALUE",
+                config_key="analysis:jaccard/min_similarity",
                 help="report only pairs with similarity not less than VALUE")
         return parser
 

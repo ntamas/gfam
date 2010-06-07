@@ -4,8 +4,8 @@
 import optparse
 import sys
 
-from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
+from gfam import fasta
+from gfam.sequence import SeqRecord
 from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything
 
@@ -58,11 +58,7 @@ class SeqSlicerApp(CommandLineApp):
 
     def load_sequences(self, seq_file):
         """Loads the sequences from the given sequence file in FASTA format"""
-        if isinstance(seq_file, (str, unicode)) and hasattr(SeqIO, "index"):
-            self.seqs = SeqIO.index(seq_file, "fasta")
-        else:
-            seq_file = open_anything(seq_file)
-            self.seqs = SeqIO.to_dict(SeqIO.parse(seq_file, "fasta"))
+        self.seqs = fasta.Parser.to_dict(open_anything(seq_file))
 
     def run_real(self):
         """Runs the application and returns the exit code"""
@@ -82,6 +78,8 @@ class SeqSlicerApp(CommandLineApp):
 
     def process_file(self, slice_file):
         """Processes the given slice file"""
+        writer = fasta.Writer(sys.stdout)
+
         for line in open_anything(slice_file):
             parts = line.strip().split()
             if not parts:
@@ -117,7 +115,7 @@ class SeqSlicerApp(CommandLineApp):
 
             new_record = SeqRecord(record.seq[(start-1):end],
                     id=new_id, name=record.name, description="")
-            SeqIO.write([new_record], sys.stdout, "fasta")
+            writer.write(new_record)
 
 
 if __name__ == "__main__":

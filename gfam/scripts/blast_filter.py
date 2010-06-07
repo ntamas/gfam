@@ -27,13 +27,13 @@ class BlastFilterApp(CommandLineApp):
         parser.add_option("-s", "--sequence-identity",
                 dest="sequence_identity", metavar="PERCENTAGE",
                 type=float, default=0,
-                config_key="analysis:blast.min_seq_identity",
+                config_key="analysis:blast/min_seq_identity",
                 help="drop matches with sequence identity smaller "
                      "than the given PERCENTAGE")
         parser.add_option("-l", "--alignment-length",
                 dest="alignment_length", metavar="LENGTH",
                 type=float, default=0,
-                config_key="analysis:blast.min_alignment_length",
+                config_key="analysis:blast/min_alignment_length",
                 help="drop matches with alignment length less "
                      "than the given LENGTH")
         parser.add_option("-n", "--normalize",
@@ -41,18 +41,19 @@ class BlastFilterApp(CommandLineApp):
                 metavar="METHOD", type="choice",
                 choices=["off", "query", "hit", "smaller", "larger"], 
                 default="off",
-                config_key="analysis:blast.normalization_method",
+                config_key="analysis:blast/normalization_method",
                 help="normalize the alignment length to between 0 and 1 "
                      "by dividing it with the length of the sequence given "
                      "by METHOD (smaller, larger, query or hit)")
         parser.add_option("-e", "--max-e-value", dest="max_e_value",
                 metavar="VALUE", type=float, default=100,
-                config_key="analysis:blast.max_e_value",
+                config_key="analysis:blast/max_e_value",
                 help="drop matches with an E-value less than the given VALUE")
         parser.add_option("-S", "--sequences",
                 dest="sequences_file", metavar="FILE",
                 help="FASTA file containing all the sequences used by BLAST. "
                      "This is necessary if -n is used.",
+                config_key="generated/file.unassigned_fragments",
                 default=None)
         return parser
 
@@ -63,7 +64,6 @@ class BlastFilterApp(CommandLineApp):
         else:
             infiles = self.args
 
-        print self.options.max_e_value
         filter = self.construct_blast_filter()
         for infile in infiles:
             self.process_file(infile, filter)

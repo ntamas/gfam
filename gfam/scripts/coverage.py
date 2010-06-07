@@ -26,10 +26,12 @@ class CoverageApp(CommandLineApp):
         parser.add_option("-x", "--exclude", dest="ignored",
                 metavar="SOURCE",
                 help="ignore the given assignment source",
+                config_key="analysis:coverage/untrusted_sources",
                 action="append", default=[])
         parser.add_option("-g", "--gene-ids", dest="gene_id_file",
                 metavar="FILE", help="only consider those gene IDs which "+
                    "are present in the list in the given FILE",
+                config_key="generated/file.valid_gene_ids",
                 default=None)
         return parser
 

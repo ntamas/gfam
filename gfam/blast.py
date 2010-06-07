@@ -7,8 +7,7 @@ __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
-from Bio import SeqIO
-
+from gfam import fasta
 from gfam.utils import open_anything
 
 class BlastFilter(object):
@@ -75,8 +74,7 @@ class BlastFilter(object):
         """Loads the sequences from the given file. The file must
         be in FASTA format. You are allowed to pass file pointers
         or names of gzipped/bzipped files here."""
-        parser = SeqIO.parse(open_anything(fname), "fasta")
-        return self.load_sequences(parser)
+        return self.load_sequences(fasta.Parser(open_anything(fname)))
 
     def _normalize_smaller(self, query_id, hit_id, length):
         """Calculates a normalized alignment length by dividing the
