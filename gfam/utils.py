@@ -6,7 +6,8 @@ __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
 __all__ = ["Assignment", "EValueFilter", "open_anything", \
-           "Sequence", "UniqueIdGenerator", "UniversalSet"]
+           "redirected", "Sequence", "UniqueIdGenerator", \
+           "UniversalSet"]
 
 import bz2
 import gzip
@@ -14,6 +15,7 @@ import sys
 import urllib2
 
 from collections import namedtuple
+from contextlib import contextmanager
 
 # pylint: disable-msg=C0103
 class Assignment(namedtuple("Assignment", \
@@ -313,6 +315,34 @@ def open_anything(fname, *args, **kwds):
     else:
         infile = open(fname, *args, **kwds)
     return infile
+
+
+@contextmanager
+def redirected(stdin=None, stdout=None, stderr=None):
+    """Temporarily redirects some of the input/output streams.
+
+    `stdin` is the new standard input, `stdout` is the new standard output,
+    `stderr` is the new standard error. ``None`` means to leave the
+    corresponding stream unchanged.
+    
+    Example::
+    
+        with redirected(stdout=open("test.txt", "w")):
+            print "Yay, redirected to a file!"
+    """
+    loc = locals()
+    stream_names = ["stdin", "stdout", "stderr"]
+    old_streams = {}
+    try:
+        for sname in stream_names:
+            stream = loc.get(sname, None)
+            if stream is not None and stream != getattr(sys, sname):
+                old_streams[sname] = getattr(sys, sname)
+                setattr(sys, sname, loc.get(sname, None))
+        yield
+    finally:
+        for sname, stream in old_streams.iteritems():
+            setattr(sys, sname, stream)
 
 
 class UniqueIdGenerator(object):
