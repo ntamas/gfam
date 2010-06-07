@@ -54,6 +54,10 @@ class FindUnassignedApp(CommandLineApp):
                 help="minimum fragment LENGTH needed in the output",
                 config_key="analysis:find_unassigned/min_fragment_length",
                 default=0, type=int)
+        parser.add_option("-r", "--seq-id-regexp", metavar="REGEXP",
+                help="remap sequence IDs using REGEXP",
+                config_key="sequence_id_regexp",
+                dest="sequence_id_regexp")
         parser.add_option("-S", "--sequences",
                 dest="sequences_file", metavar="FILE",
                 help="FASTA file containing all the sequences of the representative gene model",
@@ -71,7 +75,11 @@ class FindUnassignedApp(CommandLineApp):
 
     def process_sequences_file(self, fname):
         self.seq_ids_to_length = {}
-        for seq in fasta.Parser(open_anything(fname)):
+        parser = fasta.Parser(open_anything(fname))
+        parser = fasta.regexp_remapper(parser,
+                self.options.sequence_id_regexp,
+        )
+        for seq in parser:
             self.seq_ids_to_length[seq.id] = len(seq.seq)
 
     def process_infile(self, fname):

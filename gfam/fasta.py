@@ -5,10 +5,12 @@ __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
-__all__ = ["Parser", "Writer"]
+__all__ = ["Parser", "regexp_remapper", "Writer"]
+
+import re
 
 from gfam.sequence import SeqRecord, Sequence
-
+from itertools import izip
 from textwrap import TextWrapper
 
 
@@ -76,10 +78,33 @@ class Parser(object):
         `SeqRecord` objects. The arguments are passed on intact to the
         constructor of `FASTAParser`.
         """
-        result = {}
-        for seq in cls(*args, **kwds):
-            result[seq.id] = seq
+        result = dict(izip(seq.id, seq) for seq in cls(*args, **kwds))
         return result
+
+
+def regexp_remapper(iterable, regexp=None, replacement=r'\g<id>'):
+    """Regexp-based sequence ID remapper.
+
+    This class takes a sequence iterator as an input and remaps
+    each ID in the sequence using a call to `re.sub`.
+    `iterable` must yield `SeqRecord` objects; `regexp`
+    is the regular expression matching the part to be
+    replaced, `replacement` is the replacement string that
+    may contain backreferences to `regexp`.
+
+    If `regexp` is ``None`` or an empty string, returns
+    the original iterable.
+    """
+    if not regexp:
+        for seq in iterable:
+            yield seq
+        return
+
+    regexp = re.compile(regexp)
+    for seq in iterable:
+        seq.id = regexp.sub(seq.id, replacement)
+        yield seq
+
 
 class Writer(object):
     """Writes `SeqRecord` objects in FASTA format to a given file handle"""

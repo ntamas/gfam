@@ -53,13 +53,23 @@ class SeqSlicerApp(CommandLineApp):
         parser.add_option("-i", "--ignore-unknown", dest="ignore_unknown",
                 default=False, action="store_true",
                 help="ignore unknown sequence IDs")
+        parser.add_option("-r", "--seq-id-regexp", metavar="REGEXP",
+                help="remap sequence IDs using REGEXP",
+                config_key="sequence_id_regexp",
+                dest="sequence_id_regexp")
 
         return parser
 
     def load_sequences(self, seq_file):
         """Loads the sequences from the given sequence file in FASTA format"""
         self.log.info("Loading sequences from %s..." % seq_file)
-        self.seqs = fasta.Parser.to_dict(open_anything(seq_file))
+        self.seqs = {}
+
+        parser = fasta.Parser(open_anything(seq_file))
+        parser = fasta.regexp_remapper(parser,
+                self.options.sequence_id_regexp)
+
+        self.seqs = dict(((seq.id, seq) for seq in parser))
 
     def run_real(self):
         """Runs the application and returns the exit code"""
