@@ -45,13 +45,13 @@ file is documented and mostly self-explanatory.
 
 You can launch ``gfam`` by typing::
 
-    $ gfam
+    $ bin/gfam
 
 This will run the whole ``gfam`` analysis pipeline using the configuration
 specified in ``gfam.cfg``. If your configuration file is named otherwise,
 you can run it by typing::
 
-    $ gfam -c my_config.cfg
+    $ bin/gfam -c my_config.cfg
 
 Questions, comments
 ===================

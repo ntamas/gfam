@@ -38,11 +38,11 @@ class GFamCalculation(CalculationModule):
         self._verbose = bool(verbose)
 
     def run(self):
-        # Search for the CommandLineApp object in the module
         self.logger.info("Starting module %s" % self.name)
 
         self.prepare()
 
+        # Search for the CommandLineApp object in the module
         app = []
         for key, value in self.module.__dict__.iteritems():
             if isinstance(value, type) and value != CommandLineApp \
@@ -52,7 +52,8 @@ class GFamCalculation(CalculationModule):
         if len(app) != 1:
             raise ValueError("more than one CommandLineApp in %s" % self.name)
 
-        app = app[0]()
+        # Create the application
+        app = app[0](logger=self.logger)
         args = ["-c", self.config.get("@global.config_file")]
 
         if self.verbose:
@@ -61,9 +62,9 @@ class GFamCalculation(CalculationModule):
         for param, value in self.parameters.iteritems():
             if not param.startswith("switch."):
                 continue
-            switch = param[7:]
+            switch, value = value.split(" ", 1)
             value = modula.storage_engine.get_filename(value.strip())
-            args.extend(["-%s" % switch, value])
+            args.extend([switch, value])
 
         if "infile" in self.parameters:
             infiles = self.parameters["infile"].split(",")
@@ -130,6 +131,10 @@ class GFamMasterScript(CommandLineApp):
 
     def run_real(self):
         """Runs the application"""
+
+        # Shut up the root logger, logging will be done by modula
+        logging.getLogger('').handlers = []
+
         config_file = self.options.config_file or "gfam.cfg"
 
         if not os.path.exists(config_file):
@@ -166,11 +171,12 @@ class GFamMasterScript(CommandLineApp):
         [blast_all]
         depends=seqslicer
         infile=seqslicer
-        switch.o=blast_all
+        switch.0=-o blast_all
 
         [blast_filter]
-        depends=blast_all
+        depends=blast_all, seqslicer
         infile=blast_all
+        switch.0=-S seqslicer
 
         [jaccard]
         depends=blast_filter

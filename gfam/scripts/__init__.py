@@ -17,8 +17,11 @@ __all__ = ["CommandLineApp"]
 class CommandLineApp(object):
     """Generic command line application class"""
 
-    def __init__(self):
-        self.log = self.create_logger()
+    def __init__(self, logger=None):
+        if logger:
+            self.log = logger
+        else:
+            self.log = self.create_logger()
         self.options, self.args = None, None
 
     def create_parser(self):
@@ -35,6 +38,7 @@ class CommandLineApp(object):
             log_name = self.__class__.short_name
         else:
             log_name = self.__class__.__module__
+
         log = logging.getLogger(log_name)
         log.setLevel(logging.WARNING)
         logging.basicConfig(level=logging.DEBUG, format="%(message)s")
