@@ -6,16 +6,21 @@ __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
 __all__ = ["Assignment", "EValueFilter", "open_anything", \
-           "redirected", "Sequence", "UniqueIdGenerator", \
+           "redirected", "Sequence", "search_file", \
+           "temporary_dir", "UniqueIdGenerator", \
            "UniversalSet"]
 
 import bz2
 import gzip
+import os
+import platform
 import sys
 import urllib2
 
 from collections import namedtuple
 from contextlib import contextmanager
+from shutil import rmtree
+from tempfile import mkdtemp
 
 # pylint: disable-msg=C0103
 class Assignment(namedtuple("Assignment", \
@@ -343,6 +348,52 @@ def redirected(stdin=None, stdout=None, stderr=None):
     finally:
         for sname, stream in old_streams.iteritems():
             setattr(sys, sname, stream)
+
+def search_file(filename, search_path=None, executable=True):
+    """Finds the given `filename` in the given search path.
+    If `executable` and we are on Windows, ``.exe`` will be
+    appended to the filename. Returns the full path of the
+    file or ``None`` if it is not found on the path."""
+    if not search_path:
+        search_path = os.environ["PATH"]
+
+    if executable and platform.system() == "Windows":
+        filename = filename+".exe"
+
+    exists = os.path.exists
+    join = os.path.join
+
+    for path in search_path.split(os.pathsep):
+        fullpath = join(path, filename)
+        if exists(fullpath):
+            return abspath(fullpath)
+
+    return None
+
+
+@contextmanager
+def temporary_dir(*args, **kwds):
+    """Context manager that creates a temporary directory when
+    entering the context and removes it when exiting.
+    
+    Every argument is passed on to `mkdtemp` except a keyword
+    argument named `change` which tells whether we should change
+    to the newly created temporary directory or not. The current
+    directory will be restored when exiting the context manager."""
+    change = "change" in kwds
+    if change:
+        del kwds["change"]
+
+    name = mkdtemp(*args, **kwds)
+    try:
+        if change:
+            old_dir = os.getcwd()
+            os.chdir(name)
+        yield name
+    finally:
+        if change:
+            os.chdir(old_dir)
+        rmtree(name)
 
 
 class UniqueIdGenerator(object):

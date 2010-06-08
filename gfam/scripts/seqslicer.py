@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Sequence slicer application"""
 
-import optparse
 import sys
 
 from gfam import fasta

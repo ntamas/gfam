@@ -11,7 +11,6 @@ import sys
 
 from gfam.interpro import InterPro, InterProNames
 from gfam.scripts import CommandLineApp
-from gfam.scripts.find_unassigned import FindUnassignedApp
 from gfam.utils import Sequence
 
 __author__  = "Tamas Nepusz"
@@ -120,6 +119,7 @@ class FindDomainArchitectureApp(CommandLineApp):
 
 
     def process_interpro_file(self, interpro_file):
+        from gfam.scripts.find_unassigned import FindUnassignedApp
         unassigned_app = FindUnassignedApp()
         unassigned_app.set_sequence_id_regexp(self.options.sequence_id_regexp)
         unassigned_app.process_sequences_file(self.options.sequences_file)

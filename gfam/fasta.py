@@ -40,7 +40,10 @@ class Parser(object):
             line = handle.readline()
             if not line:
                 return
-            yield line.rstrip().replace("\r", "")
+            line = line.rstrip().replace("\r", "")
+            if not line:
+                continue
+            yield line
 
 
     def sequences(self):
@@ -102,7 +105,7 @@ def regexp_remapper(iterable, regexp=None, replacement=r'\g<id>'):
 
     regexp = re.compile(regexp)
     for seq in iterable:
-        seq.id = regexp.sub(seq.id, replacement)
+        seq.id = regexp.sub(replacement, seq.id)
         yield seq
 
 

@@ -92,7 +92,7 @@ class FindUnassignedApp(CommandLineApp):
                 self.seqcat[assignment.id] = seq
             if seq.length != assignment.length:
                 raise ValueError, "different lengths encountered for %s: %d and %d" % (seq.name, seq.length, assignment.length)
-            seq.assign(assignment)
+            seq.assign(assignment, silent=True)
 
     def print_unassigned(self):
         for seqID, seq in self.seqcat.iteritems():

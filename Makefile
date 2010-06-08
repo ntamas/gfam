@@ -67,7 +67,7 @@ coverage: work/coverage_comparison.txt
 overrep: work/overrepresentation_analysis.txt
 
 work/gene_ids.txt: $(TAIR_SEQUENCES_FILE)
-	$(PYTHON) -m gfam.scripts.extract_gene_ids $< >$@
+	$(PYTHON) -m gfam.scripts.extract_gene_ids -c $(CONFIG_FILE) $< >$@
 
 work/filtered_assignments.txt: $(TAIR_DOMAINS_FILE) $(INTERPRO_PARENT_CHILD_FILE) work/gene_ids.txt bin/assignment_source_filter.py
 	$(PYTHON) -m gfam.scripts.assignment_source_filter -c $(CONFIG_FILE) $< >$@
@@ -76,7 +76,7 @@ work/unassigned_fragments.tab: work/filtered_assignments.txt $(TAIR_SEQUENCES_FI
 	$(PYTHON) -m gfam.scripts.find_unassigned -c $(CONFIG_FILE) <$< >$@
 
 work/unassigned_fragments.ffa: work/unassigned_fragments.tab $(TAIR_SEQUENCES_FILE)
-	$(PYTHON) -m gfam.scripts.seqslicer -i $< $(TAIR_SEQUENCES_FILE) >$@
+	$(PYTHON) -m gfam.scripts.seqslicer -c $(CONFIG_FILE) $< $(TAIR_SEQUENCES_FILE) >$@
 
 work/unassigned_fragments.psq: work/unassigned_fragments.ffa
 	cd work && $(FORMATDB) -n unassigned_fragments -i unassigned_fragments.ffa -o F
