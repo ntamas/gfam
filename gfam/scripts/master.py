@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Master script driving the whole of GFam"""
 
+import gfam.modula as modula
 import logging
 import os
 import sys
@@ -11,10 +12,9 @@ from cStringIO import StringIO
 from gfam.scripts import CommandLineApp
 from gfam.utils import redirected
 
-import modula
-from modula.configuration import Configuration
-from modula.module import CalculationModule, DefaultModuleManager
-from modula.storage import DiskStorageEngine
+from gfam.modula.configuration import Configuration
+from gfam.modula.module import CalculationModule, DefaultModuleManager
+from gfam.modula.storage import DiskStorageEngine
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
