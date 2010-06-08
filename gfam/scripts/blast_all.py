@@ -91,7 +91,7 @@ class AllAgainstAllBLASTApp(CommandLineApp):
         sequence_file = os.path.abspath(sequence_file)
 
         with temporary_dir(change=True) as dirname:
-            self.log.info("Using temporary directory: %s" % dirname)
+            self.log.debug("Using temporary directory: %s" % dirname)
             ok = self.run_formatdb(sequence_file)
             ok = ok and self.run_blastall(sequence_file)
             if not ok:

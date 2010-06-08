@@ -37,8 +37,8 @@ class FindUnassignedApp(CommandLineApp):
 
     short_name = "find_unassigned"
 
-    def __init__(self):
-        super(FindUnassignedApp, self).__init__()
+    def __init__(self, *args, **kwds):
+        super(FindUnassignedApp, self).__init__(*args, **kwds)
         self.seqcat = {}
 
     def create_parser(self):
@@ -75,6 +75,7 @@ class FindUnassignedApp(CommandLineApp):
         self.print_unassigned()
 
     def process_sequences_file(self, fname):
+        self.log.info("Loading sequences from %s..." % fname)
         self.seq_ids_to_length = {}
         parser = fasta.Parser(open_anything(fname))
         parser = fasta.regexp_remapper(parser,
@@ -84,6 +85,8 @@ class FindUnassignedApp(CommandLineApp):
             self.seq_ids_to_length[seq.id] = len(seq.seq)
 
     def process_infile(self, fname):
+        self.log.info("Processing input file: %s" % fname)
+
         for assignment in AssignmentReader(fname):
             try:
                 seq = self.seqcat[assignment.id]

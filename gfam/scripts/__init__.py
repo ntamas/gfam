@@ -30,6 +30,8 @@ class CommandLineApp(object):
         parser = ConfigurableOptionParser(usage=dedent(doc).strip())
         parser.add_option("-v", "--verbose", dest="verbose",
                 action="store_true", help="verbose logging")
+        parser.add_option("-d", "--debug", dest="debug",
+                action="store_true", help="show debug messages")
         return parser
 
     def create_logger(self):
@@ -42,6 +44,7 @@ class CommandLineApp(object):
         log = logging.getLogger(log_name)
         log.setLevel(logging.WARNING)
         logging.basicConfig(level=logging.DEBUG, format="%(message)s")
+
         return log
 
     def run(self, args=None):
@@ -54,6 +57,8 @@ class CommandLineApp(object):
 
         if self.options.verbose:
             self.log.setLevel(logging.INFO)
+        if self.options.debug:
+            self.log.setLevel(logging.DEBUG)
 
         return self.run_real()
 

@@ -158,7 +158,7 @@ class GFamMasterScript(CommandLineApp):
         depends: file.input.iprscan, file.input.sequences,
             file.mapping.interpro_parent_child, extract_gene_ids
         infile=file.input.iprscan
-        switch.g=extract_gene_ids
+        switch.0=-g extract_gene_ids
 
         [find_unassigned]
         depends=assignment_source_filter, file.input.sequences
@@ -208,10 +208,10 @@ class GFamMasterScript(CommandLineApp):
                 modula_configuration.set("@inputs", name, value)
 
         modula.init(modula_configuration, \
-                    storage_engine_factory = GFamDiskStorageEngine)
+                    storage_engine_factory = GFamDiskStorageEngine,
+                    debug = self.options.debug)
         modula.module_manager.module_factory = GFamCalculation
 
-        logging.basicConfig(format="[%(name)s] %(message)s")
         modula.run("overrep")
 
 if __name__ == "__main__":

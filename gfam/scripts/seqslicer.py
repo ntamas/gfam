@@ -37,8 +37,8 @@ class SeqSlicerApp(CommandLineApp):
 
     short_name = "seqslicer"
 
-    def __init__(self):
-        super(SeqSlicerApp, self).__init__()
+    def __init__(self, *args, **kwds):
+        super(SeqSlicerApp, self).__init__(*args, **kwds)
         self.seqs = None
 
     def create_parser(self):
