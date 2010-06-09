@@ -36,7 +36,7 @@ work/unassigned_fragments.ffa: work/unassigned_fragments.tab $(TAIR_SEQUENCES_FI
 	$(PYTHON) -m gfam.scripts.seqslicer -c $(CONFIG_FILE) $< $(TAIR_SEQUENCES_FILE) >$@
 
 work/unassigned_fragment_matches.blast: work/unassigned_fragments.ffa
-	$(PYTHON) -m gfam.script.blast_all -c $(CONFIG_FILE) $< >$@
+	$(PYTHON) -m gfam.scripts.blast_all -c $(CONFIG_FILE) $< >$@
 
 work/relevant_matches.blast: work/unassigned_fragment_matches.blast work/unassigned_fragments.ffa
 	$(PYTHON) -m gfam.scripts.blast_filter -c $(CONFIG_FILE) $< >$@

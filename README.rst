@@ -33,6 +33,14 @@ You will need the following tools to run ``gfam``:
 .. _`Python 2.5`: http://www.python.org
 .. _`NCBI BLAST`: ftp://ftp.ncbi.nlm.nih.gov/blast/executables/release/LATEST
 
+The latest release of `SciPy`_ is recommended, but not necessary.
+``gfam`` uses `SciPy`_ for calculating the logarithm of the gamma
+function in the overrepresentation analysis routines, but it falls
+back to a (somewhat slower) Python implementation if `SciPy`_ is
+not installed.
+
+.. _`SciPy`: http://www.scipy.org
+
 Running ``gfam``
 ================
 
