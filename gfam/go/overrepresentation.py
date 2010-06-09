@@ -11,10 +11,30 @@ __all__ = ["OverrepresentationAnalyser"]
 
 from collections import defaultdict
 from gfam.utils import bidict
-from math import exp
+from math import exp, log
 from operator import itemgetter
-from scipy.special import gammaln
 
+try:
+    from scipy.special import gammaln
+except ImportError:
+    def gammaln(n):
+        """Logarithm of Euler's gamma function for discrete values."""
+        if n < 1:
+            return float('inf')
+        if n < 3:
+            return 0.0
+        c = [76.18009172947146, -86.50532032941677, \
+             24.01409824083091, -1.231739572450155, \
+             0.001208650973866179, -0.5395239384953 * 0.00001]
+        x, y = float(n), float(n)
+        tm = x + 5.5
+        tm -= (x + 0.5) * log(tm)
+        se = 1.0000000000000190015
+        for j in range(6):
+            y += 1.0
+            se += c[j] / y
+        return -tm + log(2.5066282746310005 * se / x)
+        
 def logchoose(n, k):
     """Calculates the logarithm of n-choose-k"""
     lgn1 = gammaln(n+1)
