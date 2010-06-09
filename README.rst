@@ -25,10 +25,10 @@ Requirements
 
 You will need the following tools to run ``gfam``:
 
-  * `Python 2.5`_ or latest. Python 3 is not supported yet.
+* `Python 2.5`_ or latest. Python 3 is not supported yet.
 
-  * `NCBI BLAST`_; in particular, the ``formatdb`` and ``blastall`` tools
-    from the legacy C-based BLAST distribution.
+* `NCBI BLAST`_; in particular, the ``formatdb`` and ``blastall`` tools
+  from the legacy C-based BLAST distribution.
 
 .. _`Python 2.5`: http://www.python.org
 .. _`NCBI BLAST`: ftp://ftp.ncbi.nlm.nih.gov/blast/executables/release/LATEST
