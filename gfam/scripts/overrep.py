@@ -5,8 +5,8 @@ import optparse
 import sys
 
 from collections import defaultdict
-from gene_ontology import Tree as GOTree
-from gene_ontology.overrepresentation import OverrepresentationAnalyser
+from gfam.go import Tree as GOTree
+from gfam.go.overrepresentation import OverrepresentationAnalyser
 from gfam.interpro import InterPro2GOMapping
 from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything

@@ -2,16 +2,11 @@
 Storage classes for Modula
 """
 
+from gfam.modula.hash import sha1
 from gfam.modula.log import get_logger
 
 import os
-import sys
 import cPickle as pickle
-
-if sys.version_info >= (2, 5):
-    from hashlib import sha1
-else:
-    from sha import new as sha1
 
 
 class NotFoundError(Exception):
@@ -96,7 +91,9 @@ class DiskStorageEngine(AbstractStorageEngine):
         configuration"""
         AbstractStorageEngine.__init__(self, *args, **kwds)
         self.storage_dir = self.config["@paths.storage"]
+        self.storage_hash = sha1
         if not os.path.isdir(self.storage_dir):
+            self.logger.warning("Creating storage path: %s" % self.storage_dir)
             os.makedirs(self.storage_dir)
         self.logger.debug("Using storage path: %s" % self.storage_dir)
 
@@ -106,9 +103,9 @@ class DiskStorageEngine(AbstractStorageEngine):
         if parameters is None:
             parameters = module.parameters
         keys = sorted(parameters.keys())
-        hash = sha1()
-        hash.update(" ".join(["%r=%r" % (key, parameters[key]) \
-                              for key in keys]))
+        hash = self.storage_hash()
+        hash.update(",".join("%r=%r" % (key, parameters[key]) \
+                             for key in keys))
         hash = hash.hexdigest()
         return os.path.join(self.storage_dir, module.name, hash)
 

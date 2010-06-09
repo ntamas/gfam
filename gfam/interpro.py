@@ -3,8 +3,7 @@
 import re
 
 from collections import Mapping, defaultdict
-from gene_ontology.utils import bidict
-from gfam.utils import Assignment, open_anything
+from gfam.utils import Assignment, bidict, open_anything
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
