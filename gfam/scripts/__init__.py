@@ -47,6 +47,10 @@ class CommandLineApp(object):
 
         return log
 
+    def error(self, message):
+        """Signals a fatal error and shuts down the application."""
+        self.parser.error(message)
+
     def run(self, args=None):
         """Runs the application. This method processes the command line using the
         command line parser and as such, it should not be overridden in child

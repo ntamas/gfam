@@ -15,7 +15,6 @@ import gzip
 import os
 import platform
 import sys
-import urllib2
 
 from collections import namedtuple
 from contextlib import contextmanager
@@ -312,6 +311,7 @@ def open_anything(fname, *args, **kwds):
         infile = sys.stdin
     elif (fname.startswith("http://") or fname.startswith("ftp://") or \
          fname.startswith("https://")) and not kwds and not args:
+        import urllib2
         infile = urllib2.urlopen(fname)
     elif fname[-4:] == ".bz2":
         infile = bz2.BZ2File(fname, *args, **kwds)

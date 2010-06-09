@@ -91,7 +91,7 @@ class AssignmentSourceFilterApp(CommandLineApp):
         if not self.args:
             self.args = ["-"]
         if len(self.args) > 1:
-            self.parser.error("Only one input file may be given")
+            self.error("Only one input file may be given")
 
         self.process_infile(self.args[0])
 

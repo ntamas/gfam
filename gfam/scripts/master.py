@@ -138,7 +138,7 @@ class GFamMasterScript(CommandLineApp):
         config_file = self.options.config_file or "gfam.cfg"
 
         if not os.path.exists(config_file):
-            self.parser.error("Configuration file not found: %s" % config_file)
+            self.error("Configuration file not found: %s" % config_file)
 
         config = ConfigParser()
         config.read([config_file])

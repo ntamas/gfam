@@ -37,14 +37,14 @@ class OverrepresentationAnalysisApp(CommandLineApp):
 
     short_name = "overrep"
 
-    def __init__(self):
-        super(OverrepresentationAnalysisApp, self).__init__()
+    def __init__(self, *args, **kwds):
+        super(OverrepresentationAnalysisApp, self).__init__(*args, **kwds)
         self.go_tree = None
 
     def run_real(self):
         """Runs the overrepresentation analysis application"""
         if len(self.args) != 3:
-            self.parser.error("expected exactly three input file names")
+            self.error("expected exactly three input file names")
 
         go_tree_file, go_mapping_file, input_file = self.args
 

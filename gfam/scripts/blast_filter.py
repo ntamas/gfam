@@ -81,8 +81,8 @@ class BlastFilterApp(CommandLineApp):
 
         if options.normalize_alignment_length != "off":
             if not options.sequences_file:
-                self.parser.error("must specify sequences file using " \
-                                  "-S when -n is given")
+                self.error("must specify sequences file using "\
+                           "-S when -n is given")
             filter.load_sequences_from_file(options.sequences_file)
 
         return filter

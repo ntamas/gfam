@@ -78,7 +78,7 @@ class AllAgainstAllBLASTApp(CommandLineApp):
             if not path:
                 path = search_file(util, executable=True)
                 if not path:
-                    self.parser.error("cannot find %s in system path" % util)
+                    self.error("cannot find %s in system path" % util)
             setattr(self.options, optkey, os.path.abspath(path))
 
         for arg in self.args:

@@ -29,8 +29,8 @@ class FindDomainArchitectureApp(CommandLineApp):
 
     short_name = "find_domain_arch"
 
-    def __init__(self):
-        super(FindDomainArchitectureApp, self).__init__()
+    def __init__(self, *args, **kwds):
+        super(FindDomainArchitectureApp, self).__init__(*args, **kwds)
         self.seqcat = {}
 
     def create_parser(self):
@@ -51,7 +51,7 @@ class FindDomainArchitectureApp(CommandLineApp):
                 help="use the InterPro parent-child FILE to remap IDs",
                 config_key="file.mapping.interpro_parent_child",
                 default=None)
-        parser.add_option("-d", "--details",
+        parser.add_option("--details",
                 dest="details", metavar="FILE",
                 help="print more details about the domain architecture into FILE",
                 config_key="generated/file.domain_architecture_details",
@@ -71,12 +71,12 @@ class FindDomainArchitectureApp(CommandLineApp):
     def run_real(self):
         """Runs the applications"""
         if len(self.args) != 2:
-            self.parser.error("exactly two input files are expected")
+            self.error("exactly two input files are expected")
 
         if self.options.interpro_parent_child_file:
-            self.interpro = InterPro.FromFile(self.options.interpro_parent_child_file)
-            self.log.info("Loaded InterPro parent-child assignments from %s." % \
+            self.log.info("Loading InterPro parent-child assignments from %s..." % \
                     self.options.interpro_parent_child_file)
+            self.interpro = InterPro.FromFile(self.options.interpro_parent_child_file)
         else:
             self.interpro = InterPro()
 
