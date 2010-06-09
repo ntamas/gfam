@@ -98,7 +98,7 @@ def init_master_logger(datefmt="%Y/%m/%d %H:%M:%S", debug=False):
     debug messages, otherwise it is ``False``."""
     logger = get_logger()
     handler = ColoredConsoleHandler()
-    handler.setLevel([logging.INFO, logging.DEBUG][debug])
+    handler.setLevel([logging.INFO, logging.DEBUG][bool(debug)])
     if handler.uses_colors:
         formatter = logging.Formatter("[%(asctime)s] %(message)s",
                 datefmt=datefmt)
