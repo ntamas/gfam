@@ -6,6 +6,8 @@ runs an all-against-all BLAST on a given set of sequences and removes
 the temporary files afterwards.
 """
 
+from __future__ import with_statement
+
 import os
 import subprocess
 import sys

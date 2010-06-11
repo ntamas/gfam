@@ -13,6 +13,8 @@ when one tries to resume the calculation.
 Python package as well.
 """
 
+from __future__ import with_statement
+
 import gfam.modula as modula
 import logging
 import os

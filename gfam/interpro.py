@@ -2,8 +2,13 @@
 
 import re
 
-from collections import Mapping, defaultdict
+from collections import defaultdict
 from gfam.utils import Assignment, bidict, open_anything
+
+try:
+    from collections import Mapping
+except ImportError:
+    from gfam.compat import Mapping
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"

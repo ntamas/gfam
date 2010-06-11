@@ -9,13 +9,26 @@ __all__ = ["Assignment", "bidict", "EValueFilter", "open_anything", \
            "redirected", "Sequence", "search_file", \
            "temporary_dir", "UniqueIdGenerator", "UniversalSet"]
 
-import bz2
-import gzip
+try:
+    import bz2
+except ImportError:
+    pass
+
+try:
+    import gzip
+except ImportError:
+    pass
+
 import os
 import platform
 import sys
 
-from collections import namedtuple
+try:
+    from collections import namedtuple
+except ImportError:
+    # For Python 2.5 and older
+    from gfam.compat import namedtuple
+
 from contextlib import contextmanager
 from shutil import rmtree
 from tempfile import mkdtemp
