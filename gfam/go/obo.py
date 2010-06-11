@@ -11,8 +11,8 @@ which is my only test case anyway.
 
 Usage example::
 
-    import gfam.go.obo as obo
-    parser = obo.Parser(open("gene_ontology.1_2.obo"))
+    import gfam.go.obo
+    parser = gfam.go.obo.Parser(open("gene_ontology.1_2.obo"))
     gene_ontology = {}
     for stanza in parser:
         gene_ontology[stanza.tags["id"][0]] = stanza.tags
@@ -149,8 +149,8 @@ class Parser(object):
         """Creates an OBO parser that reads the given file-like object.
         If you want to create a parser that reads an OBO file, do this:
 
-          >>> import obo
-          >>> parser = obo.Parser(open("gene_ontology.1_2.obo"))
+          >>> import gfam.go.obo
+          >>> parser = gfam.go.obo.Parser(open("gene_ontology.1_2.obo"))
 
         Only the headers are read when creating the parser. You can
         access these right after construction as follows:

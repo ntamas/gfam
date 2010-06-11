@@ -38,10 +38,17 @@ __version__ = "0.1"
 
 __all__ = ["Annotation", "AnnotationFile", "Tree", "Term"]
 
-from collections import deque, namedtuple
+from collections import deque
+
+try:
+    from collections import namedtuple
+except ImportError:
+    from gfam.compat import namedtuple
 
 from gfam.go.utils import ParseError
 from gfam.utils import open_anything
+
+import gfam.go.obo
 
 class Annotation(object):
     """Class representing a GO annotation (possibly parsed from an
@@ -140,7 +147,7 @@ class AnnotationFile(object):
         the file is assumed to contain gzipped data and it will be unzipped
         on the fly. Example:
 
-          >>> import gene_ontology as go
+          >>> import gfam.go as go
           >>> parser = go.AnnotationFile("gene_association.sgd.gz")
 
         To read the annotations in the file, you must iterate over the parser
@@ -260,8 +267,7 @@ class Tree(object):
     def from_obo(cls, fp):
         """Constructs a GO tree from an OBO file. `fp` is a file pointer
         to the OBO file we want to use"""
-        import gene_ontology.obo as obo
-        parser = obo.Parser(fp)
+        parser = gfam.go.obo.Parser(fp)
         tree = cls()
         for stanza in parser:
             term = Term.from_stanza(stanza)
@@ -301,7 +307,7 @@ class Term(object):
     @classmethod
     def from_stanza(cls, stanza):
         """Constructs a GO term from a stanza coming from an
-        OBO file. `stanza` must be an instance of `gene_ontology.obo.Stanza`.
+        OBO file. `stanza` must be an instance of `gfam.go.obo.Stanza`.
         """
         identifier = stanza.tags["id"][0]
         name = stanza.tags.get("name", [id])[0]

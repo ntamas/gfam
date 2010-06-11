@@ -72,8 +72,8 @@ class OverrepresentationAnalyser(object):
         it to a given Gene Ontology tree and a given mapping from entities to
         their respective GO terms.
 
-        `tree` must be an instance of `gene_ontology.Tree`_. `mapping` must be
-        a bidirectional dictionary object (`gene_ontology.utils.bidict`_) that
+        `tree` must be an instance of `gfam.go.Tree`_. `mapping` must be
+        a bidirectional dictionary object (`gfam.utils.bidict`_) that
         maps entities to GO terms and vice versa. For `mapping`, if an entity
         is annotated by a GO term, it is not necessary to list all the
         ancestors of that GO term for that entity, this will be taken care of
