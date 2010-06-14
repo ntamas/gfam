@@ -162,7 +162,7 @@ class AssignmentSourceFilterApp(CommandLineApp):
             # Calculate the coverage
             seq = Sequence(name, a.length)
             for a, _ in assignments:
-                seq.assign(a, silent=True)
+                seq.assign(a)
             coverage[source] = seq.coverage()
 
         a = assignments_by_source.keys()[0]
@@ -172,7 +172,7 @@ class AssignmentSourceFilterApp(CommandLineApp):
         if coverage:
             best_source = max(coverage.keys(), key = coverage.__getitem__)
             for a, line in assignments_by_source[best_source]:
-                seq.assign(a, silent=True)
+                seq.assign(a)
                 tab_count = list(line).count("\t")
                 if tab_count < 13:
                     line = line + "\t" * (13-tab_count)
@@ -204,7 +204,7 @@ class AssignmentSourceFilterApp(CommandLineApp):
             for idx, (a, _) in enumerate(unused_assignments):
                 if a.source not in sources:
                     continue
-                if seq.assign(a, silent=True):
+                if seq.assign(a):
                     selected_idxs.add(idx)
                     idx_to_stage[idx] = stage_no+2
         for idx in sorted(selected_idxs):

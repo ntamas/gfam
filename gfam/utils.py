@@ -251,12 +251,13 @@ class Sequence(object):
                 evalue=None, length=self.length, comment=None)
         return self.assign(assignment, *args, **kwds)
 
-    def assign(self, assignment, silent=False, overlap_check=True):
+    def assign(self, assignment, overlap_check=True):
         """Assigns a fragment of this sequence using the given assignment.
-        If `silent` is ``True``, no error messages are printed about overlapping
-        assignments or conflicts with existing assignments. If `overlap_check`
-        is ``False``, we will not check for overlaps or conflicts with existing
-        assignments.
+        If `overlap_check` is ``False``, we will not check for overlaps or
+        conflicts with existing assignments.
+
+        Returns ``True`` if the assignment was added, ``False`` if it
+        wasn't due to an overlap conflict.
         """
         if ":SF" in assignment.domain:
             # Remove subfamily info from domain
@@ -277,9 +278,6 @@ class Sequence(object):
             return True
 
         if skip == "duplicate":
-            return False
-
-        if silent:
             return False
 
         if skip == "overlap":
