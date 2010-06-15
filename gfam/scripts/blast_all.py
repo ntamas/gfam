@@ -125,7 +125,7 @@ class AllAgainstAllBLASTApp(CommandLineApp):
 
         Returns ``True`` if the execution was successful, ``False`` otherwise.
         """
-        self.log.info("Invoking blastall...")
+        self.log.info("Invoking blastall, this might take a long time...")
 
         args = [self.options.blastall_path]
         args.extend(["-p", self.options.blast_tool])

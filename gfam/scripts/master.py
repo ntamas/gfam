@@ -119,13 +119,24 @@ class GFamDiskStorageEngine(DiskStorageEngine):
 
 class GFamMasterScript(CommandLineApp):
     """\
-    Usage: %prog [options]
+    Usage: %prog [options] [command]
 
     Runs the whole GFam pipeline, driven by the given configuration
-    file (specified with the `-c` option).
+    file (specified with the `-c` option). The given command must be
+    one of the following:
+
+        - run: runs the whole pipeline. This is the default.
+
+        - clean: removes the temporary directory used to store
+          intermediate results.
     """
 
     short_name = "gfam"
+
+    def __init__(self, *args, **kwds): 
+        super(GFamMasterScript, self).__init__(*args, **kwds)
+        self.modula = None
+        self.config = None
 
     def create_parser(self):
         """Creates the command line parser for the GFam master script"""
@@ -236,27 +247,56 @@ class GFamMasterScript(CommandLineApp):
         logging.getLogger('').handlers = []
 
         # Read the configuration file
-        config = self.read_config()
+        self.config = self.read_config()
 
         # Initialize Modula
-        modula_config = self.get_modula_config(config)
+        modula_config = self.get_modula_config(self.config)
         modula.init(modula_config, debug = self.options.debug,
                     storage_engine_factory = GFamDiskStorageEngine)
         modula.module_manager.module_factory = GFamCalculation
+        self.modula = modula
 
+        # Use the logger from Modula
+        self.log = self.modula.logger
+
+        # Run the commands
+        if not self.args:
+            self.args = ["run"]
+        for command in self.args:
+            try:
+                method = getattr(self, "do_%s" % command)
+            except AttributeError:
+                self.log.fatal("No such command: %s" % command)
+                return 1
+            error_code = method()
+            if error_code:
+                return error_code
+
+    def do_clean(self):
+        """Clears the temporary directory used for intermediate results."""
         # Get the output folder name
-        outfolder = config.get("DEFAULT", "folder.work")
+        outfolder = self.config.get("DEFAULT", "folder.work")
+
+        # Remove the folder
+        self.log.info("Removing temporary folder: %s" % outfolder)
+        shutil.rmtree(outfolder)
+        self.log.info("Temporary folder removed successfully.")
+
+    def do_run(self):
+        """Runs the whole GFam pipeline"""
+        # Get the output folder name
+        outfolder = self.config.get("DEFAULT", "folder.work")
 
         # Run and export the inferred domain architectures
         outfile = os.path.join(outfolder, "domain_architectures.txt")
-        modula.run("find_domain_arch", force=self.options.force)
-        shutil.copy(modula.storage_engine.get_filename("find_domain_arch"),
+        self.modula.run("find_domain_arch", force=self.options.force)
+        shutil.copy(self.modula.storage_engine.get_filename("find_domain_arch"),
                 outfile)
         self.log.info("Exported domain architectures to %s." % outfile)
 
         # Run and export the overrepresentation analysis
         outfile = os.path.join(outfolder, "overrepresentation_analysis.txt") 
-        modula.run("overrep", force=self.options.force)
-        shutil.copy(modula.storage_engine.get_filename("overrep"), outfile)
+        self.modula.run("overrep", force=self.options.force)
+        shutil.copy(self.modula.storage_engine.get_filename("overrep"), outfile)
         self.log.info("Exported overrepresentation analysis to %s." % outfile)
 
