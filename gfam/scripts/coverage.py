@@ -3,9 +3,10 @@
 import optparse
 import sys
 
+from gfam.assignment import SequenceWithAssignments
 from gfam.interpro import AssignmentParser
 from gfam.scripts import CommandLineApp
-from gfam.utils import open_anything, SequenceWithAssignments, UniversalSet
+from gfam.utils import open_anything, UniversalSet
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"

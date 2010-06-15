@@ -9,9 +9,9 @@ import operator
 import optparse
 import sys
 
+from gfam.assignment import AssignmentOverlapChecker, SequenceWithAssignments
 from gfam.interpro import InterPro, InterProNames
 from gfam.scripts import CommandLineApp
-from gfam.utils import AssignmentOverlapChecker, SequenceWithAssignments
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"

@@ -11,8 +11,8 @@ import sys
 from gfam import fasta
 from gfam.interpro import AssignmentReader
 from gfam.scripts import CommandLineApp
-from gfam.utils import AssignmentOverlapChecker, SequenceWithAssignments,\
-                       open_anything
+from gfam.assignment import AssignmentOverlapChecker, SequenceWithAssignments
+from gfam.utils import open_anything
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"

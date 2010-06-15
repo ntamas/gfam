@@ -3,11 +3,10 @@
 import sys
 
 from collections import defaultdict
+from gfam.assignment import AssignmentOverlapChecker, SequenceWithAssignments
 from gfam.interpro import AssignmentParser, InterPro
 from gfam.scripts import CommandLineApp
-from gfam.utils import AssignmentOverlapChecker, EValueFilter, \
-                       SequenceWithAssignments, UniversalSet, \
-                       open_anything
+from gfam.utils import EValueFilter, open_anything, UniversalSet
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"

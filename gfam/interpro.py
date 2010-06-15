@@ -3,7 +3,8 @@
 import re
 
 from collections import defaultdict
-from gfam.utils import Assignment, bidict, open_anything
+from gfam.assignment import Assignment
+from gfam.utils import bidict, open_anything
 
 try:
     from collections import Mapping
