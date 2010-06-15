@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
 __all__ = ["Assignment", "bidict", "EValueFilter", "open_anything", \
-           "redirected", "Sequence", "search_file", \
+           "redirected", "SequenceWithAssignments", "search_file", \
            "temporary_dir", "UniqueIdGenerator", "UniversalSet"]
 
 try:
@@ -30,6 +30,7 @@ except ImportError:
     from gfam.compat import namedtuple
 
 from contextlib import contextmanager
+from gfam.enum import Enum
 from shutil import rmtree
 from tempfile import mkdtemp
 
@@ -216,7 +217,109 @@ class EValueFilter(object):
         return result
 
 
-class Sequence(object):
+class OverlapType(Enum):
+    """Enum describing the different overlap types that can be detected
+    by `AssignmentOverlapChecker`. See the documentation of
+    `AssignmentOverlapChecker._check_single` for more details.
+    """
+    NO_OVERLAP = "NO_OVERLAP"
+    DUPLICATE = "DUPLICATE"
+    INSERTION_DIFFERENT = "INSERTION_DIFFERENT"
+    DIFFERENT = "DIFFERENT"
+    OVERLAP = "OVERLAP"
+
+
+class AssignmentOverlapChecker(object):
+    """Static class that contains the central logic of determining
+    whether an assignment can be added to a partially assigned
+    `SequenceWithAssignments`_.
+    """
+
+    max_overlap = 20
+
+    @classmethod
+    def check(cls, sequence, assignment):
+        """Checks whether an `assignment` can be added to a partially
+        assigned `sequence`. `sequence` must be an instance of
+        `SequenceWithAssignments`, `assignment` must be an instance
+        of `Assignment`.
+
+        The output is equivalent to the output of the first `_check_single`
+        that returns anything different from `OverlapType.NO_OVERLAP`,
+        or `OverlapType.NO_OVERLAP` otherwise.
+        """
+        for other_assignment in sequence.assignments:
+            result = cls._check_single(assignment, other_assignment)
+            if result != OverlapType.NO_OVERLAP:
+                return result
+        return OverlapType.NO_OVERLAP
+
+    @classmethod
+    def _check_single(cls, assignment, other_assignment):
+        """Checks whether the given `assignment` overlaps with another
+        assignment `other_assignment`. Returns one of the following:
+
+            - `OverlapType.NO_OVERLAP`: there is no overlap between the
+              two given assignments
+
+            - `OverlapType.DUPLICATE`: `assignment` is a duplicate of
+              `other_assignment` (same starting and ending positions)
+
+            - `OverlapType.INSERTION_DIFFERENT`: `assignment` is inserted into
+              `other_assignment` or vice versa, but they have different data
+              sources.
+
+            - `OverlapType.DIFFERENT`: `other_assignment` overlaps with `assignment`
+              partially, but they have different data sources
+
+            - `OverlapType.OVERLAP`: `other_assignment` overlaps with `assignment`
+              partially, they have the same data source, but the size of
+              the overlap is larger than the maximum allowed overlap specified
+              in `OverlapChecker.max_overlap`.
+        """
+        domain, start, end = assignment.domain, assignment.start, assignment.end
+        other_start, other_end = other_assignment.start, other_assignment.end
+
+        if other_start == start and other_end == end:
+            # This is a duplicate assignment, so we must skip it
+            return OverlapType.DUPLICATE
+
+        if other_start <= start and other_end >= end:
+            if other_assignment.source == assignment.source:
+                # This is a valid domain insertion, the new domain is the
+                # one which was inserted into the old one
+                return OverlapType.NO_OVERLAP
+            return OverlapType.INSERTION_DIFFERENT
+
+        if other_start >= start and other_end <= end:
+            if other_assignment.source == assignment.source:
+                # This is a valid domain insertion, the new domain is the
+                # one which contains the old one completely
+                return OverlapType.NO_OVERLAP
+            return OverlapType.INSERTION_DIFFERENT
+
+        if other_start <= start and other_end <= end and other_end >= start:
+            if other_assignment.source == assignment.source:
+                # This is a partial overlap
+                overlap_size = other_end-start+1
+                if overlap_size > cls.max_overlap:
+                    return OverlapType.OVERLAP
+            else:
+                return OverlapType.DIFFERENT
+
+        if other_start >= start and other_end >= end and other_start <= end:
+            if other_assignment.source == assignment.source:
+                # This is a partial overlap
+                overlap_size = end-other_start+1
+                if overlap_size > cls.max_overlap:
+                    return OverlapType.OVERLAP
+            else:
+                return OverlapType.DIFFERENT
+
+        return OverlapType.NO_OVERLAP
+
+
+class SequenceWithAssignments(object):
     """Class representing a sequence for which some parts are assigned to
     InterPro domains.
 
@@ -231,6 +334,7 @@ class Sequence(object):
     """
 
     __slots__ = ("name", "length", "assignments")
+    overlap_checker = AssignmentOverlapChecker
 
     def __init__(self, name, length):
         self.name = name
@@ -265,100 +369,13 @@ class Sequence(object):
             new_domain = assignment.domain[0:assignment.domain.index(":SF")]
             assignment = assignment._replace(domain=new_domain)
 
-        skip, overlap_with = None, None
         if overlap_check:
-            for a in self.assignments:
-                skip = self._overlap_check(assignment, a)
-                if skip:
-                    overlap_with = a
-                    break
+            overlap_state = self.overlap_checker.check(self, assignment)
+            if overlap_state != OverlapType.NO_OVERLAP:
+                return False
 
-        if not skip:
-            self.assignments.append(assignment)
-            return True
-
-        if skip == "duplicate":
-            return False
-
-        if skip == "overlap":
-            print >>sys.stderr, "WARNING: partially overlapping " +\
-                     "assignment for %s: %s and %s" % (self.name, \
-                     assignment.short_repr(), \
-                     overlap_with.short_repr())
-        elif skip == "overlap_different":
-            print >>sys.stderr, "WARNING: partially overlapping " +\
-                     "assignment for %s from different sources: "+\
-                     "%s and %s" % (self.name, \
-                     assignment.short_repr(), \
-                     overlap_with.short_repr())
-        elif skip == "insertion_different":
-            print >>sys.stderr, "WARNING: fully overlapping " +\
-                     "assignment for %s from different sources: "+\
-                     "%s and %s" % (self.name, \
-                     assignment.short_repr(), \
-                     overlap_with.short_repr())
-        else:
-            print >>sys.stderr, "WARNING: skipping assignment %s, reason: %s"\
-                    % (assignment.short_repr(), skip)
-        return False
-
-    def _overlap_check(self, assignment, a):
-        """Checks whether the given `assignment` overlaps with another assignment
-        `a`. Returns ``None`` if there is no overlap, or the type of overlap
-        as a string. The type of overlap is one of the following:
-
-            - ``duplicate``: `assignment` is a duplicate of `a` (same starting and
-              ending positions)
-
-            - ``insertion_different``: `a` is inserted into `assignment` or vice
-              versa, but they have different data sources.
-
-            - ``overlap_different``: `a` overlaps with `assignment` partially,
-              but they have different data sources.
-
-            - ``overlap``: `a` overlaps with `assignment` partially, and although
-              they have the same data source, the overlap is too large, so `a`
-              cannot be allowed.
-        """
-        domain, start, end = assignment.domain, assignment.start, assignment.end
-
-        if a.start == start and a.end == end:
-            # This is a duplicate assignment, so we must skip it
-            return "duplicate"
-
-        if a.start <= start and a.end >= end:
-            if a.source == assignment.source:
-                # This is a valid domain insertion, the new domain is the
-                # one which was inserted into the old one
-                return None
-            return "insertion_different"
-
-        if a.start >= start and a.end <= end:
-            if a.source == assignment.source:
-                # This is a valid domain insertion, the new domain is the
-                # one which contains the old one completely
-                return None
-            return "insertion_different"
-
-        if a.start <= start and a.end <= end and a.end >= start:
-            if a.source == assignment.source:
-                # This is a partial overlap
-                overlap_size = a.end-start+1
-                if overlap_size > 20:
-                    return "overlap"
-            else:
-                return "overlap_different"
-
-        if a.start >= start and a.end >= end and a.start <= end:
-            if a.source == assignment.source:
-                # This is a partial overlap
-                overlap_size = end-a.start+1
-                if overlap_size > 20:
-                    return "overlap"
-            else:
-                return "overlap_different"
-
-        return None
+        self.assignments.append(assignment)
+        return True
 
     def coverage(self):
         ok = [0] * self.length

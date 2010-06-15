@@ -11,7 +11,7 @@ import sys
 
 from gfam.interpro import InterPro, InterProNames
 from gfam.scripts import CommandLineApp
-from gfam.utils import Sequence
+from gfam.utils import AssignmentOverlapChecker, SequenceWithAssignments
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -66,12 +66,19 @@ class FindDomainArchitectureApp(CommandLineApp):
                 help="remap sequence IDs using REGEXP",
                 config_key="sequence_id_regexp",
                 dest="sequence_id_regexp")
+        parser.add_option("--max-overlap", metavar="SIZE",
+                help="sets the maximum overlap size allowed between "
+                     "assignments of the same data source. Default: %default",
+                config_key="max_overlap",
+                dest="max_overlap", type=int, default=20)
         return parser
 
     def run_real(self):
         """Runs the applications"""
         if len(self.args) != 2:
             self.error("exactly two input files are expected")
+
+        AssignmentOverlapChecker.max_overlap = self.options.max_overlap
 
         if self.options.interpro_parent_child_file:
             self.log.info("Loading InterPro parent-child assignments from %s..." % \
@@ -126,7 +133,8 @@ class FindDomainArchitectureApp(CommandLineApp):
         unassigned_app.process_infile(interpro_file)
         self.seqcat = unassigned_app.seqcat
         for seq_id in set(unassigned_app.seq_ids_to_length.keys()) - set(self.seqcat.keys()):
-            self.seqcat[seq_id] = Sequence(seq_id, unassigned_app.seq_ids_to_length[seq_id])
+            self.seqcat[seq_id] = SequenceWithAssignments(seq_id, \
+                                  unassigned_app.seq_ids_to_length[seq_id])
 
     def process_clustering_file(self, fname):
         f = open(fname)
@@ -166,7 +174,7 @@ class FindDomainArchitectureApp(CommandLineApp):
                 primary_source = ", ".join(primary_source)
 
             if self.details_file:
-                seq2 = Sequence(seq.name, seq.length)
+                seq2 = SequenceWithAssignments(seq.name, seq.length)
                 seq2.assignments = [assignment for assignment in assignments \
                                     if assignment.source != "Novel"]
 

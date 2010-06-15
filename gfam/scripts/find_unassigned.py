@@ -11,7 +11,8 @@ import sys
 from gfam import fasta
 from gfam.interpro import AssignmentReader
 from gfam.scripts import CommandLineApp
-from gfam.utils import Sequence, open_anything
+from gfam.utils import AssignmentOverlapChecker, SequenceWithAssignments,\
+                       open_anything
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -63,9 +64,16 @@ class FindUnassignedApp(CommandLineApp):
                 help="FASTA file containing all the sequences of the representative gene model",
                 config_key="analysis:find_unassigned/sequences_file",
                 default=None)
+        parser.add_option("--max-overlap", metavar="SIZE",
+                help="sets the maximum overlap size allowed between "
+                     "assignments of the same data source. Default: %default",
+                config_key="max_overlap",
+                dest="max_overlap", type=int, default=20)
         return parser
 
     def run_real(self):
+        AssignmentOverlapChecker.max_overlap = self.options.max_overlap
+
         self.set_sequence_id_regexp(self.options.sequence_id_regexp)
         self.process_sequences_file(self.options.sequences_file)
 
@@ -91,7 +99,7 @@ class FindUnassignedApp(CommandLineApp):
             try:
                 seq = self.seqcat[assignment.id]
             except KeyError:
-                seq = Sequence(assignment.id, assignment.length)
+                seq = SequenceWithAssignments(assignment.id, assignment.length)
                 self.seqcat[assignment.id] = seq
             if seq.length != assignment.length:
                 raise ValueError, "different lengths encountered for %s: %d and %d" % (seq.name, seq.length, assignment.length)

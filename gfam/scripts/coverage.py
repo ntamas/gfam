@@ -5,7 +5,7 @@ import sys
 
 from gfam.interpro import AssignmentParser
 from gfam.scripts import CommandLineApp
-from gfam.utils import open_anything, Sequence, UniversalSet
+from gfam.utils import open_anything, SequenceWithAssignments, UniversalSet
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -87,7 +87,7 @@ class CoverageApp(CommandLineApp):
         if not assignments:
             return
 
-        seq = Sequence(name, assignments[0].length)
+        seq = SequenceWithAssignments(name, assignments[0].length)
         for assignment in assignments:
             seq.assign(assignment, overlap_check=False)
 

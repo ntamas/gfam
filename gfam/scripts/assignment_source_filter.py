@@ -5,7 +5,9 @@ import sys
 from collections import defaultdict
 from gfam.interpro import AssignmentParser, InterPro
 from gfam.scripts import CommandLineApp
-from gfam.utils import EValueFilter, UniversalSet, Sequence, open_anything
+from gfam.utils import AssignmentOverlapChecker, EValueFilter, \
+                       SequenceWithAssignments, UniversalSet, \
+                       open_anything
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -63,10 +65,17 @@ class AssignmentSourceFilterApp(CommandLineApp):
                    "are present in the list in the given FILE",
                 config_key="generated/file.valid_gene_ids",
                 default=None)
+        parser.add_option("--max-overlap", metavar="SIZE",
+                help="sets the maximum overlap size allowed between "
+                     "assignments of the same data source. Default: %default",
+                config_key="max_overlap",
+                dest="max_overlap", type=int, default=20)
         return parser
 
     def run_real(self):
         """Runs the application"""
+        AssignmentOverlapChecker.max_overlap = self.options.max_overlap
+
         if self.options.interpro_file:
             self.log.info("Loading known InterPro IDs from %s..." % \
                     self.options.interpro_file)
@@ -160,14 +169,14 @@ class AssignmentSourceFilterApp(CommandLineApp):
                 continue
 
             # Calculate the coverage
-            seq = Sequence(name, a.length)
+            seq = SequenceWithAssignments(name, a.length)
             for a, _ in assignments:
                 seq.assign(a)
             coverage[source] = seq.coverage()
 
         a = assignments_by_source.keys()[0]
 
-        seq = Sequence(name, assignments_by_source[a][0][0].length)
+        seq = SequenceWithAssignments(name, assignments_by_source[a][0][0].length)
         unused_assignments = []
         if coverage:
             best_source = max(coverage.keys(), key = coverage.__getitem__)
