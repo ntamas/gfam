@@ -7,9 +7,8 @@ __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
-__all__ = ["Assignment", "bidict", "EValueFilter", "open_anything", \
-           "redirected", "SequenceWithAssignments", "search_file", \
-           "temporary_dir", "UniqueIdGenerator", "UniversalSet"]
+__all__ = ["Assignment", "AssignmentOverlapChecker", "OverlapType",
+           "SequenceWithAssignments"]
 
 try:
     from collections import namedtuple
