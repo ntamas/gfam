@@ -288,7 +288,7 @@ class GFamMasterScript(CommandLineApp):
         outfolder = self.config.get("DEFAULT", "folder.work")
 
         # Run and export the inferred domain architectures
-        outfile = os.path.join(outfolder, "domain_architectures.txt")
+        outfile = os.path.join(outfolder, "domain_architectures.tab")
         self.modula.run("find_domain_arch", force=self.options.force)
         shutil.copy(self.modula.storage_engine.get_filename("find_domain_arch"),
                 outfile)

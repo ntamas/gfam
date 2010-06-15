@@ -7,7 +7,7 @@ class Sequence(str):
     class; however, there is no guarantee that it will always stay
     so.
     """
-
+    pass
 
 class SeqRecord(object):
     """A sequence with its associated metadata.
