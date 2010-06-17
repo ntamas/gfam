@@ -4,3 +4,4 @@ data/*
 work/*
 *.egg-info
 domain_architectures.zip
+doc/build

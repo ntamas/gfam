@@ -1,5 +1,5 @@
 """Classes corresponding to domain assignments (`Assignment`) and
-sequences with corresponding domain assignments (`SequenceWithAssignment`).
+sequences with corresponding domain assignments (`SequenceWithAssignments`).
 """
 
 __author__  = "Tamas Nepusz"
@@ -77,7 +77,7 @@ class Assignment(namedtuple("Assignment", \
 class OverlapType(Enum):
     """Enum describing the different overlap types that can be detected
     by `AssignmentOverlapChecker`. See the documentation of
-    `AssignmentOverlapChecker._check_single` for more details.
+    `AssignmentOverlapChecker.check_single` for more details.
     """
     NO_OVERLAP = "NO_OVERLAP"
     DUPLICATE = "DUPLICATE"
@@ -89,7 +89,7 @@ class OverlapType(Enum):
 class AssignmentOverlapChecker(object):
     """Static class that contains the central logic of determining
     whether an assignment can be added to a partially assigned
-    `SequenceWithAssignments`_.
+    `SequenceWithAssignments`.
     """
 
     max_overlap = 20
@@ -101,18 +101,18 @@ class AssignmentOverlapChecker(object):
         `SequenceWithAssignments`, `assignment` must be an instance
         of `Assignment`.
 
-        The output is equivalent to the output of the first `_check_single`
+        The output is equivalent to the output of the first `check_single`
         that returns anything different from `OverlapType.NO_OVERLAP`,
         or `OverlapType.NO_OVERLAP` otherwise.
         """
         for other_assignment in sequence.assignments:
-            result = cls._check_single(assignment, other_assignment)
+            result = cls.check_single(assignment, other_assignment)
             if result != OverlapType.NO_OVERLAP:
                 return result
         return OverlapType.NO_OVERLAP
 
     @classmethod
-    def _check_single(cls, assignment, other_assignment):
+    def check_single(cls, assignment, other_assignment):
         """Checks whether the given `assignment` overlaps with another
         assignment `other_assignment`. Returns one of the following:
 
@@ -186,11 +186,14 @@ class SequenceWithAssignments(object):
 
         - ``length``: the number of amino acids in the sequence
 
-        - ``assignments``: a list of `Assignment`_ instances that describe
+        - ``assignments``: a list of `Assignment` instances that describe
           the domain architecture of the sequence
     """
 
     __slots__ = ("name", "length", "assignments")
+
+    #: The overlap checker used by this instance. This points to
+    #: `AssignmentOverlapChecker` by default.
     overlap_checker = AssignmentOverlapChecker
 
     def __init__(self, name, length):
@@ -248,7 +251,8 @@ class SequenceWithAssignments(object):
         return all(a.end < start or a.start > end for a in self.assignments)
 
     def resolve_interpro_ids(self, interpro):
-        """Calls resolve_interpro_ids() on each assignment of this sequence"""
+        """Calls `Assignment.resolve_interpro_ids` on each assignment of this
+        sequence"""
         self.assignments = [assignment.resolve_interpro_ids(interpro) \
                             for assignment in self.assignments]
 

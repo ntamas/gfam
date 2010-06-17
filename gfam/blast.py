@@ -26,7 +26,7 @@ class BlastFilter(object):
           filter
           
     You can also ask the filter to normalize the alignment length to
-    between zero and one by calling ``set_normalize_func``.
+    between zero and one by calling `set_normalize_func`.
     """
 
     short_name = "blast_filter"
@@ -40,8 +40,9 @@ class BlastFilter(object):
         self.set_normalize_func("off")
 
     def accepts(self, line):
-        """Returns ``True`` if the filter accepts `line`, ``False``
-        otherwise."""
+        """Returns ``True`` if the filter accepts the given line,
+        ``False`` otherwise.
+        """
         line = line.strip()
         if not line or line[0] == "#":
             return True
@@ -121,7 +122,7 @@ class BlastFilter(object):
 
         Alternatively, you may pass a callable in place of the function
         name. The callable must accept four arguments, the first is the
-        `BlastFilter`_ object itself, the second is the length of the
+        `BlastFilter` object itself, the second is the length of the
         query sequence, the third is the length of the hit sequence,
         the fourth is the unnormalized match length.
         """

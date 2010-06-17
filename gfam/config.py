@@ -1,11 +1,16 @@
-"""Configuration-related classes for GFam"""
+"""Configuration-related classes for GFam.
+
+This module provides `ConfigurableOptionParser`, an extension of Python's
+built-in `optparse.OptionParser` that lets you provide default values for
+command-line options from a given configuration file.
+"""
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
-__all__ = ["ConfigurableOptionParser"]
+__all__ = ["ConfigurableOption", "ConfigurableOptionParser"]
 
 from ConfigParser import ConfigParser
 from optparse import OptionParser, Option
@@ -66,7 +71,7 @@ class ConfigurableOptionParser(OptionParser):
     command line arguments using the same syntax you would use with
     `OptionParser`, but it also lets you attach a configuration key
     to each of the options. It also registers an option ``-c`` and a
-    long option ``--config-file` that can be used to specify the
+    long option ``--config-file`` that can be used to specify the
     input configuration file. If an option is not present on the
     command line, this option parser will try to look up the corresponding
     configuration key in the given configuration file.

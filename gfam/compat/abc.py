@@ -29,6 +29,9 @@ class Container(object):
         raise NotImplementedError
 
 class Mapping(Sized, Iterable, Container):
+    """An abstract base class similar to `collections.Mapping` in Python 2.6.
+    This will be used in place of `collections.Mapping` if necessary."""
+
     def __getitem__(self, key):
         raise KeyError
 
