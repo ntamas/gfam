@@ -196,8 +196,8 @@ class GFamMasterScript(CommandLineApp):
         infile=assignment_source_filter, cca
 
         [overrep]
-        depends=file.input.gene_ontology, file.mapping.interpro2go, find_domain_arch
-        infile=file.input.gene_ontology, file.mapping.interpro2go, find_domain_arch
+        depends=file.mapping.gene_ontology, file.mapping.interpro2go, find_domain_arch
+        infile=file.mapping.gene_ontology, file.mapping.interpro2go, find_domain_arch
 
         """)
 
