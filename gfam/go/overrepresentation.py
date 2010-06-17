@@ -89,15 +89,15 @@ class OverrepresentationAnalyser(object):
         `correction` specifies the multiple hypothesis testing correction to be
         used and it must be one of the following:
 
-          - ``None``, ``"none"`` or ``"off"``: no correction
+        - ``None``, ``"none"`` or ``"off"``: no correction
 
-          - ``"fdr"``: controlling the false discovery rate according
-            to the method of Benjamini and Hochberg
+        - ``"fdr"``: controlling the false discovery rate according
+          to the method of Benjamini and Hochberg
 
-          - ``"bonferroni"``: Bonferroni correction of the family-wise
-            error rate
+        - ``"bonferroni"``: Bonferroni correction of the family-wise
+          error rate
 
-          - ``"sidak"``: Sidak correction of the family-wise error rate
+        - ``"sidak"``: Sidak correction of the family-wise error rate
         """
         self.tree = tree
         self.mapping = self._propagate_go_term_ancestors(mapping)

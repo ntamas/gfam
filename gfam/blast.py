@@ -16,14 +16,14 @@ class BlastFilter(object):
     
     You can tune the filter with the following instance variables:
         
-        - ``min_sequence_identity``: the minimum sequence identity
-          required by the filter
+    - ``min_sequence_identity``: the minimum sequence identity
+      required by the filter
           
-        - ``min_alignment_length``: the minimum alignment length
-          required by the filter
+    - ``min_alignment_length``: the minimum alignment length
+      required by the filter
           
-        - ``max_e_value``: the maximum E-value required by the
-          filter
+    - ``max_e_value``: the maximum E-value required by the
+      filter
           
     You can also ask the filter to normalize the alignment length to
     between zero and one by calling `set_normalize_func`.

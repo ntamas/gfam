@@ -25,14 +25,14 @@ class SeqRecord(object):
     
     The class has the following fields:
 
-        - ``seq``: the sequence itself, an instance of `Sequence`.
-        - ``id``: a short, unique ID for the sequence
-        - ``name``: the human-readable name of the sequence
-        - ``description``: the whole description line of the sequence
-          as parsed from the original data source (such as a FASTA
-          file). The FASTA writer (`gfam.fasta.Writer`) uses this
-          when writing the sequence record to a file (unless if there
-          is no description, in which case the ID is used).
+    - ``seq``: the sequence itself, an instance of `Sequence`.
+    - ``id``: a short, unique ID for the sequence
+    - ``name``: the human-readable name of the sequence
+    - ``description``: the whole description line of the sequence
+      as parsed from the original data source (such as a FASTA
+      file). The FASTA writer (`gfam.fasta.Writer`) uses this
+      when writing the sequence record to a file (unless if there
+      is no description, in which case the ID is used).
     """
 
     __slots__ = ("seq", "id", "name", "description")

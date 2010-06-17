@@ -28,28 +28,20 @@ class Assignment(namedtuple("Assignment", \
     
     An InterPro domain assignment has the following fields:
         
-        - ``id``: the ID of the sequence
-
-        - ``length``: the length of the sequence
-
-        - ``start``: the starting position of the region in the sequence
-          that is assigned to some InterPro domain (inclusive)
-
-        - ``end``: the ending position (inclusive)
-
-        - ``source``: the assignment source as reported by ``iprscan``
-
-        - ``domain``: the ID of the domain being assigned, according to the
-          assignment source
-
-        - ``evalue``: E-value of the assignment if that makes sense,
-          ``None`` otherwise
-
-        - ``interpro_id``: the InterPro ID corresponding to ``domain`` in
-          ``source``.
-
-        - ``comment``: an arbitrary comment
-        """
+    - ``id``: the ID of the sequence
+    - ``length``: the length of the sequence
+    - ``start``: the starting position of the region in the sequence
+      that is assigned to some InterPro domain (inclusive)
+    - ``end``: the ending position (inclusive)
+    - ``source``: the assignment source as reported by ``iprscan``
+    - ``domain``: the ID of the domain being assigned, according to the
+      assignment source
+    - ``evalue``: E-value of the assignment if that makes sense,
+      ``None`` otherwise
+    - ``interpro_id``: the InterPro ID corresponding to ``domain`` in
+      ``source``.
+    - ``comment``: an arbitrary comment
+    """
 
     __slots__ = ()
 
@@ -116,23 +108,23 @@ class AssignmentOverlapChecker(object):
         """Checks whether the given `assignment` overlaps with another
         assignment `other_assignment`. Returns one of the following:
 
-            - `OverlapType.NO_OVERLAP`: there is no overlap between the
-              two given assignments
+        - `OverlapType.NO_OVERLAP`: there is no overlap between the
+          two given assignments
 
-            - `OverlapType.DUPLICATE`: `assignment` is a duplicate of
-              `other_assignment` (same starting and ending positions)
+        - `OverlapType.DUPLICATE`: `assignment` is a duplicate of
+          `other_assignment` (same starting and ending positions)
 
-            - `OverlapType.INSERTION_DIFFERENT`: `assignment` is inserted into
-              `other_assignment` or vice versa, but they have different data
-              sources.
+        - `OverlapType.INSERTION_DIFFERENT`: `assignment` is inserted into
+          `other_assignment` or vice versa, but they have different data
+          sources.
 
-            - `OverlapType.DIFFERENT`: `other_assignment` overlaps with `assignment`
-              partially, but they have different data sources
+        - `OverlapType.DIFFERENT`: `other_assignment` overlaps with `assignment`
+          partially, but they have different data sources
 
-            - `OverlapType.OVERLAP`: `other_assignment` overlaps with `assignment`
-              partially, they have the same data source, but the size of
-              the overlap is larger than the maximum allowed overlap specified
-              in `OverlapChecker.max_overlap`.
+        - `OverlapType.OVERLAP`: `other_assignment` overlaps with `assignment`
+          partially, they have the same data source, but the size of
+          the overlap is larger than the maximum allowed overlap specified
+          in `OverlapChecker.max_overlap`.
         """
         start, end = assignment.start, assignment.end
         other_start, other_end = other_assignment.start, other_assignment.end
@@ -182,12 +174,12 @@ class SequenceWithAssignments(object):
 
     The class has the following fields:
 
-        - ``name``: the name of the sequence
+    - ``name``: the name of the sequence
 
-        - ``length``: the number of amino acids in the sequence
+    - ``length``: the number of amino acids in the sequence
 
-        - ``assignments``: a list of `Assignment` instances that describe
-          the domain architecture of the sequence
+    - ``assignments``: a list of `Assignment` instances that describe
+      the domain architecture of the sequence
     """
 
     __slots__ = ("name", "length", "assignments")
