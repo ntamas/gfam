@@ -30,6 +30,8 @@ Table of contents
    :maxdepth: 2
 
    intro
+   running
+   pipeline
    api
 
 Development status

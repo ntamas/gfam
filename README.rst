@@ -5,8 +5,7 @@ GFam
 Automatic annotation of gene families
 -------------------------------------
 
-:Author: Tamás Nepusz
-:Email: tamas@cs.rhul.ac.uk
+:Author: Tamás Nepusz, Rajkumar Sasidharan, Alberto Paccanaro
 
 This is the documentation of ``gfam``, a Python module to aid the automatic
 annotation of gene families based on consensus domain architecture. ``gfam``
@@ -46,7 +45,7 @@ Running ``gfam``
 
 ``gfam`` is driven by a master configuration file named ``gfam.cfg``.
 A sample configuration file is given in the distribution. The sample
-file works fine for the gene sequences of `Arabidopsis thaliana`; for
+file works fine for the gene sequences of *Arabidopsis thaliana*; for
 other species, you might have to tweak some of the parameters, and you
 will surely have to modify the paths to the data files. The configuration
 file is documented and mostly self-explanatory.
@@ -65,6 +64,6 @@ Questions, comments
 ===================
 
 If you have a question or a comment about ``gfam`` or you think you have
-found a bug, feel free to contact me using the email address given in the
-header of this document.
+found a bug, feel free to `contact me`_.
 
+.. _contact me: http://www.cs.rhul.ac.uk/home/tamas

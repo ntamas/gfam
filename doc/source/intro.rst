@@ -37,6 +37,37 @@ not installed.
 
 .. _`SciPy`: http://www.scipy.org
 
+For the impatient
+-----------------
 
+.. highlight:: sh
+
+``gfam`` is driven by a master configuration file named ``gfam.cfg``.
+A sample configuration file is given in the distribution. The sample
+file works fine for the gene sequences of *Arabidopsis thaliana*; for
+other species, you might have to tweak some of the parameters, and you
+will surely have to modify the paths to the data files. The configuration
+file is documented and mostly self-explanatory.
+
+You can launch ``gfam`` by typing::
+
+    $ bin/gfam
+
+This will run the whole ``gfam`` analysis pipeline using the configuration
+specified in ``gfam.cfg``. If your configuration file is named otherwise,
+you can run it by typing::
+
+    $ bin/gfam -c my_config.cfg
+
+The results will be put into whatever work directory you specified in the
+configuration file. By default, this is named ``work``. See :ref:`output-files`
+for more details on what will be calculated and where you can find them.
+
+Questions, comments
+===================
+
+If you have a question or a comment about ``gfam`` or you think you have
+found a bug, feel free to contact me using the email address given in the
+header of this document.
 
 
