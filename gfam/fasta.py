@@ -1,4 +1,9 @@
-"""FASTA parsing routines"""
+"""This module contains routines for parsing and writing FASTA files.
+
+It is not meant to be a full-fledged FASTA parser (check BioPython_ if you
+need one), but it works well in most cases, at least for neatly formatted
+FASTA files.
+"""
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -15,7 +20,22 @@ from textwrap import TextWrapper
 
 
 class Parser(object):
-    """Parser for FASTA files"""
+    """Parser for FASTA files.
+    
+    Usage example::
+        
+        parser = Parser(open("test.ffa"))
+        for sequence in parser:
+            print sequence.seq
+
+    It also works with remote FASTA files if you use the :mod:`urllib2`
+    module::
+
+        from urllib2 import urlopen
+        parser = Parser(urlopen("ftp://whatever.org/remote_fasta_file.ffa"))
+        for sequence in parser:
+            print sequence.seq
+    """
 
     def __init__(self, handle):
         """Initializes a FASTA parser that will read from the given
@@ -45,10 +65,11 @@ class Parser(object):
                 continue
             yield line
 
-
     def sequences(self):
         """Returns a generator that iterates over all the sequences
-        in the FASTA file."""
+        in the FASTA file. The generator will yield `SeqRecord`
+        objects.
+        """
         seq_record, seq = None, []
         for line in self._lines():
             if line[0] == ">":
@@ -75,11 +96,17 @@ class Parser(object):
 
     @classmethod
     def to_dict(cls, *args, **kwds):
-        """Creates a `SeqDict` out of a FASTA file.
+        """Creates a dictionary out of a FASTA file.
 
-        The resulting `SeqDict` will map sequence IDs to their corresponding
-        `SeqRecord` objects. The arguments are passed on intact to the
-        constructor of `FASTAParser`.
+        The resulting dictionary will map sequence IDs to their
+        corresponding `SeqRecord` objects. The arguments are passed on intact
+        to the constructor of `Parser`.
+
+        .. todo:: implement a proper caching and indexing mechanism like
+           the `SeqIO.index` function in BioPython_. This would speed up
+           :mod:`gfam.scripts.seqslicer` significantly.
+
+        .. _BioPython: http://www.biopython.org
         """
         result = dict(izip(seq.id, seq) for seq in cls(*args, **kwds))
         return result
@@ -113,15 +140,20 @@ class Writer(object):
     """Writes `SeqRecord` objects in FASTA format to a given file handle"""
 
     def __init__(self, handle):
+        """Constructs a FASTA writer object that writes to the given file
+        handle."""
         self.handle = handle
         self.wrapper = TextWrapper(width=70)
 
     def write(self, seq_record):
+        """Writes the given sequence record to the file handle passed
+        at construction time.
+        """
         if seq_record.description:
-            print ">%s" % seq_record.description
+            print >> self.handle, ">%s" % seq_record.description
         else:
-            print ">%s" % (seq_record.id, )
-        print "\n".join(self.wrapper.wrap(seq_record.seq))
+            print >> self.handle, ">%s" % (seq_record.id, )
+        print >> self.handle, "\n".join(self.wrapper.wrap(seq_record.seq))
 
 
 def test():
