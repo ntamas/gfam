@@ -6,14 +6,9 @@
 GFam -- Automatic annotation of gene families
 =============================================
 
-:Author: Tamás Nepusz
-
 This is the documentation of ``gfam``, a Python module to aid the automatic
 annotation of gene families based on consensus domain architecture, written
 by `Tamás Nepusz`_.
-
-Citation
---------
 
 GFam has no official publication yet, but there will soon be one. You are
 kindly asked to cite the webpage of GFam until an official GFam publication
@@ -22,20 +17,6 @@ comes out:
   | **GFam: Automatic annotation of gene families**
   | Tamás Nepusz, Rajkumar Sasidharan and Alberto Paccanaro.
   | <http://github.com/ntamas/gfam>
-
-Table of contents
------------------
-
-.. toctree::
-   :maxdepth: 2
-
-   intro
-   running
-   pipeline
-   api
-
-Development status
-------------------
 
 GFam can generally be considered stable. We have used it successfully to
 annotate the whole genome of *Arabidopsis thaliana* and *Arabidopsis lyrata*.
@@ -50,6 +31,14 @@ button on the GitHub_ page.
 .. _author: http://www.cs.rhul.ac.uk/home/tamas
 .. _GitHub: http://github.com/ntamas/gfam
 .. _submit a bug report: http://github.com/ntamas/gfam/issues
+
+.. toctree::
+   :maxdepth: 2
+
+   intro
+   running
+   pipeline
+   api
 
 Indices and tables
 ==================

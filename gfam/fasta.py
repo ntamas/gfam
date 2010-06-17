@@ -38,8 +38,6 @@ class Parser(object):
     """
 
     def __init__(self, handle):
-        """Initializes a FASTA parser that will read from the given
-        file handle"""
         self.handle = handle
 
     def _lines(self):
@@ -102,6 +100,10 @@ class Parser(object):
         corresponding `SeqRecord` objects. The arguments are passed on intact
         to the constructor of `Parser`.
 
+        Usage example::
+
+            seq_dict = Parser.to_dict("test.ffa")
+
         .. todo:: implement a proper caching and indexing mechanism like
            the `SeqIO.index` function in BioPython_. This would speed up
            :mod:`gfam.scripts.seqslicer` significantly.
@@ -137,11 +139,9 @@ def regexp_remapper(iterable, regexp=None, replacement=r'\g<id>'):
 
 
 class Writer(object):
-    """Writes `SeqRecord` objects in FASTA format to a given file handle"""
+    """Writes `SeqRecord` objects in FASTA format to a given file handle."""
 
     def __init__(self, handle):
-        """Constructs a FASTA writer object that writes to the given file
-        handle."""
         self.handle = handle
         self.wrapper = TextWrapper(width=70)
 

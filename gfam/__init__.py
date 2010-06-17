@@ -51,6 +51,16 @@ in one of the following submodules:
   Various utility routines that did not fit anywhere else.
 
 .. _BioPython: http://www.biopython.org
+
+General comments that apply for the whole GFam API:
+
+- Routines that accept files usually accept either filenames or file-like
+  objects. If the filename ends in ``.bz2`` or ``.gz``, it will be
+  decompressed on-the-fly in memory. If the filename starts with ``http://``,
+  ``https://`` or ``ftp://``, it is assumed to be remote object and will
+  be downloaded accordingly. This is achieved by `gfam.utils.open_anything`,
+  which is called whenever a filename or a file-like object is passed into
+  a function.
 """
 
 __author__  = "Tamas Nepusz"

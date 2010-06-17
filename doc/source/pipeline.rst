@@ -66,16 +66,70 @@ Besides the data files, the following mapping files are also needed:
 
 .. _EBI: ftp://ftp.ebi.ac.uk/pub/databases/interpro/ParentChildTreeFile.txt
 .. _Gene Ontology: http://www.geneontology.org
-.. _overrepresentation analysis: overrep
+.. _overrepresentation analysis: pipeline-step-overrep
 
 GFam accepts uncompressed files or files compressed with ``gzip`` or ``bzip2``
 for both the data and the mapping files. Compressed files will be decompressed
 on-the-fly in memory when needed.
 
+.. _pipeline-step-extract:
+
+Overview of a GFam analysis
+---------------------------
+
+GFam infers annotations for sequences by first finding a consensus domain
+architecture for each step, then collecting Gene Ontology terms for each domain
+in a given domain architecture, and performing a Gene Ontology
+overrepresentation analysis on the terms to determine whether a domain
+architecture is annotated by some GO terms that occur more frequently than
+expected by random chance. Out of these three steps, the calculation of the
+consensus domain architecture is the most complicated one, as GFam has to
+account for not only the known domain assignments from InterPro, but also
+for the possible existence of novel, previously uncharacterised domains.
+The whole pipeline can be broken to ten steps as follows:
+
+1. Extracting valid gene IDs from the sequence file.
+
+2. Determining a preliminary domain architecture for each sequence by
+   considering known domains from the domain assignment file only.
+
+3. Finding the unassigned regions of each sequence; i.e. the regions
+   that are not assigned to any domain in the preliminary domain
+   architecture.
+
+4. Slicing out the unassigned regions of each sequence into a separate
+   FASTA file.
+
+5. Running an all-against-all BLAST comparison of the unassigned sequence
+   fragments.
+
+6. Filtering BLAST results to determine which fragments may correspond to
+   the same novel domain. Such filtering is based primarily on E-values
+   and alignment lengths. At this point, we obtain a graph on the sequence
+   fragments where two fragments are connected if they passed the BLAST
+   filter.
+
+7. Calculating the Jaccard similarity of the sequence fragments based on
+   the connection patterns and removing those connections which have a
+   low Jaccard similarity.
+
+8. Finding the connected components of the remaining graph. Each connected
+   component will correspond to a tentative novel domain.
+
+9. Calculating the consensus domain architecture by merging the
+   preliminary domain architecture with the newly detected novel domains.
+
+10. Conducting a Gene Ontology overrepresentation analysis on each of
+    the sequences and their domain architectures to derive the final
+    annotations.
+
+These steps will be described more in detail in the next few subsections.
+
 Step 1 -- Extracting valid gene IDs
 -----------------------------------
 
-.. _overrep:
+
+.. _pipeline-step-overrep:
 
 Step X -- Overrepresentation analysis
 -------------------------------------

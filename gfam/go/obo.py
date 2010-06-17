@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-A very simple and not 100% compliant parser for the OBO file format
+A very simple and not 100% compliant parser for the OBO file format.
 
 This parser is supplied "as is"; it is not an official parser, it
 might puke on perfectly valid OBO files, it might parse perfectly
@@ -16,33 +16,6 @@ Usage example::
     gene_ontology = {}
     for stanza in parser:
         gene_ontology[stanza.tags["id"][0]] = stanza.tags
-
-=======
-License
-=======
-
-Copyright (c) 2009 Tamas Nepusz <tamas@cs.rhul.ac.uk>
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
 """
 
 __author__  = "Tamas Nepusz"
@@ -76,7 +49,6 @@ class Value(object):
     __slots__ = ["value", "modifiers"]
 
     def __init__(self, value, modifiers=()):
-        """Creates a new value"""
         self.value = str(value)
         if modifiers:
             self.modifiers = tuple(modifiers)
@@ -126,8 +98,6 @@ class Stanza(object):
     __slots__ = ["name", "tags"]
 
     def __init__(self, name, tags=None):
-        """Creates a new stanza with the given name and the given
-        tags (which must be a dict)"""
         self.name = name
         if tags:
             self.tags = dict(tags)

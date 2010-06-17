@@ -25,7 +25,8 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.coverage']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.coverage',
+              'sphinx.ext.todo']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -251,3 +252,8 @@ epub_copyright = u'2010, Tamas Nepusz, Rajkumar Sasidharan'
 
 # The depth of the table of contents in toc.ncx.
 #epub_tocdepth = 3
+
+# -- Options for autodocs ---------------------------------------------------
+
+autoclass_content = "both"
+

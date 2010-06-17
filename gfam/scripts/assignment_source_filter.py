@@ -3,10 +3,11 @@
 import sys
 
 from collections import defaultdict
-from gfam.assignment import AssignmentOverlapChecker, SequenceWithAssignments
+from gfam.assignment import AssignmentOverlapChecker, EValueFilter, \
+                            SequenceWithAssignments,
 from gfam.interpro import AssignmentParser, InterPro
 from gfam.scripts import CommandLineApp
-from gfam.utils import EValueFilter, open_anything, UniversalSet
+from gfam.utils import open_anything, UniversalSet
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -107,13 +108,10 @@ class AssignmentSourceFilterApp(CommandLineApp):
         self.log.info("Processing %s..." % fname)
 
         current_id, assignments_by_source = None, defaultdict(list)
-        infile = open_anything(fname)
-        parser = AssignmentParser()
         valid_ids = self.valid_sequence_ids
         evalue_filter = EValueFilter.FromString(self.options.max_e)
-        for line in infile:
-            line = line.strip()
-            assignment = parser.parse(line)
+
+        for assignment in AssignmentReader(fname):
             if assignment.source in self.ignored:
                 continue
             if assignment.id not in valid_ids:

@@ -64,7 +64,7 @@ configuration file. By default, this is named ``work``. See :ref:`output-files`
 for more details on what will be calculated and where you can find them.
 
 Questions, comments
-===================
+-------------------
 
 If you have a question or a comment about ``gfam`` or you think you have
 found a bug, feel free to contact me using the email address given in the

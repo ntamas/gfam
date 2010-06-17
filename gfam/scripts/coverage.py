@@ -4,7 +4,7 @@ import optparse
 import sys
 
 from gfam.assignment import SequenceWithAssignments
-from gfam.interpro import AssignmentParser
+from gfam.interpro import AssignmentReader
 from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything, UniversalSet
 
@@ -66,12 +66,8 @@ class CoverageApp(CommandLineApp):
         input."""
         self.log.info("Processing %s..." % fname)
         current_id, assignments = None, []
-        infile = open_anything(fname)
-        parser = AssignmentParser()
         valid_ids = self.valid_sequence_ids
-        for line in infile:
-            line = line.strip()
-            assignment = parser.parse(line)
+        for assignment in AssignmentReader(fname):
             if assignment.source in self.ignored:
                 continue
             if assignment.id not in valid_ids:

@@ -16,19 +16,29 @@ __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
-__all__ = ["AssignmentParser", "AssignmentReader", \
-           "InterPro", "InterProNames", \
-           "InterPro2GOMapping"]
+__all__ = ["AssignmentReader", "InterPro", "InterProIDMapper", \
+           "InterProNames", "InterProTree", "InterPro2GOMapping"]
 
-class AssignmentParser(object):
-    """Parses lines from an InterPro domain assignment file"""
 
-    def __init__(self):
-        pass
+class AssignmentReader(object):
+    """Iterates over assignments in an InterPro domain assignment file.
+    
+    This reader parses the output of ``iprscan`` and yields appropriate
+    `Assignment` instances for each line.
+    """
 
-    def parse(self, line):
-        """Parses a line from an InterPro domain assignment file and
-        returns the corresponding assignment"""
+    def __init__(self, filename):
+        self._fp = open_anything(filename)
+
+    def assignments(self):
+        """A generator that yields the assignments in the InterPro domain
+        assignment file one by one. Each object yielded by this generator
+        will be an instance of `Assignment`."""
+        return (self.parse_line(line) for line in self._fp)
+
+    def parse_line(self, line):
+        """Parses a single line from an InterPro domain assignment file and
+        returns a corresponding `Assignment` instance."""
         parts = line.strip().split("\t")
 
         try:
@@ -57,25 +67,40 @@ class AssignmentParser(object):
         return assignment
 
 
-class AssignmentReader(object):
-    """Iterates over assignments in an InterPro domain assignment file"""
-
-    def __init__(self, filename):
-        self._fp = open_anything(filename)
-
-    def assignments(self):
-        """Yields the assignments in the InterPro domain assignment file
-        one by one"""
-        parser = AssignmentParser()
-        for line in self._fp:
-            yield parser.parse(line)
-
     def __iter__(self):
         return self.assignments()
 
 
 class InterProTree(Mapping):
-    """Dict-like object that tells the parent of every InterPro ID"""
+    """Dict-like object that tells the parent ID corresponding to every InterPro
+    domain ID.
+    
+    This class is usually not constructed directly; an instance of this class
+    is a member of every instance of `InterPro`.
+
+    The class behaves much like a dictionary that returns the parent ID for
+    every InterPro domain ID. For unknown domain IDs, the domain ID itself is
+    returned. For sub-subfamilies, the returned value is the ID of the subfamily,
+    not the family; use `get_most_remote_ancestor` if you always need the family
+    ID no matter what.
+
+    Usage example::
+
+        >>> interpro = InterPro.FromFile("ParentChildTreeFile.txt")
+        >>> tree = interpro.tree
+        >>> tree["IPR000010"]      # this is a family ID
+        'IPR000010'
+        >>> tree["IPR001713"]      # this is a subfamily of IPR000010
+        'IPR000010'
+        >>> tree["IPR001321"]      # a sub-subfamily ID
+        'IPR013655'
+        >>> tree["IPR9999"]        # this is an unknown ID
+        'IPR9999'
+        >>> "IPR9999" in tree
+        False
+        >>> tree.get_most_remote_ancestor("IPR001321")
+        'IPR000014'
+    """
 
     def __init__(self):
         self._data = {}
@@ -87,7 +112,10 @@ class InterProTree(Mapping):
         return self._data.get(item, item)
 
     def get_most_remote_ancestor(self, item):
-        """Returns the most remote ancestor of the given item"""
+        """Returns the most remote ancestor of the given item.
+        
+        For family IDs, this returns the ID itself. For subfamily IDs and below,
+        this returns the corresponding family ID."""
         parent, child = self._data.get(item, item), item
         while parent != child:
             parent, child = self._data.get(parent, parent), parent
@@ -107,8 +135,27 @@ class InterProTree(Mapping):
 
 
 class InterProIDMapper(object):
-    """Dict-like object that maps domain IDs to their corresponding InterPro
-    IDs."""
+    """Dict-like object that maps domain IDs from various data sources
+    to their corresponding InterPro IDs.
+    
+    This class is usually not constructed directly; an instance of this class
+    is a member of every instance of `InterPro`.
+
+    The class can generally be used like a dictionary::
+
+        >>> interpro = InterPro.FromFile("ParentChildTreeFile.txt")
+        >>> mapper = interpro.mapping
+        >>> mapper["PF00031"]          # an alias for IPR000010
+        'IPR000010'
+        >>> mapper.get("IPR9999")      # no such ID
+        'IPR9999'
+        >>> mapper["IPR9999"] = "Fake ID for testing"
+        >>> mapper["IPR9999"]
+        'Fake ID for testing'
+        >>> del mapper["IPR9999"]
+        >>> "IPR9999" in mapper
+        False
+    """
 
     def __init__(self):
         self._data = {}
@@ -137,14 +184,36 @@ class InterProIDMapper(object):
 
 
 class InterProNames(object):
-    def __init__(self, name):
-        self.names = {}
-        if name is None:
-            return
-        self.load(name)
+    """Dict-like object mapping IDs to human-readable names, the only
+    difference being that unknown IDs are handled gracefully instead of
+    raising a `KeyError`.
 
-    def load(self, name):
-        for line in open_anything(name):
+    The name of this class is a bit of a misnomer as it works for *any*
+    type of IDs, not only for InterPro IDs.
+
+    .. todo:: refactor and fix the class name
+
+    Usage example::
+
+        >>> names = InterProNames.FromFile("names.tab")
+        >>> "IPR015503" in names
+        True
+        >>> "no-such-name" in names
+        False
+        >>> names["IPR015503"]
+        'Cortactin'
+        >>> names["no-such-name"]
+        'no-such-name'
+    """
+
+    def __init__(self):
+        self.names = {}
+
+    def load(self, filename):
+        """Loads ID-name assignments from a simple tab-separated flat file.
+        
+        Lines not containins any tab characters are silently ignored."""
+        for line in open_anything(filename):
             parts = line.strip().split("\t", 1)
             if len(parts) > 1:
                 self.names[parts[0]] = parts[1]
@@ -157,16 +226,38 @@ class InterProNames(object):
 
     @classmethod
     def FromFile(cls, filename):
+        """Shortcut method that does exactly what the following snippet does::
+        
+            >>> names = InterProNames()
+            >>> names.load(filename)
+        """
         return cls(filename)
 
 
 class InterPro(object):
+    """Class that encapsulates the InterPro parent-child tree (an instance
+    of `InterProTree`) and the InterPro ID mapper (an instance of
+    `InterProIDMapper`) under the same hood. This makes it easier to pass
+    both of them around in the code.
+
+    When parsing the parent-child tree, subfamiy IDs are removed from
+    aliases starting with ``PTHR``; i.e. ``PTHR10829:SF4`` will be
+    stored as ``PTHR10829`` (and mapped to ``IPR015503`` at the time of
+    writing).
+
+    For usage examples, see `InterProTree` and `InterProIDMapper`.
+    """
+
     def __init__(self):
         self.tree = InterProTree()
         self.mapping = InterProIDMapper()
 
     @classmethod
     def FromFile(cls, filename):
+        """Constructs this object from an InterPro parent-child mapping file,
+        pointed to by the given filename. Both the tree and the ID-name mapping
+        will be built from the same file.
+        """
         result = cls()
         path_to_root = []
 
@@ -176,7 +267,7 @@ class InterPro(object):
             while line[dash_count] == "-":
                 dash_count += 1
             if dash_count % 2 != 0:
-                raise ValueError, "dash count in InterPro file not even"
+                raise ValueError("dash count in InterPro file not even")
 
             line = line[dash_count:]
             parts = line.split("::")
@@ -189,8 +280,8 @@ class InterPro(object):
             else:
                 path_to_root.append(interpro_id)
                 if level != len(path_to_root):
-                    raise ValueError, "tree depth increased by more than " +\
-                                      "one between two lines"
+                    raise ValueError("tree depth increased by more than "
+                                     "one between two lines")
             if len(path_to_root) > 1:
                 result.tree[interpro_id] = path_to_root[-2]
 
@@ -203,13 +294,12 @@ class InterPro(object):
 
 
 class InterPro2GOMapping(bidict):
-    """Bidirectional dictionary that tells the corresponding Gene
+    """Bidirectional dictionary (`bidict`) that tells the corresponding Gene
     Ontology terms of every InterPro ID and vice versa.
 
-    This object encapsulates two dictionaries: `self.terms`
-    gives the Gene Ontology terms of a given InterPro domain,
-    and `self.domains` gives the InterPro domains annotated by a
-    given GO term."""
+    This object encapsulates two dictionaries: `self.terms` gives the Gene
+    Ontology terms of a given InterPro domain, and `self.domains` gives the
+    InterPro domains annotated by a given GO term."""
 
     def __init__(self):
         bidict.__init__(self)
@@ -226,7 +316,7 @@ class InterPro2GOMapping(bidict):
         """Constructs a mapping from a mapping file. The format of this
         file should be identical to the official ``interpro2go`` file
         provided by the Gene Ontology project. `tree` is a Gene Ontology
-        tree object (see `gene_ontology.Tree`_) that will be used to
+        tree object (see `gfam.go.Tree`) that will be used to
         look up terms from IDs."""
 
         regex = re.compile("InterPro:([A-Z0-9]+) .* > .* ; (GO:[0-9]+)")

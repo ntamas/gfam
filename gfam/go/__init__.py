@@ -1,33 +1,6 @@
 #!/usr/bin/env python
 """
 A higher level Gene Ontology representation in Python
-
-=======
-License
-=======
-
-Copyright (c) 2009 Tamas Nepusz <tamas@cs.rhul.ac.uk>
-
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
 """
 
 __author__  = "Tamas Nepusz"
@@ -139,13 +112,13 @@ class Annotation(object):
 
 
 class AnnotationFile(object):
-    """A parser class that processes GO annotation files"""
+    """A parser class that processes GO annotation files."""
 
     def __init__(self, file_handle):
         """Creates an annotation file parser that reads the given file-like
         object. You can also specify filenames. If the filename ends in ``.gz``,
         the file is assumed to contain gzipped data and it will be unzipped
-        on the fly. Example:
+        on the fly. Example::
 
           >>> import gfam.go as go
           >>> parser = go.AnnotationFile("gene_association.sgd.gz")
@@ -174,14 +147,11 @@ class AnnotationFile(object):
 
 
 class Tree(object):
-    """Class representing a GO tree
-
-    A GO tree contains many GO terms represented by `Term`
-    objects.
+    """Class representing the GO tree. A GO tree contains many GO terms
+    represented by `Term` objects.
     """
 
     def __init__(self):
-        """Constructs an empty GO tree."""
         self.terms = {}
         self.aliases = {}
 
@@ -243,7 +213,11 @@ class Tree(object):
                 queue.append((parent, path + [parent]))
 
     def to_igraph(self, rel="is_a"):
-        """Returns an igraph graph representing this GO tree"""
+        """Returns an :mod:`igraph` graph representing this GO tree. This is
+        handy if you happen to use igraph_.
+
+        .. _igraph: http://igraph.sf.net
+        """
         import igraph
         graph = igraph.Graph(n=len(self.terms), directed=True)
         graph.vs["id"] = self.terms.keys()
@@ -287,7 +261,8 @@ class Term(object):
     __slots__ = ("id", "name", "tags")
 
     def __init__(self, id, name="", tags=None):
-        """Constructs a GO term"""
+        """Constructs a GO term with the given ID, the given human-
+        readable name and the given tags."""
         self.id = str(id)
         self.name = str(name)
         if tags:

@@ -5,9 +5,8 @@ __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
-__all__ = ["bidict", "EValueFilter", "open_anything", "redirected", \
-           "search_file", "temporary_dir", "UniqueIdGenerator", \
-           "UniversalSet"]
+__all__ = ["bidict", "open_anything", "redirected", "search_file", \
+           "temporary_dir", "UniqueIdGenerator", "UniversalSet"]
 
 try:
     import bz2
@@ -28,7 +27,39 @@ from shutil import rmtree
 from tempfile import mkdtemp
 
 class bidict(object):
-    """Bidirectional many-to-many mapping"""
+    """Bidirectional many-to-many mapping.
+    
+    This class models many-to-many mappings that are used in some places in
+    GFam. For instance, the mapping of GO term identifiers to InterPro
+    domain identifiers is typically a many-to-many mapping (domains are
+    annotated by multiple GO terms, and GO terms may belong to multiple
+    domains).
+    
+    Being a general many-to-many mapping class, instances contain two
+    member dictionaries: `left` (which maps items from one side of the
+    relationship to *sets* of items from the other side of the relationship)
+    and `right` (which contains the exact opposite). You should only query
+    these dictionaries directly, manipulation should be done by the methods
+    provided by the `bidict` class to ensure that the two dicts are kept
+    in sync.
+
+    Example::
+
+        >>> bd = bidict()
+        >>> bd.add_left("foo", "bar")
+        >>> bd.add_left("foo", "baz")
+        >>> bd.get_left("foo") == set(['bar', 'baz'])
+        True
+        >>> bd.add_right("baz", "frob")
+        >>> bd.get_right("bar")
+        set(['foo'])
+        >>> bd.get_right("baz") == set(['foo', 'frob'])
+        True
+        >>> bd.len_left()
+        2
+        >>> bd.len_right()
+        2
+    """
 
     def __init__(self, items=None):
         object.__init__(self)
@@ -91,12 +122,14 @@ class bidict(object):
 
     def get_left(self, v1, default = None):
         """Returns the items associated to `v1` when `v1` is looked up from the
-        left dictionary"""
+        left dictionary. `default` will be returned if `v1` is not in the left
+        dictionary."""
         return self.left.get(v1, default)
 
     def get_right(self, v1, default=None):
         """Returns the items associated to `v1` when `v1` is looked up from the
-        right dictionary"""
+        right dictionary. `default` will be returned if `v2` is not in the right
+        dictionary."""
         return self.right.get(v1, default)
 
     def len_left(self):
@@ -116,51 +149,9 @@ class bidict(object):
         return self.right.iteritems()
 
 
-class EValueFilter(object):
-    """Given an assignment, this filter tells whether the assignment's
-    E-value is satisfactory to accept it.
-
-    Different E-values may be given for different data sources.
-    """
-
-    def __init__(self):
-        self.default_e_value = float('inf')
-        self.thresholds = {}
-
-    def set_threshold(self, source, evalue):
-        """Sets the E-value threshold for the given data source"""
-        self.thresholds[source] = evalue
-
-    def is_acceptable(self, assignment):
-        """Checks whether the given assignment is acceptable"""
-        threshold = self.thresholds.get(assignment.source, self.default_e_value)
-        return assignment.evalue <= threshold
-
-    @classmethod
-    def FromString(cls, description):
-        """Constructs an E-value filter from a string description that
-        can be used in command line arguments.
-        
-        The string description is a semicolon-separated list of source-threshold
-        pairs; for instance: HMMPfam=0.001;HMMSmart=0.005;0.007. The last
-        entry denotes the default E-value; in particular, if a number is
-        not preceded by a source name, it is assumed to be a default E-value.
-        """
-        result = cls()
-        for part in description.split(";"):
-            part = part.strip()
-            if "=" in part:
-                source, evalue = part.split("=", 1)
-                evalue = float(evalue)
-                result.set_threshold(source, evalue)
-            else:
-                result.default_e_value = float(part)
-        return result
-
-
 def open_anything(fname, *args, **kwds):
     """Opens the given file. The file may be given as a file object
-    or a filename. If the filename ends in .bz2 or .gz, it will
+    or a filename. If the filename ends in ``.bz2`` or ``.gz``, it will
     automatically be decompressed on the fly. If the filename starts
     with ``http://``, ``https://`` or ``ftp://`` and there is no
     other argument given, the remote URL will be opened for reading.
@@ -236,13 +227,13 @@ def search_file(filename, search_path=None, executable=True):
 
 @contextmanager
 def temporary_dir(*args, **kwds):
-    """Context manager that creates a temporary directory when
-    entering the context and removes it when exiting.
+    """Context manager that creates a temporary directory when entering the
+    context and removes it when exiting.
     
-    Every argument is passed on to `mkdtemp` except a keyword
-    argument named `change` which tells whether we should change
-    to the newly created temporary directory or not. The current
-    directory will be restored when exiting the context manager."""
+    Every argument is passed on to `tempfile.mkdtemp` except a keyword argument
+    named `change` which tells whether we should change to the newly created
+    temporary directory or not. The current directory will be restored when
+    exiting the context manager."""
     change = "change" in kwds
     if change:
         del kwds["change"]
@@ -322,16 +313,91 @@ class UniqueIdGenerator(object):
 
 
 class UniversalSet(object):
-    """Does what it says on the tin: it is a fake set containing everything.
+    """Does what it says on the tin: it is a fake set containing everything,
+    even itself.
     
-    This class can be used in places where a set is expected, and the only
-    operation performed on the set will be membership checking. The class
-    returns ``True`` when the user searches for a given member in the set,
-    regardless of what that member is.
+    This class can be used in places where a set is expected. Most of the
+    set methods are also implemented.
+
+    Usage example::
+
+        >>> s = UniversalSet()
+        >>> "abc" in s
+        True
+        >>> s in s
+        True
+        >>> s & set(["123"])
+        UniversalSet()
+        >>> s & set(["123"]) == s
+        True
     """
+
+    def __and__(self, other):
+        self._ensure_set()
+        return set(other)
 
     def __contains__(self, what):
         return True
 
+    def __eq__(self, other):
+        return isinstance(other, self.__class__)
+    
+    def __ge__(self, other):
+        self._ensure_set(other)
+        return True
 
+    def __gt__(self, other):
+        self._ensure_set(other)
+        return self != other
+
+    def __iand__(self, other):
+        self._ensure_set(other)
+        if other == self:
+            return self
+        raise TypeError, "%s is not mutable" % self.__class__.__name__
+
+    def __ior__(self, other):
+        return self
+
+    def __isub__(self, other):
+        self._ensure_set(other)
+        if not other:
+            return self
+        raise TypeError, "%s is not mutable" % self.__class__.__name__
+
+    def __le__(self, other):
+        self._ensure_set(other)
+        return self == other
+
+    def __lt__(self, other):
+        self._ensure_set(other)
+        return False
+
+    def __or__(self, other):
+        self._ensure_set(other)
+        return set(other)
+
+    def __rand__(self, other):
+        self._ensure_set(other)
+        return other
+
+    def __ror__(self, other):
+        self._ensure_set(other)
+        return self
+
+    def __rsub__(self, other):
+        self._ensure_set(other)
+        return set()
+
+    def __sub__(self, other):
+        self._ensure_set(other)
+        raise TypeError, "%s is not mutable" % self.__class__.__name__
+
+    @staticmethod
+    def _ensure_set(obj):
+        if not isinstance(obj, (set, frozenset)):
+            raise NotImplementedError
+
+    def __repr__(self):
+        return "%s()" % (self.__class__.__name__, )
 
