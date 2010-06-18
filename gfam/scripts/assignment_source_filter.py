@@ -4,8 +4,8 @@ import sys
 
 from collections import defaultdict
 from gfam.assignment import AssignmentOverlapChecker, EValueFilter, \
-                            SequenceWithAssignments,
-from gfam.interpro import AssignmentParser, InterPro
+                            SequenceWithAssignments
+from gfam.interpro import AssignmentReader, InterPro
 from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything, UniversalSet
 
@@ -27,15 +27,15 @@ class AssignmentSourceFilterApp(CommandLineApp):
 
     The assignment process has three stages:
 
-        1. For a given sequence, find all the data sources that have InterPro
-           IDs for all their domains assigned to that sequence. Take the source
-           having the maximal coverage, and use it as a primary assignment.
+        1. For a given sequence, take the source having the maximal coverage
+           and use it as a primary assignment. In this step, HMMPanther and
+           Gene3D domains are excluded.
 
         2. Loop over the unused domains and try to augment the primary assignment
            with them. Domain insertions and overlaps are allowed only if both
            domains (the one being inserted and the one which is already there in
            the assignment) have the same data source. In this step, HMMPanther
-           and Gene3D domains are excluded.
+           and Gene3D domains are still excluded.
 
         3. Try step 2 again with HMMPanther and Gene3D domains.
     """
@@ -111,7 +111,8 @@ class AssignmentSourceFilterApp(CommandLineApp):
         valid_ids = self.valid_sequence_ids
         evalue_filter = EValueFilter.FromString(self.options.max_e)
 
-        for assignment in AssignmentReader(fname):
+        reader = AssignmentReader(fname)
+        for assignment, line in reader.assignments_and_lines():
             if assignment.source in self.ignored:
                 continue
             if assignment.id not in valid_ids:
@@ -178,6 +179,7 @@ class AssignmentSourceFilterApp(CommandLineApp):
         if coverage:
             best_source = max(coverage.keys(), key = coverage.__getitem__)
             for a, line in assignments_by_source[best_source]:
+                line = line.strip()
                 seq.assign(a)
                 tab_count = list(line).count("\t")
                 if tab_count < 13:
@@ -214,7 +216,7 @@ class AssignmentSourceFilterApp(CommandLineApp):
                     selected_idxs.add(idx)
                     idx_to_stage[idx] = stage_no+2
         for idx in sorted(selected_idxs):
-            row = unused_assignments[idx][1]
+            row = unused_assignments[idx][1].strip()
             tab_count = list(row).count("\t")
             if tab_count < 13:
                 row = row + "\t" * (13-tab_count)

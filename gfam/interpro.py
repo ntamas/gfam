@@ -36,6 +36,13 @@ class AssignmentReader(object):
         will be an instance of `Assignment`."""
         return (self.parse_line(line) for line in self._fp)
 
+    def assignments_and_lines(self):
+        """A generator that yields the assignments in the InterPro domain
+        assignment file and the corresponding raw lines one by one. Each
+        object yielded by this generator will be a tuple containing an
+        instance of `Assignment` and the corresponding line."""
+        return ((self.parse_line(line), line) for line in self._fp)
+
     def parse_line(self, line):
         """Parses a single line from an InterPro domain assignment file and
         returns a corresponding `Assignment` instance."""

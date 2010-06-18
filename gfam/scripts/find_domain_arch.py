@@ -182,6 +182,9 @@ class FindDomainArchitectureApp(CommandLineApp):
                 print >>self.details_file, "    Coverage: %.3f" % seq.coverage()
                 print >>self.details_file, "    Coverage w/o novel domains: %.3f" % seq2.coverage()
                 for assignment in assignments:
+                    if assignment.comment is None and \
+                       assignment.domain.startswith("NOVEL"):
+                        assignment.comment = "novel"
                     row = "    %(start)4d-%(end)4d: %(domain)s (%(source)s, stage: %(comment)s)" % assignment._asdict()
                     print >>self.details_file, row,
                     interpro_id = assignment.interpro_id
