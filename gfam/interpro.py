@@ -238,7 +238,9 @@ class InterProNames(object):
             >>> names = InterProNames()
             >>> names.load(filename)
         """
-        return cls(filename)
+        result = cls()
+        result.load(filename)
+        return result
 
 
 class InterPro(object):
