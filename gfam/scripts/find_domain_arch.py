@@ -138,11 +138,13 @@ class FindDomainArchitectureApp(CommandLineApp):
 
     def process_clustering_file(self, fname):
         f = open(fname)
-        for idx, line in enumerate(f):
+        idx = 1
+        for line in f:
             ids = line.strip().split()
             if len(ids) < self.options.min_size:
                 continue
             domain_name = "NOVEL%05d" % idx
+            idx += 1
             for id in ids:
                 seq_id, limits = id.split(":")
                 start, end = map(int, limits.split("-"))
