@@ -7,73 +7,6 @@ are executed in order one by one and what output files are produced in the
 end. First, a short overview of the whole process will be given, followed
 by a more detailed description of each step.
 
-Input files
------------
-
-The input files can be grouped into three large groups: *data files*, *mapping
-files* and the *configuration file*.  Data files contain the actual input data
-that is specific to a given organism. Mapping files usually map between IDs of
-different data sources (for instance, from InterPro domain IDs to Gene Ontology
-terms) or IDs to human-readable descriptions. The :ref:`configuration file
-<config-file>` tells GFam where to find the data files and the mapping files.
-When one wants to process a new organism with GFam, it is therefore usually
-enough to replace the paths of the data files in the configuration only, as the
-mapping files can be re-used for multiple analyses.
-
-GFam requires the following data files:
-
-**Sequence file**
-    This file must contain all the sequences that are being analysed and
-    annotated by GFam.
-
-**Domain assignment file**
-    This file is produced by running ``iprscan``, the command-line variant of
-    `InterProScan`_ and it assigns sections of each segment in the sequence
-    file to known domains in `InterPro`_. The sequence IDs in this file must be
-    identical to the ones in the sequence file; if not, one can specify a
-    regular expression in the :ref:`configuration file <config-file>` to
-    extract the sequence ID from the FASTA defline.
-
-.. _InterProScan: http://www.ebi.ac.uk/Tools/InterProScan
-.. _InterPro: http://www.ebi.ac.uk/interpro
-
-Besides the data files, the following mapping files are also needed:
-
-**InterPro -- GO mapping**
-    This file maps InterPro IDs to their corresponding GO terms, and it
-    can be obtained from <http://www.geneontology.org/external2go/interpro2go>. 
-
-**Mapping of domain IDs to human-readable names**
-    Fairly self-explanatory; a tab-separated flat file with two columns, the
-    first being the domain ID and the second being the corresponding
-    human-readable name. It is advisable to construct a file which contains
-    at least the InterPro, HMMPfam and Superfamily IDs as these are the most
-    common (and many HMMPfam and Superfamily IDs do not have corresponding
-    InterPro IDs yet). An up-to-date assignment containing the mapping for
-    these three data sources is available from the authors upon request.
-
-**Parent-child relationships of InterPro terms**
-    This file contains the parent/child relationships between InterPro
-    accession numbers to indicate family/subfamily relationships. This file
-    is used to map each InterPro subfamily ID to the corresponding family
-    ID, and it can be obtained from `EBI`_.
-
-**The Gene Ontology**
-    This file contains the `Gene Ontology`_ in OBO format, and it is
-    required only for the `overrepresentation analysis`_ step. The latest
-    version of the file can be obtained from the homepage of the
-    `Gene Ontology`_ project.
-
-.. _EBI: ftp://ftp.ebi.ac.uk/pub/databases/interpro/ParentChildTreeFile.txt
-.. _Gene Ontology: http://www.geneontology.org
-.. _overrepresentation analysis: pipeline-step-overrep
-
-GFam accepts uncompressed files or files compressed with ``gzip`` or ``bzip2``
-for both the data and the mapping files. Compressed files will be decompressed
-on-the-fly in memory when needed.
-
-.. _pipeline-step-extract:
-
 Overview of a GFam analysis
 ---------------------------
 
@@ -119,6 +52,8 @@ The whole pipeline can be broken to eight steps as follows:
    annotations.
 
 These steps will be described more in detail in the next few subsections.
+
+.. _pipeline-step-extract:
 
 Step 1 -- Extracting valid gene IDs
 -----------------------------------
@@ -318,4 +253,30 @@ was selected into the consensus assignment.
 
 Step 8 -- Overrepresentation analysis
 -------------------------------------
+
+This final step conducts a `Gene Ontology`_ overrepresentation analysis on the
+domain architecture of the sequences given in the input file. For each sequence,
+we find the Gene Ontology terms corresponding to each of the domains in the
+consensus domain architecture of the sequence, and check each term using a
+hypergeometric test to determine whether it is overrepresented within the
+annotations of the sequence domains or not.
+
+During the overrepresentation analysis, *multiple* hypergeometric tests are
+performed to determine the significantly overrepresented terms for a *single*
+sequence. GFam lets the user account for the effects of multiple hypothesis
+testing by correcting the p-values either by controlling the family-wise
+error rate (FWER) using the Bonferroni or Sidák methods, or by controlling
+the false discovery rate (FDR) using the Benjamini-Hochberg method.
+
+The result of the overrepresentation analysis is saved into a human-readable
+text file that lists the overrepresented Gene Ontology terms in increasing
+order of p-values for each sequence.
+
+For the analysis of *A.thaliana* and *A.lyrata* sequences, we used the
+Benjamini-Hochberg method to control the FDR. The overall p-value threshold
+of the overrepresentation test was set to 0.05. Gene Ontology terms annotated
+to less than five domains were ignored as these terms have a very high
+probability of coming up as significant even by chance.
+
+.. _Gene Ontology: http://www.geneontology.org
 

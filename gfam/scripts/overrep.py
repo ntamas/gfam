@@ -41,6 +41,28 @@ class OverrepresentationAnalysisApp(CommandLineApp):
         super(OverrepresentationAnalysisApp, self).__init__(*args, **kwds)
         self.go_tree = None
 
+    def create_parser(self):
+        """Creates the command line parser for this application"""
+        parser = super(OverrepresentationAnalysisApp, self).create_parser()
+        parser.add_option("-p", "--confidence", dest="confidence",
+                metavar="PVALUE",
+                help="set the p-value cutoff to the given PVALUE. "
+                     "Default: %default",
+                config_key="analysis:overrep/confidence",
+                default=0.05, type=float)
+        parser.add_option("--correction", dest="correction",
+                metavar="METHOD", default="fdr",
+                choices=("none", "bonferroni", "sidak", "fdr"),
+                config_key="analysis:overrep/correction",
+                help="use the given correction METHOD for multiple "
+                     "hypothesis testing. Default: %default ")
+        parser.add_option("-s", "--min-size", dest="min_size",
+                metavar="SIZE", default=5,
+                config_key="analysis:overrep/min_term_size",
+                help="don't test for overrepresentation of GO terms "
+                     "with less than SIZE annotations. Default: %default")
+        return parser
+
     def run_real(self):
         """Runs the overrepresentation analysis application"""
         if len(self.args) != 3:
@@ -62,8 +84,13 @@ class OverrepresentationAnalysisApp(CommandLineApp):
     def process_file(self, input_file):
         """Processes the given input file that contains the domain
         architectures."""
+        self.log.info("Running overrepresentation analysis")
+        self.log.info("p-value = %.4f, correction method = %s" % \
+                      (self.options.confidence, self.options.correction))
         overrep = OverrepresentationAnalyser(self.go_tree, self.go_mapping,
-                confidence = 0.05, min_count = 5, correction = "fdr")
+                confidence = self.options.confidence,
+                min_count = self.options.min_size,
+                correction = self.options.correction)
         for line in open_anything(input_file):
             parts = line.strip().split("\t")
             gene_id, arch = parts[0], parts[2].split(";")
