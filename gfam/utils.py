@@ -326,76 +326,225 @@ class UniversalSet(object):
         True
         >>> s in s
         True
-        >>> s & set(["123"])
-        UniversalSet()
-        >>> s & set(["123"]) == s
+        >>> s & set(["123"]) == set(["123"])
         True
+        >>> s | set(["123"])
+        UniversalSet()
     """
 
     def __and__(self, other):
-        self._ensure_set()
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> s2 = set([1,2,3])
+            >>> (s & s2) == s2
+            True
+        """
+        self._ensure_set(other)
         return set(other)
 
     def __contains__(self, what):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> s in s
+            True
+            >>> "foo" in s
+            True
+        """
         return True
 
     def __eq__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> s2 = UniversalSet()
+            >>> s2 == s
+            True
+            >>> s == 1
+            False
+        """
         return isinstance(other, self.__class__)
     
     def __ge__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> s2 = UniversalSet()
+            >>> s2 >= s
+            True
+            >>> s >= s2
+            True
+            >>> s >= set([1,2,3])
+            True
+            >>> s >= 2
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+        """
         self._ensure_set(other)
         return True
 
     def __gt__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> s2 = UniversalSet()
+            >>> s2 > s
+            False
+            >>> s > set([1,2,3])
+            True
+            >>> s >= 2
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+        """
         self._ensure_set(other)
         return self != other
 
     def __iand__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> s &= s
+            >>> s &= set([1,2,3])
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            TypeError: UniversalSet is not mutable
+            >>> s &= 2
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+        """
         self._ensure_set(other)
         if other == self:
             return self
         raise TypeError, "%s is not mutable" % self.__class__.__name__
 
     def __ior__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> s |= s
+            >>> s |= set([1,2,3])
+            >>> s
+            UniversalSet()
+            >>> s |= 2
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+        """
+        self._ensure_set(other)
         return self
 
     def __isub__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> s -= set([1,2,3])
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            TypeError: UniversalSet is not mutable
+            >>> s -= set()
+            >>> s |= 2
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+        """
         self._ensure_set(other)
         if not other:
             return self
         raise TypeError, "%s is not mutable" % self.__class__.__name__
 
     def __le__(self, other):
-        self._ensure_set(other)
-        return self == other
+        return not self > other
 
     def __lt__(self, other):
-        self._ensure_set(other)
-        return False
+        return not self >= other
 
+    def __ne__(self, other):
+        return not self == other
+    
     def __or__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> s | set([1,2,3])
+            UniversalSet()
+            >>> s | set()
+            UniversalSet()
+            >>> s | 2
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+        """
         self._ensure_set(other)
-        return set(other)
+        return self
 
     def __rand__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> s2 = set([1,2,3])
+            >>> (s2 & s) == s2
+            True
+        """
         self._ensure_set(other)
         return other
 
     def __ror__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> set([1,2,3]) | s
+            UniversalSet()
+            >>> set() | s
+            UniversalSet()
+            >>> 2 | s
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+        """
         self._ensure_set(other)
         return self
 
     def __rsub__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> set([1,2,3]) - s
+            set([])
+            >>> 2 - s
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+        """
         self._ensure_set(other)
         return set()
 
     def __sub__(self, other):
+        """Example::
+
+            >>> s = UniversalSet()
+            >>> set([1,2,3]) - s
+            set([])
+            >>> s - set([1,2,3])
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+            >>> 2 - s
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+        """
         self._ensure_set(other)
-        raise TypeError, "%s is not mutable" % self.__class__.__name__
+        if other == self:
+            return set()
+        raise NotImplementedError
 
     @staticmethod
     def _ensure_set(obj):
-        if not isinstance(obj, (set, frozenset)):
+        if not isinstance(obj, (set, frozenset, UniversalSet)):
             raise NotImplementedError
 
     def __repr__(self):
