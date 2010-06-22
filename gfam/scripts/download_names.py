@@ -57,7 +57,8 @@ class DownloadNamesApp(CommandLineApp):
         most recent description file is linked on the given page using
         an ``<a>`` tag with ``href`` equal to ``dir.des.scop.txt_X.XX``,
         where ``X.XX`` is the version number. If such an identification
-        fails, this method will throw an exception.
+        fails, this method will return without printing anything but a
+        warning on the logging stream.
         """
         self.log.info("Downloading SCOP page from %s..." % url)
         contents = open_anything(url).read()
