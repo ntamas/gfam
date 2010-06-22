@@ -74,6 +74,12 @@ class DownloadNamesApp(CommandLineApp):
                 max_idx = idx
 
         version = max_version_nosplit
+
+        if version is None:
+            self.log.warning("Cannot infer the most recent version of SCOP, "
+                             "skipping Superfamily IDs")
+            return
+
         self.log.info("Most recent SCOP version is assumed to be %s" % version)
         url = "%sdir.des.scop.txt_%s" % (url, version)
 
