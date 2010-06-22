@@ -127,6 +127,9 @@ class Enum(object):
             IMP = "Inferred from Mutant Phenotype"
             [...]
 
+    After you have defined an enum class like the one above, you
+    can make use of it this way::
+
         >>> GOEvidenceCode.EXP
         GOEvidenceCode.EXP
         >>> GOEvidenceCode.EXP.value

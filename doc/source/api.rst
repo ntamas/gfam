@@ -68,11 +68,54 @@ API documentation
 .. automodule:: gfam.interpro
    :members:
 
+:mod:`gfam.modula` -- Modular calculation framework
+---------------------------------------------------
+
+Modula is a modular calculation framework for Python that allows you to
+define tasks that depend on input files and on each others. Modula will
+figure out which tasks have to be executed in which order in order to
+calculate the final results -- this is done by a simple depth first
+search on the task dependency graph.
+
+Modula started out as a separate project, and you don't have to know its
+internals in order to use the GFam API. The only reason why it has been
+placed as a submodule of GFam is to avoid foricng users to install Modula
+separately. The Modula API is not documented here as it is not an internal
+part of GFam. Modula is used only by the GFam master script (see
+:mod:`gfam.scripts.master`) to execute the calculation steps in the
+proper order.
+
 :mod:`gfam.sequence` -- Simple sequence and sequence record classes
 -------------------------------------------------------------------
 
 .. automodule:: gfam.sequence
    :members:
+
+:mod:`gfam.scripts` -- Command line scripts
+-------------------------------------------
+
+.. automodule:: gfam.scripts
+   :members:
+
+Each step in the `GFam pipeline <pipeline>` is implemented in a separate
+submodule of :mod:`gfam.scripts`. These submodules contain only a single
+class per submodule, derived from `gfam.scripts.CommandLineApp`. The
+submodules are invoked automatically in the right order by a master
+script in `gfam.scripts.master`. In general, you only have to invoke
+the master script and it will do the rest for you, but some of the
+steps might be useful on their own, so they can be invoked independently
+from the command line as:
+
+.. code-block:: sh
+
+   $ python -m gfam.scripts.modulename
+
+where *modulename* is the name of the submodule to be executed. You can
+get usage information for each submodule by typing:
+
+.. code-block:: sh
+
+   $ python -m gfam.scripts.modulename --help
 
 :mod:`gfam.utils` -- Utility classes and functions
 --------------------------------------------------

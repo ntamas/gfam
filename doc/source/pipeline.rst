@@ -1,3 +1,5 @@
+.. _pipeline:
+
 Steps of the GFam pipeline
 ==========================
 
