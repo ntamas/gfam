@@ -74,7 +74,7 @@ class DownloadNamesApp(CommandLineApp):
                 max_idx = idx
 
         version = max_version_nosplit
-        self.log.info("Most recent SCOP version is assumed to be %s" % max_version)
+        self.log.info("Most recent SCOP version is assumed to be %s" % version)
         url = "%sdir.des.scop.txt_%s" % (url, version)
 
         for line in open_anything(url):
