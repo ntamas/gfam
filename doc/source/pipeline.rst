@@ -109,15 +109,15 @@ from other data sources in a greedy manner using the following rules:
    (in the sense that it starts and ends at the same amino acid index),
    the domain is excluded from further consideration.
 
-3. If a domain to be added overlaps with an already added domain from another
+4. If a domain to be added overlaps with an already added domain from another
    data source, the domain is excluded from further consideration.
 
-4. If a domain to be added is inserted *completely* into another domain from
+5. If a domain to be added is inserted *completely* into another domain from
    the same data source, it is added to the primary assignment and the
    process continues with the next domain from step 2. Note that the opposite
    cannot happen as we consider domains in decreasing order of their sizes.
 
-5. If a domain to be added overlaps partially with an already added domain
+6. If a domain to be added overlaps partially with an already added domain
    from the same data source, the size of the overlap decides what to do.
    Overlaps smaller than a given threshold are allowed, the domain will be
    added and the process continues from step 2. Otherwise, the domain is
