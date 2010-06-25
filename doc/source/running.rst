@@ -84,12 +84,19 @@ This will download the InterPro, Pfam and Superfamily IDs from the Internet
 and prepare the appropriate name mapping file in ``data/names.dat``. If you
 wish to put it elsewhere, simply specify a different output file name. If
 you omit the trailing ``>data/names.dat`` part, the mapping will be written
-into the standard output.
+into the standard output. You can also compress the mapping file on-the-fly
+using ``gzip`` or ``bzip2`` and use the compressed file directly in the
+configuration file as GFam will uncompress it when needed. The following
+command constructs a compressed name mapping file::
+
+    $ bin/download_names.py | gzip -9 >data/names.dat.gz
 
 Note that the script relies on the following locations to download data:
 
 - <ftp://ftp.ebi.ac.uk/pub/databases/interpro/names.dat> for the InterPro
   name mapping
+
+- <http://pfam.sanger.ac.uk/families?output=text> for the PFam name mapping
 
 - <http://scop.mrc-lmb.cam.ac.uk/scop/parse/> for the SCOP description files
   (named ``dir.des.scop.txt_X.XX``, where ``X.XX`` stands for the SCOP

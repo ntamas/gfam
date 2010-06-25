@@ -30,7 +30,7 @@ class DownloadNamesApp(CommandLineApp):
         urls = {"interpro":
                     "ftp://ftp.ebi.ac.uk/pub/databases/interpro/names.dat",
                 "pfam":
-                    "ftp://ftp.sanger.ac.uk/",
+                    "http://pfam.sanger.ac.uk/families?output=text",
                 "superfamily":
                     "http://scop.mrc-lmb.cam.ac.uk/scop/parse/"
                 }
@@ -46,6 +46,19 @@ class DownloadNamesApp(CommandLineApp):
         self.log.info("Downloading InterPro names from %s..." % url)
         for line in open_anything(url):
             sys.stdout.write(line)
+
+    def download_pfam(self, url):
+        """Downloads the official PFam ID-name mappings from the given URL
+        and prints the mapping to the standard output.
+        """
+        self.log.info("Downloading PFam names from %s..." % url)
+        for line in open_anything(url):
+            if line[0] == "#":
+                continue
+            parts = line.split("\t", 2)
+            if len(parts) < 3:
+                continue
+            sys.stdout.write("%s\t%s" % (parts[0], parts[2]))
 
     def download_superfamily(self, url):
         """Downloads the most recent mappings from SCOP sunids to human
