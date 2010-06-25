@@ -235,7 +235,26 @@ class AssignmentSourceFilterApp(CommandLineApp):
         If there is no configuration file specified or it does not
         contain the corresponding keys, it will simply use a default
         stage setup which ignores HMMPanther and Gene3D in the first
-        and second steps, but uses all sources in the third step."""
+        and second steps, but uses all sources in the third step.
+        
+        The method will be looking for configuration keys named like
+        ``stages.1``, ``stages.2`` and so on in the ``analysis:iprscan_filter``
+        section of the config file. The value of each such config key must
+        be an expression consisting of assignment source names and the
+        operators ``+`` and ``-``, with their usual meaning of addition
+        and exclusion. The special source name ``ALL`` means all possible
+        data sources, enabling us to write expressions like ``ALL-HMMPanther``
+        (meaning all the sources except HMMPanther). Some examples:
+            
+        - ``HMMPanther`` means HMMPanther only.
+        - ``ALL`` means all possible data sources.
+        - ``HMMPanther+HMMPfam`` means HMMPanther or HMMPfam.
+        - ``ALL-HMMPanther-Gene3D`` means all possible data sources but
+          HMMPanther or Gene3D.
+        - ``ALL+HMMPanther`` does not really make sense as you are extending
+          all data sources with HMMPanther, so it is equivalent to ``ALL``.
+          GFam will figure out what you meant anyway.
+        """
         cfg = self.parser.config
         if cfg is None:
             spec = ["ALL-HMMPanther-Gene3D", "ALL-HMMPanther-Gene3D",
