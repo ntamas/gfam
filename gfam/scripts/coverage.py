@@ -6,7 +6,7 @@ import sys
 from gfam.assignment import SequenceWithAssignments
 from gfam.interpro import AssignmentReader
 from gfam.scripts import CommandLineApp
-from gfam.utils import open_anything, UniversalSet
+from gfam.utils import complementerset, open_anything
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -45,7 +45,7 @@ class CoverageApp(CommandLineApp):
             for line in open_anything(self.options.gene_id_file):
                 self.valid_sequence_ids.add(line.strip())
         else:
-            self.valid_sequence_ids = UniversalSet()
+            self.valid_sequence_ids = complementerset()
 
         self.ignored = set()
         for source in self.options.ignored:

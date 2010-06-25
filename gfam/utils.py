@@ -5,8 +5,8 @@ __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
-__all__ = ["bidict", "open_anything", "redirected", "search_file", \
-           "temporary_dir", "UniqueIdGenerator", "UniversalSet"]
+__all__ = ["bidict", "complementerset", "open_anything", "redirected",
+           "search_file", "temporary_dir", "UniqueIdGenerator"]
 
 try:
     import bz2
@@ -312,68 +312,88 @@ class UniqueIdGenerator(object):
         return sorted(self._ids.keys(), key = self._ids.__getitem__)
 
 
-class UniversalSet(object):
-    """Does what it says on the tin: it is a fake set containing everything,
-    even itself.
-    
-    This class can be used in places where a set is expected. Most of the
-    set methods are also implemented.
+class complementerset(object):
+    """This object behaves more or less like a set, with one exception,
+    the membership checking. For a `complementerset` object, you can
+    define the elements which are *not* in the set, everything else is
+    contained in it. The semantics of the operators are the same as for
+    sets.
 
     Usage example::
 
-        >>> s = UniversalSet()
+        >>> s = complementerset()
         >>> "abc" in s
         True
         >>> s in s
         True
-        >>> s & set(["123"]) == set(["123"])
-        True
-        >>> s | set(["123"])
-        UniversalSet()
+        >>> s -= set(["abc"])
+        >>> s
+        complementerset(['abc'])
+        >>> "abc" in s
+        False
     """
+
+    def __init__(self, iterable=()):
+        """Constructs a complementer set that contains everything except
+        the members of the given iterable."""
+        self._set = set(iterable)
 
     def __and__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
+            >>> s = complementerset()
             >>> s2 = set([1,2,3])
             >>> (s & s2) == s2
             True
+            >>> s = complementerset([3,4])
+            >>> (s & s2) == set([1,2])
+            True
+            >>> (s & complementerset([1,2,3])) == complementerset([1,2,3,4])
+            True
         """
+        if isinstance(other, self.__class__):
+            return complementerset(self._set | other._set)
+
         self._ensure_set(other)
-        return set(other)
+        return set(other) - self._set
 
     def __contains__(self, what):
         """Example::
 
-            >>> s = UniversalSet()
+            >>> s = complementerset([1,2])
             >>> s in s
             True
             >>> "foo" in s
             True
+            >>> 1 in s
+            False
         """
-        return True
+        return what not in self._set
 
     def __eq__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
-            >>> s2 = UniversalSet()
-            >>> s2 == s
+            >>> s = complementerset([1,2])
+            >>> s == complementerset([1,2])
             True
+            >>> s == complementerset([1,2,3])
+            False
             >>> s == 1
             False
         """
-        return isinstance(other, self.__class__)
-    
+        return isinstance(other, self.__class__) and \
+               self._set == other._set
+
     def __ge__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
-            >>> s2 = UniversalSet()
+            >>> s = complementerset()
+            >>> s2 = complementerset()
             >>> s2 >= s
             True
             >>> s >= s2
+            True
+            >>> s >= complementerset([1,2])
             True
             >>> s >= set([1,2,3])
             True
@@ -381,86 +401,176 @@ class UniversalSet(object):
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             NotImplementedError
+            >>> complementerset([1,2,3]) >= complementerset([1,2,3])
+            True
+            >>> complementerset([1,2]) >= complementerset([2,3,4])
+            False
         """
+        if isinstance(other, self.__class__):
+            return self._set <= other._set
+
         self._ensure_set(other)
         return True
 
     def __gt__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
-            >>> s2 = UniversalSet()
+            >>> s = complementerset()
+            >>> s2 = complementerset()
             >>> s2 > s
             False
+            >>> s > s2
+            False
+            >>> s > complementerset([1,2])
+            True
             >>> s > set([1,2,3])
             True
-            >>> s >= 2
+            >>> s > 2
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             NotImplementedError
+            >>> complementerset([1,2,3]) > complementerset([1,2,3])
+            False
+            >>> complementerset([1,2]) > complementerset([1,2,3])
+            True
+            >>> complementerset([1,2,3]) > complementerset([1,2])
+            False
+            >>> complementerset([1,2]) > complementerset([2,3,4])
+            False
         """
-        self._ensure_set(other)
-        return self != other
+        return self != other and self >= other
 
     def __iand__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
+            >>> s = complementerset([3,4,5])
             >>> s &= s
+            >>> s == complementerset([3, 4, 5])
+            True
+            >>> s &= complementerset([5,6])
+            >>> s
+            complementerset([3, 4, 5, 6])
             >>> s &= set([1,2,3])
-            Traceback (most recent call last):
-              File "<stdin>", line 1, in ?
-            TypeError: UniversalSet is not mutable
+            >>> s == set([1, 2])
+            True
+            >>> s = complementerset()
             >>> s &= 2
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             NotImplementedError
         """
-        self._ensure_set(other)
-        if other == self:
+        if isinstance(other, self.__class__):
+            self._set |= other._set
             return self
-        raise TypeError, "%s is not mutable" % self.__class__.__name__
+
+        self._ensure_set(other)
+        return other - self._set
 
     def __ior__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
+            >>> s = complementerset([3,4,5])
             >>> s |= s
+            >>> s == complementerset([3, 4, 5])
+            True
             >>> s |= set([1,2,3])
+            >>> s == complementerset([4, 5])
+            True
+            >>> s |= complementerset([1, 4])
             >>> s
-            UniversalSet()
+            complementerset([4])
             >>> s |= 2
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             NotImplementedError
         """
+        if isinstance(other, self.__class__):
+            self._set &= other._set
+            return self
+
         self._ensure_set(other)
+        self._set -= other
         return self
 
     def __isub__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
+            >>> s = complementerset()
             >>> s -= set([1,2,3])
-            Traceback (most recent call last):
-              File "<stdin>", line 1, in ?
-            TypeError: UniversalSet is not mutable
-            >>> s -= set()
-            >>> s |= 2
+            >>> s
+            complementerset([1, 2, 3])
+            >>> s -= 2
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             NotImplementedError
+            >>> s -= complementerset([1,2,4])
+            >>> s
+            set([4])
         """
+        if isinstance(other, self.__class__):
+            return other._set - self._set
+
         self._ensure_set(other)
-        if not other:
-            return self
-        raise TypeError, "%s is not mutable" % self.__class__.__name__
+        self._set |= other
+        return self
 
     def __le__(self, other):
-        return not self > other
+        """Example::
+
+            >>> s = complementerset()
+            >>> s2 = complementerset()
+            >>> s2 <= s
+            True
+            >>> s <= s2
+            True
+            >>> s <= complementerset([1,2])
+            False
+            >>> s <= set([1,2,3])
+            False
+            >>> s <= 2
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+            >>> complementerset([1,2,3]) <= complementerset([1,2,3])
+            True
+            >>> complementerset([1,2]) <= complementerset([2,3,4])
+            False
+        """
+        if isinstance(other, self.__class__):
+            return self._set >= other._set
+
+        self._ensure_set(other)
+        return False
 
     def __lt__(self, other):
-        return not self >= other
+        """Example::
+
+            >>> s = complementerset()
+            >>> s2 = complementerset()
+            >>> s2 < s
+            False
+            >>> s < s2
+            False
+            >>> s < complementerset([1,2])
+            False
+            >>> complementerset([1,2]) < s
+            True
+            >>> s < set([1,2,3])
+            False
+            >>> s < 2
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
+            >>> complementerset([1,2,3]) < complementerset([1,2,3])
+            False
+            >>> complementerset([1,2]) < complementerset([1,2,3])
+            False
+            >>> complementerset([1,2,3]) < complementerset([1,2])
+            True
+            >>> complementerset([1,2]) < complementerset([2,3,4])
+            False
+        """
+        return self != other and self <= other
 
     def __ne__(self, other):
         return not self == other
@@ -468,85 +578,94 @@ class UniversalSet(object):
     def __or__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
-            >>> s | set([1,2,3])
-            UniversalSet()
-            >>> s | set()
-            UniversalSet()
+            >>> s = complementerset([2,4,5])
+            >>> s | set([1,2,3]) == complementerset([4, 5])
+            True
+            >>> s | complementerset([1,2])
+            complementerset([2])
             >>> s | 2
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             NotImplementedError
         """
+        if isinstance(other, self.__class__):
+            return complementerset(self._set & other._set)
+
         self._ensure_set(other)
-        return self
+        return complementerset(self._set - other)
 
     def __rand__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
-            >>> s2 = set([1,2,3])
-            >>> (s2 & s) == s2
+            >>> s = complementerset([2,4,5])
+            >>> set([1,2,3]) & s == set([1,3])
             True
+            >>> complementerset([1,2,3]) & s == complementerset([1,2,3,4,5])
+            True
+            >>> 2 & s
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in ?
+            NotImplementedError
         """
-        self._ensure_set(other)
-        return other
+        return self & other
 
     def __ror__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
-            >>> set([1,2,3]) | s
-            UniversalSet()
-            >>> set() | s
-            UniversalSet()
+            >>> s = complementerset([2,4,5])
+            >>> set([1,2,3]) | s == complementerset([4, 5])
+            True
+            >>> complementerset([1, 2]) | s
+            complementerset([2])
             >>> 2 | s
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             NotImplementedError
         """
-        self._ensure_set(other)
-        return self
+        return self | other
+
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__.__name__, list(self._set))
 
     def __rsub__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
-            >>> set([1,2,3]) - s
+            >>> set([1,2,3]) - complementerset()
             set([])
-            >>> 2 - s
+            >>> (set([1,2,3]) - complementerset([1,2,4])) == set([1,2])
+            True
+            >>> 2 - complementerset()
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             NotImplementedError
         """
+        if isinstance(other, self.__class__):
+            raise NotImplementedError
+
         self._ensure_set(other)
-        return set()
+        return other.intersection(self._set)
 
     def __sub__(self, other):
         """Example::
 
-            >>> s = UniversalSet()
-            >>> set([1,2,3]) - s
-            set([])
-            >>> s - set([1,2,3])
-            Traceback (most recent call last):
-              File "<stdin>", line 1, in ?
-            NotImplementedError
-            >>> 2 - s
+            >>> complementerset() - set([1,2,3])
+            complementerset([1, 2, 3])
+            >>> complementerset([1,2,3]) - complementerset([2,4])
+            set([4])
+            >>> complementerset([3,4]) - set([1,2,3])
+            complementerset([1, 2, 3, 4])
+            >>> complementerset() - 2 
             Traceback (most recent call last):
               File "<stdin>", line 1, in ?
             NotImplementedError
         """
+        if isinstance(other, self.__class__):
+            return other._set - self._set
+
         self._ensure_set(other)
-        if other == self:
-            return set()
-        raise NotImplementedError
+        return complementerset(self._set | other)
 
     @staticmethod
     def _ensure_set(obj):
-        if not isinstance(obj, (set, frozenset, UniversalSet)):
+        if not isinstance(obj, (set, frozenset, complementerset)):
             raise NotImplementedError
-
-    def __repr__(self):
-        return "%s()" % (self.__class__.__name__, )
-
