@@ -78,6 +78,11 @@ class ConfigurableOptionParser(OptionParser):
 
     Configuration keys must be specified in slashed format (i.e.
     ``section/item``).
+
+    This class also exposes an instance attribute named `config`, which
+    contains the parsed configuration values from the specified configuration
+    file. `config` will be an instance of `ConfigParser` or ``None`` if
+    `parse_args()` was not called so far.
     """
 
     def __init__(self, *args, **kwds):
@@ -85,6 +90,7 @@ class ConfigurableOptionParser(OptionParser):
             kwds["option_class"] = ConfigurableOption
 
         OptionParser.__init__(self, *args, **kwds)
+        self.config = None
 
         self.add_option("-c", "--config-file", dest="config_file",
                 help="name of the configuration FILE", metavar="FILE",
@@ -117,6 +123,8 @@ class ConfigurableOptionParser(OptionParser):
             if config.has_option(section, item):
                 option.process(option.config_key, config.get(section, item), \
                         options, self)
+
+        self.config = config
 
         return options, args
 

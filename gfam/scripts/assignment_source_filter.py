@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
+import re
 import sys
 
 from collections import defaultdict
-from gfam.assignment import AssignmentOverlapChecker, EValueFilter, \
-                            SequenceWithAssignments
+from gfam.assignment import Assignment, AssignmentOverlapChecker, \
+                            EValueFilter, SequenceWithAssignments
 from gfam.interpro import AssignmentReader, InterPro
 from gfam.scripts import CommandLineApp
 from gfam.utils import complementerset, open_anything
@@ -140,42 +141,52 @@ class AssignmentSourceFilterApp(CommandLineApp):
         if not assignments_by_source:
             return []
 
+        # Determine the length of the sequence (and check that the length is
+        # the same across all assignments; if not, then the input file is
+        # inconsistent and the sequence will be skipped).
+        source = assignments_by_source.keys()[0]
+        seq_length = assignments_by_source[source][0][0].length
+        for source, assignments in assignments_by_source.iteritems():
+            if any(assignment.length != seq_length \
+                   for assignment, _ in assignments):
+                self.log.warning("Sequence %s has multiple assignments with "
+                                 "different sequence lengths in the "
+                                 "input file, skipping")
+                return []
+
+        # Initially, the result is empty
         result = []
 
-        # First, find the data source which is fully covered by InterPro IDs and
-        # covers the most of the sequence
+        # Set up the stages
+        stages = self.get_stages_from_config()
+        """
+        stages = [complementerset(["HMMPanther", "Gene3D"]),
+                  complementerset(["HMMPanther", "Gene3D"]),
+                  complementerset()]
+        """
+
+        # The first stage is treated specially as we have to select a single
+        # source thas has the largest coverage. In the remaining stages, we
+        # are allowed to cherrypick from different sources.
+
+        # First, find the data source which covers the most of the sequence
+        # and is allowed in stage 1
+        first_stage = stages.pop(0)
         coverage = {}
-        assignments_without_interpro_ids = []
-        all_sources = set()
         for source, assignments in assignments_by_source.iteritems():
-            all_sources.add(source)
-            # Check if all the assignments have InterPro IDs
-            ok = True
-            for a, line in assignments:
-                if a.interpro_id:
-                    continue
-                if source not in ["PatternScan", "FPrintScan"]:
-                    assignments_without_interpro_ids.append((a, line))
-                ok = False
-
-            # This step temporarily disabled
-            # if not ok:
-            #     continue
-
-            # At this stage, we don't consider HMMPanther or Gene3D
-            if source == "HMMPanther" or source == "Gene3D":
+            # Exclude those sources that we don't consider in the first stage
+            if source not in first_stage:
                 continue
 
             # Calculate the coverage
-            seq = SequenceWithAssignments(name, a.length)
+            seq = SequenceWithAssignments(name, seq_length)
             for a, _ in assignments:
                 seq.assign(a)
             coverage[source] = seq.coverage()
 
-        a = assignments_by_source.keys()[0]
-
-        seq = SequenceWithAssignments(name, assignments_by_source[a][0][0].length)
-        unused_assignments = []
+        # Find the source giving the best coverage, add its domains into
+        # the current assignment.
+        seq = SequenceWithAssignments(name, seq_length)
         if coverage:
             best_source = max(coverage.keys(), key = coverage.__getitem__)
             for a, line in assignments_by_source[best_source]:
@@ -188,6 +199,9 @@ class AssignmentSourceFilterApp(CommandLineApp):
         else:
             best_source = None
 
+        # Collect the unused assignments (not from the best source)
+        # into unused_assignments
+        unused_assignments = []
         for source, assignments in assignments_by_source.iteritems():
             if source == best_source:
                 continue
@@ -195,27 +209,18 @@ class AssignmentSourceFilterApp(CommandLineApp):
 
         # Try to fill the unassigned regions with the rest of the assignments
         # that were unused so far, starting from the longest assignment.
-        # In the first stage, we exclude HMMPanther
+        unused_assignments.sort(key = lambda x: -x[0].get_assigned_length())
 
-        unused_assignments.sort(\
-              key = lambda x: x[0].end-x[0].start, reverse = True
-        )
-
-        if "HMMPanther" in all_sources or "Gene3D" in all_sources:
-            stages = [all_sources - set(["HMMPanther", "Gene3D"]), all_sources]
-        else:
-            stages = [all_sources]
-
-        selected_idxs = set()
+        # Okay, we're done with the first stage, process the rest.
+        # idx_to_stage will contain the indices of the selected
+        # assignments as keys and the number of the corresponding
+        # stage in which they were selected as values.
         idx_to_stage = {}
         for stage_no, sources in enumerate(stages):
             for idx, (a, _) in enumerate(unused_assignments):
-                if a.source not in sources:
-                    continue
-                if seq.assign(a):
-                    selected_idxs.add(idx)
+                if a.source in sources and seq.assign(a):
                     idx_to_stage[idx] = stage_no+2
-        for idx in sorted(selected_idxs):
+        for idx in sorted(idx_to_stage.keys()):
             row = unused_assignments[idx][1].strip()
             tab_count = list(row).count("\t")
             if tab_count < 13:
@@ -223,6 +228,43 @@ class AssignmentSourceFilterApp(CommandLineApp):
             result.append("%s\t%s" % (row, idx_to_stage[idx]))
 
         return result
+
+    def get_stages_from_config(self):
+        """Turns to the configuration file specified at startup to
+        fetch the data sources to be used in each stage of the algorithm.
+        If there is no configuration file specified or it does not
+        contain the corresponding keys, it will simply use a default
+        stage setup which ignores HMMPanther and Gene3D in the first
+        and second steps, but uses all sources in the third step."""
+        cfg = self.parser.config
+        if cfg is None:
+            spec = ["ALL-HMMPanther-Gene3D", "ALL-HMMPanther-Gene3D",
+                    "ALL"]
+        else:
+            spec, idx = [], 1
+            section = "analysis:iprscan_filter"
+            while cfg.has_option(section, "stages.%d" % idx):
+                spec.append(cfg.get(section, "stages.%d" % idx))
+                idx += 1
+
+        regexp = re.compile("([-+])?\s*([^-+]+)")
+        result = []
+        for item in spec:
+            sources = set()
+            for match in regexp.finditer(item):
+                sign, source = match.groups()
+                if source == "ALL":
+                    source = complementerset()
+                else:
+                    source = set([source.strip()])
+                if sign == "-":
+                    sources -= source
+                else:
+                    sources |= source
+            result.append(sources)
+
+        return result
+
 
 
 if __name__ == "__main__":

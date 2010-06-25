@@ -45,6 +45,11 @@ class Assignment(namedtuple("Assignment", \
 
     __slots__ = ()
 
+    def get_assigned_length(self):
+        """Returns the number of amino acids covered by the assignment
+        within the sequence."""
+        return self.end - self.start + 1
+
     def resolve_interpro_ids(self, interpro):
         """If the assignment has an InterPro ID, this method makes sure
         that the domain is equal to the highest common ancestor of the

@@ -333,6 +333,8 @@ class complementerset(object):
         False
     """
 
+    __slots__ = ("_set", )
+
     def __init__(self, iterable=()):
         """Constructs a complementer set that contains everything except
         the members of the given iterable."""
