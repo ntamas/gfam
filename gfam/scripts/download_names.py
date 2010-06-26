@@ -31,6 +31,8 @@ class DownloadNamesApp(CommandLineApp):
                     "ftp://ftp.ebi.ac.uk/pub/databases/interpro/names.dat",
                 "pfam":
                     "http://pfam.sanger.ac.uk/families?output=text",
+                "smart":
+                    "http://smart.embl-heidelberg.de/smart/descriptions.pl",
                 "superfamily":
                     "http://scop.mrc-lmb.cam.ac.uk/scop/parse/"
                 }
@@ -56,9 +58,22 @@ class DownloadNamesApp(CommandLineApp):
             if line[0] == "#":
                 continue
             parts = line.split("\t", 2)
-            if len(parts) < 3:
+            if len(parts) < 3 or not parts[2]:
                 continue
             sys.stdout.write("%s\t%s" % (parts[0], parts[2]))
+
+    def download_smart(self, url):
+        """Downloads the official Smart ID-name mappings from the given
+        URL and prints the mapping to the standard output.
+        """
+        self.log.info("Downloading Smart names from %s..." % url)
+        for line in open_anything(url):
+            parts = line.split("\t", 3)
+            if len(parts) < 3 or not parts[2]:
+                continue
+            if parts[1] == "ACC" and parts[2] == "DEFINITION":
+                continue
+            sys.stdout.write("%s\t%s\n" % (parts[1], parts[2]))
 
     def download_superfamily(self, url):
         """Downloads the most recent mappings from SCOP sunids to human
@@ -101,7 +116,7 @@ class DownloadNamesApp(CommandLineApp):
             if line[0] == '#':
                 continue
             parts = line.split("\t", 4)
-            if parts[1] != "sf":
+            if parts[1] != "sf" or not parts[4]:
                 continue
             sys.stdout.write("SSF%s\t%s" % (parts[0], parts[4]))
 
