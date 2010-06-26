@@ -98,6 +98,9 @@ Note that the script relies on the following locations to download data:
 
 - <http://pfam.sanger.ac.uk/families?output=text> for the PFam name mapping
 
+- <http://smart.embl-heidelberg.de/smart/descriptions.pl> for the Smart
+  name mapping
+
 - <http://scop.mrc-lmb.cam.ac.uk/scop/parse/> for the SCOP description files
   (named ``dir.des.scop.txt_X.XX``, where ``X.XX`` stands for the SCOP
   version number). It also relies on the most recent version of the SCOP
