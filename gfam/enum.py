@@ -17,8 +17,7 @@ def first(iter):
     generator expression as you can use the indexing operator
     for ordinary lists and tuples."""
     for item in iter:
-        yield item
-        return
+        return item
     raise ValueError("iterable is empty")
 
 class EnumMeta(type):
@@ -42,7 +41,9 @@ class EnumMeta(type):
 
         # Extend enum_values with the items directly declared here
         for key, value in attrs.iteritems():
-            if key[:2] != "__":
+            # Skip internal methods, properties and callables
+            if key[:2] != "__" and not callable(value) \
+                    and not isinstance(value, property):
                 inst = cls(key, value, override=True)
                 enum_values[key] = inst
                 super(EnumMeta, cls).__setattr__(key, inst)
@@ -76,11 +77,18 @@ class EnumMeta(type):
     def __contains__(self, key):
         return key in self.__enum__
 
-    @classmethod
-    def from_value(cls, value):
+    def from_name(self, name):
+        """Constructs an instance of this enum from its name"""
+        try:
+            return self.__enum__[name]
+        except KeyError:
+            raise NameError("no enum item with the given name: %r" % name)
+
+    def from_value(self, value):
         """Constructs an instance of this enum from its value"""
         try:
-            return first(key for key, val in self.__enum__ if val == value)
+            return first(val for val in self.__enum__.itervalues() \
+                         if val.value == value)
         except ValueError:
             raise ValueError("no enum item with the given value: %r" % value)
 
@@ -120,27 +128,32 @@ class Enum(object):
 
     Usage example::
 
-        class GOEvidenceCode(Enum):
-            EXP = "Inferred from Experiment"
-            IDA = "Inferred from Direct Assay"
-            IPI = "Inferred from Physical Interaction"
-            IMP = "Inferred from Mutant Phenotype"
-            [...]
+        >>> class Spam(Enum):
+        ...     SPAM  = "Spam spam spam"
+        ...     EGGS  = "Eggs"
+        ...     BACON = "Bacon"
 
     After you have defined an enum class like the one above, you
     can make use of it this way::
 
-        >>> GOEvidenceCode.EXP
-        GOEvidenceCode.EXP
-        >>> GOEvidenceCode.EXP.value
-        'Inferred from Experiment'
+        >>> Spam.BACON
+        Spam.BACON
+        >>> Spam.BACON.value
+        'Bacon'
 
-    Think about enums as Python dictionaries that map symbolic keys to
+    Think about enums as Python dictionaries that map symbolic names to
     values. Enums even provide methods similar to the non-mutating methods
     of Python dictionaries::
 
-        >>> values = GOEvidenceCode.values()
-        [GOEvidenceCode.EXP, GOEvidenceCode.IDA, ...]
+        >>> sorted(Spam.keys())
+        ['BACON', 'EGGS', 'SPAM']
+    
+    You can also get an instance of the enum from its symbolic name or value:
+
+        >>> Spam.from_name("BACON")
+        Spam.BACON
+        >>> Spam.from_value("Spam spam spam")
+        Spam.SPAM
     """
 
     __metaclass__ = EnumMeta
@@ -167,5 +180,4 @@ class Enum(object):
 
     @property
     def value(self):
-        """Returns the value of this enum instance"""
         return self._value
