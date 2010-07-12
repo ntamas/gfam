@@ -42,7 +42,7 @@ class EnumMeta(type):
         # Extend enum_values with the items directly declared here
         for key, value in attrs.iteritems():
             # Skip internal methods, properties and callables
-            if key[:2] != "__" and not callable(value) \
+            if key[:2] != "__" and not hasattr(value, "__call__") \
                     and not isinstance(value, property):
                 inst = cls(key, value, override=True)
                 enum_values[key] = inst

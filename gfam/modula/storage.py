@@ -6,8 +6,12 @@ from gfam.modula.hash import sha1
 from gfam.modula.log import get_logger
 
 import os
-import cPickle as pickle
 
+try:
+    import cPickle as pickle
+except ImportError:
+    # Python 3
+    import pickle
 
 class NotFoundError(Exception):
     def __init__(self, name, resource=None, nestedExc = None):

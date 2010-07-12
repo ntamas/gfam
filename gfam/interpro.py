@@ -282,7 +282,7 @@ class InterPro(object):
             parts = line.split("::")
             interpro_id, aliases = parts[0], parts[2:]
 
-            level = dash_count / 2 + 1
+            level = dash_count // 2 + 1
             if level <= len(path_to_root):
                 path_to_root = path_to_root[:level]
                 path_to_root[-1] = interpro_id

@@ -442,6 +442,9 @@ class complementerset(object):
         """
         return self != other and self >= other
 
+    def __hash__(self):
+        return hash(self._set)
+
     def __iand__(self, other):
         """Example::
 
