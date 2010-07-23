@@ -178,7 +178,8 @@ def open_anything(fname, *args, **kwds):
 # W0613: unused argument.
 @contextmanager
 def redirected(stdin=None, stdout=None, stderr=None):
-    """Temporarily redirects some of the input/output streams.
+    """Context manager that temporarily redirects some of the input/output
+    streams.
 
     `stdin` is the new standard input, `stdout` is the new standard output,
     `stderr` is the new standard error. ``None`` means to leave the

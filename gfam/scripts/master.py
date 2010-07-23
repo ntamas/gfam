@@ -83,8 +83,10 @@ class GFamCalculation(CalculationModule):
         stdout = modula.storage_engine.get_result_stream(self, mode="wb")
         try:
             with redirected(stdin=stdin, stdout=stdout):
-                app.run(args)
+                retcode = app.run(args)
             stdout.close()
+            if retcode:
+                raise RuntimeError("non-zero return code from child module")
         except:
             # If an error happens, remove the output file and re-raise
             # the exception

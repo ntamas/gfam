@@ -26,7 +26,8 @@ class AssignmentSourceFilterApp(CommandLineApp):
     This program expects incoming assignments from the standard input or from
     a given file and print the selected ones to the standard output.
 
-    The assignment process has three stages:
+    The assignment process has three stages by default; stages can be
+    configured in the config file. The default setup is as follows:
 
         1. For a given sequence, take the source having the maximal coverage
            and use it as a primary assignment. In this step, HMMPanther and

@@ -3,7 +3,9 @@
 
 This is a convenience wrapper around `formatdb` and `blastall` that
 runs an all-against-all BLAST on a given set of sequences and removes
-the temporary files afterwards.
+the temporary files afterwards. It also detects whether the legacy
+C-based BLAST tools or the newer C++-based tools are installed, and
+adjusts the command line accordingly.
 """
 
 from __future__ import with_statement
@@ -66,6 +68,52 @@ class AllAgainstAllBLASTApp(CommandLineApp):
 
         return parser
 
+    def get_blast_cmdline(self, tool_name, args = None):
+        """Given the name of a BLAST tool in `tool_name`, looks up the
+        value of the corresponding option from the command line, and tries
+        to figure out whether it is a path to a folder containing the tools
+        or the path to the tool itself. Returns a list of arguments that
+        should be passed to `subprocess.Popen` in order to execute the tool.
+        `args` is a set of extra arguments that should be passed to the tool.
+
+        If the newer, C++-based BLAST tools are installed, it automatically
+        prepends the list of arguments with ``legacy_blast.pl`` to adapt
+        the new tools to the calling interface of the old ones.
+        """
+        if not args:
+            args = []
+
+        tool_path = getattr(self.options, tool_name + "_path")
+        if not tool_path:
+            tool_path = os.getcwd()
+
+        if os.path.isfile(tool_path):
+            # The path exists and points to a real file, so we simply return
+            return [tool_path] + args
+
+        if not os.path.exists(tool_path):
+            # The path does not exist. Assume that this is a file referring to
+            # the old BLAST tools, but the user has the new one. Try to extract
+            # the folder and see if the folder exists.
+            base, tool_name = os.path.split(tool_path)
+
+        if os.path.isdir(tool_path):
+            # The path exists and points to a folder
+            base = os.path.normpath(tool_path)
+
+        # Okay, first check for the actual tool in the folder
+        full_path = os.path.join(tool_path, tool_name)
+        if os.path.isfile(full_path):
+            return [full_path] + args
+
+        # Nope, try the legacy script
+        full_path = os.path.join(tool_path, "legacy_blast.pl")
+        if os.path.isfile(full_path):
+            return [full_path, tool_name] + args + ["--path", tool_path]
+
+        # Nothing succeeded
+        return None
+
 
     def run_real(self):
         """Runs the application and returns the exit code"""
@@ -73,7 +121,7 @@ class AllAgainstAllBLASTApp(CommandLineApp):
             self.args = ["-"]
 
         # Find formatdb and blastall in the current path if needed, ensure that
-        # the paths are absolute
+        # the paths are absolute.
         for util in ["formatdb", "blastall"]:
             optkey = "%s_path" % util
             path = getattr(self.options, optkey)
@@ -108,8 +156,12 @@ class AllAgainstAllBLASTApp(CommandLineApp):
         """
         self.log.info("Invoking formatdb...")
 
-        args = [self.options.formatdb_path]
-        args.extend(["-n", "database", "-i", sequence_file, "-o", "F"])
+        args = ["-n", "database", "-i", sequence_file, "-o", "F"]
+        args = self.get_blast_cmdline("formatdb", args)
+        if not args:
+            self.log.fatal("cannot find formatdb in %s" % self.options.formatdb_path)
+            return False
+
         formatdb = subprocess.Popen(args, stdin=open(os.devnull), \
                 stdout=sys.stderr)
         retcode = formatdb.wait()
@@ -127,12 +179,17 @@ class AllAgainstAllBLASTApp(CommandLineApp):
         """
         self.log.info("Invoking blastall, this might take a long time...")
 
-        args = [self.options.blastall_path]
+        args = []
         args.extend(["-p", self.options.blast_tool])
         args.extend(["-d", "database", "-i", sequence_file])
         args.extend(["-m", str(self.options.blast_output_format)])
         if self.options.output_file:
             args.extend(["-o", self.options.output_file])
+
+        args = self.get_blast_cmdline("blastall", args)
+        if not args:
+            self.log.fatal("cannot find blastall in %s" % self.options.blastall_path)
+            return False
 
         blastall = subprocess.Popen(args, stdin=open(os.devnull))
         retcode = blastall.wait()
