@@ -57,9 +57,9 @@ class ColoredConsoleHandler(logging.StreamHandler):
         my_record = copy.copy(record)
         level = my_record.levelno
         if level >= logging.ERROR:
-            color = '\x1b[31m'
+            color = '\x1b[31m\x1b[1m'
         elif level >= logging.WARNING:
-            color = '\x1b[33m'
+            color = '\x1b[33m\x1b[1m'
         elif level >= logging.INFO:
             color = '\x1b[0m'
         elif level >= logging.DEBUG:
