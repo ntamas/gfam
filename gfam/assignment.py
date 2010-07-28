@@ -78,6 +78,7 @@ class OverlapType(Enum):
     """
     NO_OVERLAP = "NO_OVERLAP"
     DUPLICATE = "DUPLICATE"
+    INSERTION = "INSERTION"
     INSERTION_DIFFERENT = "INSERTION_DIFFERENT"
     DIFFERENT = "DIFFERENT"
     OVERLAP = "OVERLAP"
@@ -119,6 +120,9 @@ class AssignmentOverlapChecker(object):
         - `OverlapType.DUPLICATE`: `assignment` is a duplicate of
           `other_assignment` (same starting and ending positions)
 
+        - `OverlapType.INSERTION`: there is a complete domain insertion in
+          either direction
+
         - `OverlapType.INSERTION_DIFFERENT`: `assignment` is inserted into
           `other_assignment` or vice versa, but they have different data
           sources.
@@ -140,16 +144,16 @@ class AssignmentOverlapChecker(object):
 
         if other_start <= start and other_end >= end:
             if other_assignment.source == assignment.source:
-                # This is a valid domain insertion, the new domain is the
-                # one which was inserted into the old one
-                return OverlapType.NO_OVERLAP
+                # This is a valid domain insertion, assignment is inserted
+                # into other_assignment
+                return OverlapType.INSERTION
             return OverlapType.INSERTION_DIFFERENT
 
         if other_start >= start and other_end <= end:
             if other_assignment.source == assignment.source:
-                # This is a valid domain insertion, the new domain is the
-                # one which contains the old one completely
-                return OverlapType.NO_OVERLAP
+                # This is a valid domain insertion, other_assignment is
+                # inserted into assignment
+                return OverlapType.INSERTION
             return OverlapType.INSERTION_DIFFERENT
 
         if other_start <= start and other_end <= end and other_end >= start:
@@ -172,6 +176,29 @@ class AssignmentOverlapChecker(object):
 
         return OverlapType.NO_OVERLAP
 
+    @classmethod
+    def get_overlap_size(cls, assignment, other_assignment):
+        """Returns the length of the overlap between the given `assignment`
+        and another (`other_assignment`). It is assumed (and not checked)
+        that the two assignments refer to the same sequence.
+        """
+        start, end = assignment.start, assignment.end
+        other_start, other_end = other_assignment.start, other_assignment.end
+
+        if other_start <= start and other_end >= end:
+            return end-start+1
+
+        if other_start >= start and other_end <= end:
+            return other_end-other_start+1
+
+        if other_start <= start and other_end <= end and other_end >= start:
+            return other_end-start+1
+
+        if other_start >= start and other_end >= end and other_start <= end:
+            return end-other_start+1
+
+        return 0
+
 
 class SequenceWithAssignments(object):
     """Class representing a sequence for which some parts are assigned to
@@ -192,6 +219,11 @@ class SequenceWithAssignments(object):
     #: The overlap checker used by this instance. This points to
     #: `AssignmentOverlapChecker` by default.
     overlap_checker = AssignmentOverlapChecker
+
+    #: Acceptable overlap types which we allow in assignments.
+    #: By default, we consider complete domain insertions and the
+    #: absence of overlaps acceptable.
+    acceptable_overlaps = set([OverlapType.NO_OVERLAP, OverlapType.INSERTION])
 
     def __init__(self, name, length):
         self.name = name
@@ -228,7 +260,7 @@ class SequenceWithAssignments(object):
 
         if overlap_check:
             overlap_state = self.overlap_checker.check(self, assignment)
-            if overlap_state != OverlapType.NO_OVERLAP:
+            if overlap_state not in self.acceptable_overlaps:
                 return False
 
         self.assignments.append(assignment)

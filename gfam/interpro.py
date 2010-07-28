@@ -93,7 +93,7 @@ class InterProTree(Mapping):
 
     Usage example::
 
-        >>> interpro = InterPro.FromFile("ParentChildTreeFile.txt")
+        >>> interpro = InterPro.FromFile("data/ParentChildTreeFile.txt")
         >>> tree = interpro.tree
         >>> tree["IPR000010"]      # this is a family ID
         'IPR000010'
@@ -150,10 +150,14 @@ class InterProIDMapper(object):
 
     The class can generally be used like a dictionary::
 
-        >>> interpro = InterPro.FromFile("ParentChildTreeFile.txt")
+        >>> interpro = InterPro.FromFile("data/ParentChildTreeFile.txt")
         >>> mapper = interpro.mapping
         >>> mapper["PF00031"]          # an alias for IPR000010
         'IPR000010'
+        >>> mapper["IPR9999"]          # no such ID
+        Traceback (most recent call last):
+            ...
+        KeyError: 'IPR9999'
         >>> mapper.get("IPR9999")      # no such ID
         'IPR9999'
         >>> mapper["IPR9999"] = "Fake ID for testing"
@@ -202,7 +206,7 @@ class InterProNames(object):
 
     Usage example::
 
-        >>> names = InterProNames.FromFile("names.tab")
+        >>> names = InterProNames.FromFile("data/names.dat.gz")
         >>> "IPR015503" in names
         True
         >>> "no-such-name" in names
@@ -236,7 +240,7 @@ class InterProNames(object):
         """Shortcut method that does exactly what the following snippet does::
         
             >>> names = InterProNames()
-            >>> names.load(filename)
+            >>> names.load(filename)           #doctest: +SKIP
         """
         result = cls()
         result.load(filename)
