@@ -133,11 +133,43 @@ data sources. For *Arabidopsis thaliana* and *Arabidopsis lyrata*, we found the
 following strategy to be successful:
 
 1. Assignments from HAMAP, PatternScan, FPrintScan, Seg and Coil are thrown
-   away completely.
+   away completely for the following reasons:
+
+   - HAMAP may not be a suitable resource for eukaryotic family annotation as
+     it is geared towards completely sequenced microbial proteome sets and
+     provides manually curated microbial protein families in
+     UniProtKB/Swiss-Prot [#1]_. For *Arabidopsis thaliana*, there were only
+     133 domains annotated by HAMAP and all domains had E-values larger than
+     0.001.
+
+   - PatternScan and FPrintScan [#2]_ are resources for identifying motifs in a
+     sequence and are not very helpful in understanding larger evolutionary
+     units or domains. The match size ranges between 3 and 103 amino acids for
+     PatternScan and between 4 and 30 amino acids for FPrintScan.
+
+   - Seg and Coil were ignored as these define regions of low compositional
+     complexity and coiled coils, respectively, and are not particularly
+     informative in the context of defining gene families.
 
 2. An E-value threshold of 10\ :sup:`-3` is applied to the remaining data
    sources, except for Superfamily, HMMPanther, Gene3D and HMMPIR which are
    taken into account without any thresholding.
+
+   The threshold of 10\ :sup:`-3` was chosen based on the following
+   observation. There are 3,816 domain assignments from HMMPfam with a E-value
+   larger than 0.1, 1,625 assignments with an E-value between 0.1 and 0.01 and
+   1,650 assignments with an E-value between 0.01 and 0.001. We looked at the
+   type of domains that had an E-value between 0.1 and 0.01 and 0.01 and 0.001.
+   We noticed that at least 80% of the domains are some kind of repeat domains
+   (PPR, Kelch, LLR, TPR etc) or short protein motifs (different types of zinc
+   fingers, EF-hand, HLH etc).  It is reasonable to believe that at an E-value
+   less than 0.001, the majority of the domains are likely to be spurious
+   matches due to the sequence nature (low-complex and short) of these domains.
+   We decided to consider domains from HMMPfam that had an E-value of 0.001 or
+   smaller. We may miss but only a handful of real domains if we choose 0.001
+   as our E-value threshold.  However, we would like to point out that the
+   threshold is not hard-wired into GFam, rather it is a parameter than can be
+   tuned for each assignment source to suit the users' needs.
 
 3. GFam performs three passes on the list of domain assignments obtained up
    to now. The first and second passes do not consider HMMPanther and Gene3D
@@ -145,27 +177,44 @@ following strategy to be successful:
    considers all the data sources.
 
 4. The maximum overlap allowed between two domains of the same source
-   (excluding complete insertions which are always accepted) is 20 amino
-   acids.
+   (excluding complete insertions which are always accepted) is 30 amino
+   acids. This was based on the distribution of domain overlap lengths
+   for the different resources.
 
 The stages and the E-value thresholds are configurable in the
 :ref:`configuration file <config-file>`.
+
+.. [#1] Lima T, Auchincloss AH, Coudert E, Keller G, Michoud K, Rivoire C,
+        Bulliard V, de Castro E, Lachaize C, Baratin D, Phan I, Bougueleret L
+        and Bairoch A. HAMAP: a database of completely sequenced microbial
+        proteome sets and manually curated microbial protein families in
+        UniProtKB/Swiss-Prot. *Nucl Acids Res* **37**\ (Database):D471-D478,
+        2009.
+
+.. [#2] Scordis P, Flower DR and Attwood TK. FingerPRINTScan: intelligent
+        searching of the PRITNS motif database. *Bioinformatics*
+        **15**\ (10):799-806, 1999.
 
 .. _pipeline-step-unassigned:
 
 Step 3 -- Finding unassigned sequence fragments
 -----------------------------------------------
 
-This step begins the exploration for novel, previously uncharacterised
-domains among the sequence fragments left uncovered by the preliminary
-assignment that we calculated in :ref:`step 2 <pipeline-step-preliminary>`.
-The step iterates over each sequence and extract the fragments that are
-not covered by any of the domains in the preliminary domain assignment.
-Sequences or fragments that are too short are thrown away, the remaining
-fragments are written in FASTA format into an intermediary file. The
-sequence and fragment length thresholds are configurable. For the
-analysis of *A.thaliana* and *A.lyrata* sequences, the minimum fragment
-length is set to 75 amino acids.
+This step begins the exploration for novel, previously uncharacterised domains
+among the sequence fragments left uncovered by the preliminary assignment that
+we calculated in :ref:`step 2 <pipeline-step-preliminary>`.  We improvised on
+the method described by Haas *et al* [#3]_ to identify novel domains.  The step
+iterates over each sequence and extract the fragments that are not covered by
+any of the domains in the preliminary domain assignment.  Sequences or
+fragments that are too short are thrown away, the remaining fragments are
+written in FASTA format into an intermediary file. The sequence and fragment
+length thresholds are configurable. For the analysis of *A.thaliana* and
+*A.lyrata* sequences, the minimum fragment length is set to 75 amino acids.
+
+.. [#3] Haas BJ, Wortman JR, Ronning CM, Hannick LI, Smith RK Jr, Maiti R,
+        Chan AP, Yu C, Farzad M, Wu D, White O, Town CD. Complete reannotation
+        of the *Arabidopsis* genome: methods, tools, protocols and the final
+        release. *BMC Biol* **3**:7, 2005.
 
 .. _pipeline-step-blast:
 
