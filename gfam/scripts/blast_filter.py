@@ -47,7 +47,7 @@ class BlastFilterApp(CommandLineApp):
         parser.add_option("-e", "--max-e-value", dest="max_e_value",
                 metavar="VALUE", type=float, default=100,
                 config_key="analysis:blast_filter/max_e_value",
-                help="drop matches with an E-value less than the given VALUE")
+                help="drop matches with an E-value larger than the given VALUE")
         parser.add_option("-S", "--sequences",
                 dest="sequences_file", metavar="FILE",
                 help="FASTA file containing all the sequences used by BLAST. "

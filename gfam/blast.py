@@ -130,7 +130,7 @@ class BlastFilter(object):
             self.normalize_func = name
         else:
             funcs = { \
-                "off": lambda _1, _2, _3, length: length, \
+                "off": lambda _1, _2, length: length, \
                 "smaller": self._normalize_smaller, \
                 "larger": self._normalize_larger, \
                 "query": self._normalize_query, \
