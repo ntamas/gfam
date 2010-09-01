@@ -97,7 +97,7 @@ proper order.
 .. automodule:: gfam.scripts
    :members:
 
-Each step in the `GFam pipeline <pipeline>` is implemented in a separate
+Each step in the `GFam pipeline <pipeline>`_ is implemented in a separate
 submodule of :mod:`gfam.scripts`. These submodules contain only a single
 class per submodule, derived from `gfam.scripts.CommandLineApp`. The
 submodules are invoked automatically in the right order by a master

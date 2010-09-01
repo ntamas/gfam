@@ -88,8 +88,12 @@ class AssignmentOverlapChecker(object):
     """Static class that contains the central logic of determining
     whether an assignment can be added to a partially assigned
     `SequenceWithAssignments`.
+
+    The class has a class variable named `max_overlap` which stores
+    the maximum allowed overlap size. This is 20 by default.
     """
 
+    #: The maximum allowed overlap size.
     max_overlap = 20
 
     @classmethod
@@ -133,7 +137,7 @@ class AssignmentOverlapChecker(object):
         - `OverlapType.OVERLAP`: `other_assignment` overlaps with `assignment`
           partially, they have the same data source, but the size of
           the overlap is larger than the maximum allowed overlap specified
-          in `OverlapChecker.max_overlap`.
+          in `AssignmentOverlapChecker.max_overlap`.
         """
         start, end = assignment.start, assignment.end
         other_start, other_end = other_assignment.start, other_assignment.end

@@ -167,8 +167,8 @@ class Histogram(object):
     def __init__(self, bin_width = 1, data = None):
         """Initializes the histogram with the given data set.
 
-        @param bin_width: the bin width of the histogram.
-        @param data: the data set to be used. Must contain real numbers.
+        :param bin_width: the bin width of the histogram.
+        :param data: the data set to be used. Must contain real numbers.
         """
         self._bin_width = float(bin_width)
         self._bins = None
@@ -182,10 +182,12 @@ class Histogram(object):
     def _get_bin(self, num, create = False):
         """Returns the bin index corresponding to the given number.
 
-        @param num: the number for which the bin is being sought
-        @param create: whether to create a new bin if no bin exists yet.
-        @return: the index of the bin or C{None} if no bin exists yet and
-          {create} is C{False}."""
+        :param num: the number for which the bin is being sought
+        :param create: whether to create a new bin if no bin exists yet.
+
+        :Returns:
+          the index of the bin or ``None`` if no bin exists yet and
+          `create` is ``False``."""
         if len(self._bins) == 0:
             if not create:
                 result = None
@@ -246,8 +248,8 @@ class Histogram(object):
     def add(self, num, repeat=1):
         """Adds a single number to the histogram.
         
-        @param num: the number to be added
-        @param repeat: number of repeated additions
+        :param num: the number to be added
+        :param repeat: number of repeated additions
         """
         num = float(num)
         binidx = self._get_bin(num, True)
@@ -255,9 +257,11 @@ class Histogram(object):
         self._running_mean.add(num, repeat)
 
     def add_many(self, data):
-        """Adds a single number or the elements of an iterable to the histogram.
+        """Adds a single number or the elements of an iterable to the
+        histogram.
 
-        @param data: the data to be added"""
+        :param data: an iterable containing the data to be added
+        """
         try:
             iterator = iter(data)
         except TypeError:
@@ -273,10 +277,11 @@ class Histogram(object):
         self._running_mean = RunningMean()
 
     def bins(self):
-        """Generator returning the bins of the histogram in increasing order
+        """Generator returning the bins of the histogram in increasing
+        order
         
-        @return: a tuple with the following elements: left bound, right bound,
-          number of elements in the bin"""
+        Returns a tuple with the following elements: left bound, right
+        bound, number of elements in the bin"""
         x = self._min
         for elem in self._bins:
             yield (x, x+self._bin_width, elem)

@@ -25,7 +25,9 @@ You will need the following tools to run ``gfam``:
   tested with Jython_ 2.5.1.
 
 * `NCBI BLAST`_; in particular, the ``formatdb`` and ``blastall`` tools
-  from the legacy C-based BLAST distribution.
+  from the legacy C-based BLAST distribution. You can still use ``gfam``
+  wit the newer, C++-based BLAST if you have the ``legacy_blast.pl``
+  wrapper script in the BLAST folder.
 
 .. _Python: http://www.python.org
 .. _`NCBI BLAST`: ftp://ftp.ncbi.nlm.nih.gov/blast/executables/release/LATEST

@@ -12,7 +12,7 @@ in one of the following submodules:
   utilities.
 
 :mod:`gfam.compat`
-  Classes and functions to maintain compatibility with Python 2.6.
+  Classes and functions to maintain compatibility with Python 2.5.
 
 :mod:`gfam.config`
   An extension of Python's built-in :mod:`optparse` module to allow supplying
