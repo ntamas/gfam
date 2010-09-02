@@ -53,7 +53,16 @@ other species, you might have to tweak some of the parameters, and you
 will surely have to modify the paths to the data files. The configuration
 file is documented and mostly self-explanatory.
 
-You can launch ``gfam`` by typing::
+If you do not have a configuration file for some reason, or you want to
+generate a new one from scratch, you can ask ``gfam`` to do it::
+
+    $ bin/gfam init
+
+This will create a default configuration file named ``gfam.cfg`` (if it does
+not exist already) and lists the configuration options you have to set in
+the file before starting GFam.
+
+If the configuration file is well in order, you can launch ``gfam`` by typing::
 
     $ bin/gfam
 
