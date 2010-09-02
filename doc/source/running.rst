@@ -135,7 +135,7 @@ please refer to the `ConfigParser module`_ in the documentation of Python.
 The full list of supported configuration keys and their default values is as
 follows:
 
-.. include:: generated/config.rst
+.. include:: generated/config.inc
 
 .. _output-files:
 

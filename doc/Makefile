@@ -36,12 +36,12 @@ help:
 	@echo "  sync       to synchronise the HTML output with the online version"
 
 clean:
-	-rm -f source/generated/*.rst
+	-rm -f source/generated/*.inc
 	-rm -rf $(BUILDDIR)/*
 
-genfiles: source/generated/config.rst
+genfiles: source/generated/config.inc
 	
-source/generated/config.rst: scripts/generate_config_docs.py ../gfam/scripts/master.py
+source/generated/config.inc: scripts/generate_config_docs.py ../gfam/scripts/master.py
 	mkdir -p source/generated/
 	PYTHONPATH=../ $(PYTHON) $< >$@
 
