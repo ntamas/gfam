@@ -382,9 +382,9 @@ file.mapping.interpro2go=data/interpro2go
 
 # File containing a tab-separated list of InterPro IDs and their corresponding
 # human-readable descriptions. This can be constructed by the following
-# command:
+# command::
 #
-# bin/download_names.py | gzip -9 >data/names.dat.gz
+#     $ bin/download_names.py | gzip -9 >data/names.dat.gz
 file.mapping.interpro2name=data/names.dat.gz
 
 # File containing the parent-child relationships of InterPro terms
@@ -408,7 +408,7 @@ folder.output=work
 
 # The folder containing the BLAST executables. It does not matter whether you
 # have the old C-based or the newer C++-based tools, GFam can use both if you
-# also have the legacy_blast.pl script that adapts the new tools to the
+# also have the ``legacy_blast.pl`` script that adapts the new tools to the
 # command line syntax used by the older ones.
 folder.blast=
 
@@ -416,16 +416,16 @@ folder.blast=
 # executables or the full path (including the name of the tool). If you have the
 # newer, C++-based BLAST tools (which do not have formatdb), pass the name of the
 # folder containing the BLAST executables here, and if you have the
-# legacy_blast.pl script in the same folder (plus a working Perl setup), GFam
-# will detect the situation and run legacy_blast.pl accordingly.
+# ``legacy_blast.pl`` script in the same folder (plus a working Perl setup), GFam
+# will detect the situation and run ``legacy_blast.pl`` accordingly.
 util.formatdb=%(folder.blast)s
 
 # The path to blastall. You may use the name of the folder containing the BLAST
 # executables or the full path (including the name of the tool). If you have the
 # newer, C++-based BLAST tools (which do not have blastall), pass the name of the
 # folder containing the BLAST executables here, and if you have the
-# legacy_blast.pl script in the same folder (plus a working Perl setup), GFam
-# will detect the situation and run legacy_blast.pl accordingly.
+# ``legacy_blast.pl`` script in the same folder (plus a working Perl setup), GFam
+# will detect the situation and run ``legacy_blast.pl`` accordingly.
 util.blastall=%(folder.blast)s
 
 ###########################################################################
@@ -468,9 +468,9 @@ e_value_thresholds=1e-3;superfamily=inf;HMMPanther=inf;Gene3D=inf;HMMPIR=inf
 # File containing the parent-child relationships of InterPro terms
 interpro_parent_child_mapping=%(file.mapping.interpro_parent_child)s
 
-# The following configuration keys specify which assignment sources are to be
-# taken into account at each stage of the analysis. For more information about
-# what these stages are, please refer to the documentation, especially the
+# These configuration keys specify which assignment sources are to be taken
+# into account at each stage of the analysis. For more information about what
+# these stages are, please refer to the documentation, especially the
 # description of Step 2 in section "Steps of the GFam pipeline"
 stages.1=ALL-HMMPanther-Gene3D
 stages.2=ALL-HMMPanther-Gene3D

@@ -114,6 +114,29 @@ Note that the script relies on the following locations to download data:
 The configuration file
 ----------------------
 
+The default configuration file of GFam is called ``gfam.cfg``, but you can
+specify an alternative configuration file name on the command line using the
+``-c`` switch. A sample configuration file is included in the GFam distribution;
+however, you can always generate a new one by running the following command::
+
+    $ bin/gfam init
+
+This will generate a file named ``gfam.cfg`` in the current directory and list
+the configuration keys you have to modify before starting your analyses.
+
+The configuration file consists of sections, led by a ``[section]`` header and
+followed by ``name=value`` entries. Lines beginning with ``#`` or ``;`` are
+ignored and used to provide comments. Lines containing whitespace characters
+only are also ignored. For more details about the configuration file format,
+please refer to the `ConfigParser module`_ in the documentation of Python.
+
+.. _ConfigParser module: http://docs.python.org/library/configparser.html
+
+The full list of supported configuration keys and their default values is as
+follows:
+
+.. include:: generated/config.rst
+
 .. _output-files:
 
 Output files

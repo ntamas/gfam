@@ -43,9 +43,12 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
+# Exclude generated documentation
+exclude_patterns = 'source/generated/*.rst'
+
 # General information about the project.
 project = u'GFam'
-copyright = u'2010, Tamas Nepusz, Rajkumar Sasidharan'
+copyright = u'2010, Tam\u00b4s Nepusz, Rajkumar Sasidharan'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
