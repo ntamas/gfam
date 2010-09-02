@@ -24,6 +24,7 @@ import textwrap
 
 from ConfigParser import ConfigParser
 from cStringIO import StringIO
+from functools import wraps
 from gfam.modula.hash import sha1
 from gfam.modula.module import CalculationModule
 from gfam.modula.storage import DiskStorageEngine, NotFoundError
@@ -35,6 +36,7 @@ __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
+__all__ = ["GFamMasterScript"]
 
 class GFamCalculation(CalculationModule):
     """Class representing a GFam calculation step. This is a subclass of
@@ -119,6 +121,19 @@ class GFamDiskStorageEngine(DiskStorageEngine):
         pass
 
 
+def needs_config(func):
+    """Decorator for methods in `GFamMasterScript` that require a valid
+    configuration file.
+    """
+    @wraps(func)
+    def wrapper(self, *args, **kwds):
+        if self.config is None:
+            self.error("Configuration file not found: %s. Try gfam init "
+                       "to generate a new one." % self.options.config_file)
+        return func(self, *args, **kwds)
+    return wrapper
+
+
 class GFamMasterScript(CommandLineApp):
     """\
     Usage: %prog [options] [command]
@@ -126,6 +141,8 @@ class GFamMasterScript(CommandLineApp):
     Runs the whole GFam pipeline, driven by the given configuration
     file (specified with the `-c` option). The given command must be
     one of the following:
+
+        - init: generates a configuration file from scratch.
 
         - run: runs the whole pipeline. This is the default.
 
@@ -236,7 +253,7 @@ class GFamMasterScript(CommandLineApp):
 
         config_file = self.options.config_file
         if not os.path.exists(config_file):
-            self.error("Configuration file not found: %s" % config_file)
+            return None
 
         config = ConfigParser()
         config.read([config_file])
@@ -251,15 +268,16 @@ class GFamMasterScript(CommandLineApp):
         # Read the configuration file
         self.config = self.read_config()
 
-        # Initialize Modula
-        modula_config = self.get_modula_config(self.config)
-        modula.init(modula_config, debug = self.options.debug,
-                    storage_engine_factory = GFamDiskStorageEngine)
-        modula.module_manager.module_factory = GFamCalculation
-        self.modula = modula
+        if self.config:
+            # Initialize Modula
+            modula_config = self.get_modula_config(self.config)
+            modula.init(modula_config, debug = self.options.debug,
+                        storage_engine_factory = GFamDiskStorageEngine)
+            modula.module_manager.module_factory = GFamCalculation
+            self.modula = modula
 
-        # Use the logger from Modula
-        self.log = self.modula.logger
+            # Use the logger from Modula
+            self.log = self.modula.logger
 
         # Run the commands
         if not self.args:
@@ -274,6 +292,7 @@ class GFamMasterScript(CommandLineApp):
             if error_code:
                 return error_code
 
+    @needs_config
     def do_clean(self):
         """Clears the temporary directory used for intermediate results."""
         # Get the output folder name
@@ -284,6 +303,38 @@ class GFamMasterScript(CommandLineApp):
         shutil.rmtree(outfolder)
         self.log.info("Temporary folder removed successfully.")
 
+    def do_init(self):
+        """Initializes a configuration file in the current directory."""
+        # Check whether we already have a config file in the current directory.
+        cfgfile = self.options.config_file
+
+        if os.path.exists(cfgfile):
+            self.error("%s already exists, please remove it before "
+                       "generating a new one." % cfgfile)
+            return 1
+
+        with open(cfgfile, "w") as fp:
+            fp.write(CONFIGURATION_FILE_TEMPLATE)
+
+        print "Configuration file generated successfully."
+        print
+        print "Please open the configuration file in the text editor and provide"
+        print "the correct values for the following configuration keys:"
+        print
+
+        # Check which config keys are empty in the config file, these have
+        # to be filled
+        config = ConfigParser()
+        config.read([cfgfile])
+        seen_keys = set()
+        for section in ["DEFAULT"] + config.sections():
+            for name, value in config.items(section, raw=True):
+                if not value and name not in seen_keys:
+                    print "  - %s (in section %r)" % (name, section)
+                    if section == "DEFAULT":
+                        seen_keys.add(name)
+
+    @needs_config
     def do_run(self):
         """Runs the whole GFam pipeline"""
         # Get the output folder name
@@ -302,3 +353,228 @@ class GFamMasterScript(CommandLineApp):
         shutil.copy(self.modula.storage_engine.get_filename("overrep"), outfile)
         self.log.info("Exported overrepresentation analysis to %s." % outfile)
 
+###########################################################################
+
+CONFIGURATION_FILE_TEMPLATE = """\
+###########################################################################
+## Configuration file for GFam                                           ##
+###########################################################################
+
+[DEFAULT]
+
+###########################################################################
+## Input files                                                           ##
+###########################################################################
+
+# Raw output file from IPRScan that contains domain assignments for all the
+# sequences we are interested in
+file.input.iprscan=
+
+# A FASTA file containing all the sequences being analysed
+file.input.sequences=
+
+# A file containing the Gene Ontology in OBO format
+file.mapping.gene_ontology=data/gene_ontology.obo
+
+# File containing the mapping of GO terms to InterPro entries, as downloaded
+# from geneontology.org
+file.mapping.interpro2go=data/interpro2go
+
+# File containing a tab-separated list of InterPro IDs and their corresponding
+# human-readable descriptions. This can be constructed by the following
+# command:
+#
+# bin/download_names.py | gzip -9 >data/names.dat.gz
+file.mapping.interpro2name=data/names.dat.gz
+
+# File containing the parent-child relationships of InterPro terms
+file.mapping.interpro_parent_child=data/ParentChildTreeFile.txt
+
+###########################################################################
+## Folders                                                               ##
+###########################################################################
+
+# The working folder in which to put intermediary files
+folder.work=work
+
+# The output folder in which to put the final results
+folder.output=work
+
+###########################################################################
+## External utilities used by GFam                                       ##
+###########################################################################
+
+[utilities]
+
+# The folder containing the BLAST executables. It does not matter whether you
+# have the old C-based or the newer C++-based tools, GFam can use both if you
+# also have the legacy_blast.pl script that adapts the new tools to the
+# command line syntax used by the older ones.
+folder.blast=
+
+# The path to formatdb. You may use the name of the folder containing the BLAST
+# executables or the full path (including the name of the tool). If you have the
+# newer, C++-based BLAST tools (which do not have formatdb), pass the name of the
+# folder containing the BLAST executables here, and if you have the
+# legacy_blast.pl script in the same folder (plus a working Perl setup), GFam
+# will detect the situation and run legacy_blast.pl accordingly.
+util.formatdb=%(folder.blast)s
+
+# The path to blastall. You may use the name of the folder containing the BLAST
+# executables or the full path (including the name of the tool). If you have the
+# newer, C++-based BLAST tools (which do not have blastall), pass the name of the
+# folder containing the BLAST executables here, and if you have the
+# legacy_blast.pl script in the same folder (plus a working Perl setup), GFam
+# will detect the situation and run legacy_blast.pl accordingly.
+util.blastall=%(folder.blast)s
+
+###########################################################################
+## Analysis parameters                                                   ##
+###########################################################################
+
+# Some of the parameters in the next few section refer to other configuration
+# options in the form of %(item)s. In general, you should keep these
+# references and modify the referred keys instead.
+
+[DEFAULT]
+
+# Python regular expression that matches gene IDs from the sequence file.
+# This is necessary if the IPRScan output uses a sequence ID that is
+# only a part of the sequence ID in the input FASTA file. If it is
+# empty, no ID transformation will be done, the sequence IDs in the
+# input FASTA file will be matched intact to the IPRScan output.
+# If it is not empty, it must be a valid Python regular expression
+# with a *named* group "id" that matches the gene ID that is used
+# in the IPRScan output. If you don't know what named groups are,
+# check the documentation of the Python `re` module.
+sequence_id_regexp=
+
+# Which assignment sources NOT to trust from InterPro? (space separated)
+untrusted_sources=HAMAP PatternScan FPrintScan Seg Coil
+
+# Maximum overlap allowed between assignments originating from the
+# same data source
+max_overlap=20
+
+[analysis:iprscan_filter]
+
+# E-value thresholds to use when processing the initial InterPro file.
+# This entry is a semicolon-separated list of source=threshold pairs, the given
+# threshold will be used for the given data source. If an entry contains
+# only a threshold, this will be considered as a default threshold for
+# sources not explicitly mentioned here.
+e_value_thresholds=1e-3;superfamily=inf;HMMPanther=inf;Gene3D=inf;HMMPIR=inf
+
+# File containing the parent-child relationships of InterPro terms
+interpro_parent_child_mapping=%(file.mapping.interpro_parent_child)s
+
+# The following configuration keys specify which assignment sources are to be
+# taken into account at each stage of the analysis. For more information about
+# what these stages are, please refer to the documentation, especially the
+# description of Step 2 in section "Steps of the GFam pipeline"
+stages.1=ALL-HMMPanther-Gene3D
+stages.2=ALL-HMMPanther-Gene3D
+stages.3=ALL
+
+[analysis:find_unassigned]
+
+# Minimum number of amino acids in a sequence in order to consider it further
+# (i.e. to calculate its unassigned fragments)
+min_seq_length=30
+
+# Minimum number of amino acids in a sequence fragment in order to
+# consider that fragment as a novel domain candidate
+min_fragment_length=75
+
+# Input FASTA file containing all the sequences of the representative
+# gene model being analysed
+sequences_file=%(file.input.sequences)s
+
+[analysis:blast_filter]
+
+# Minimum sequence identity between two fragments to consider them
+# as being in the same domain
+min_seq_identity=45
+
+# Minimum alignment length between two fragments to consider them
+# as being in the same domain. If normalization_method is not off,
+# this must be the normalized alignment length threshold according
+# to the chosen normalization method.
+min_alignment_length=0.7
+
+# Maximum E-value between two fragments in order to consider them
+# as being in the same domain
+max_e_value=1e-3
+
+# Normalization method to use for calculating normalized alignment length
+# Must be one of: off, smaller, larger, query, hit
+normalization_method=query
+
+[analysis:jaccard]
+
+# Minimum Jaccard similarity between the neighbour sets of two
+# fragments in order to consider them as being in the same domain
+min_similarity=0.66
+
+# Whether to assume that a protein is connected to itself or not
+assume_loops=1
+
+# Whether to consider only those protein pairs which are linked in
+# the input file. If this is 1, protein pairs not in the input file
+# will not be returned even if their Jaccard similarity is larger
+# than the given threshold
+only_linked=1
+
+[analysis:cca]
+
+# Empty section, this script has no individual parameters to tune, but
+# this might change in the future
+
+[analysis:find_domain_arch]
+
+# A novel domain occur in at least this number of sequences
+min_novel_domain_size=4
+
+[analysis:overrep]
+
+# The p-value threshold in the hypergeometric test used in the
+# overrepresentation analysis process
+confidence=0.05
+
+# The method used to account for multiple hypothesis testing.
+# Valid choices: bonferroni (Bonferroni correction), Sidak
+# (Sidak correction), fdr (Benjamini-Hochberg method), none (off).
+# The Bonferroni and Sidak correction methods control the
+# family-wise error rate (FWER), while the Benjamini-Hochberg method
+# control the false discovery rate.
+correction=fdr
+
+# The minimum number of annotated domains a GO term must have in order
+# to be considered in the overrepresentation analysis
+min_term_size=5
+
+[analysis:coverage]
+
+# Empty section, this script has no individual parameters to tune, but
+# this might change in the future
+
+## WARNING: you should not have to modify anything beyond this point.
+## Make sure that you know what you are doing.
+
+###########################################################################
+
+###########################################################################
+## Paths for the generated files                                         ##
+###########################################################################
+
+[generated]
+
+# File in which the unassigned sequence fragments are stored
+file.unassigned_fragments=%(folder.work)s/unassigned_fragments.ffa
+
+# File containing a list of valid gene IDs (extracted from the input file)
+file.valid_gene_ids=%(folder.work)s/gene_ids.txt
+
+# File containing the detailed final domain architecture for each sequence
+file.domain_architecture_details=%(folder.output)s/domain_architecture_details.txt
+"""
