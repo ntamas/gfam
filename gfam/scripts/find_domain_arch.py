@@ -99,6 +99,9 @@ class FindDomainArchitectureApp(CommandLineApp):
         self.process_clustering_file(clustering_file)
         self.sort_by_domain_architecture()
 
+        for seqs in self.domain_archs.itervalues():
+            seqs.sort()
+
         self.domain_archs = self.domain_archs.items()
         self.domain_archs.sort(key=lambda x: len(x[1]), reverse=True)
 

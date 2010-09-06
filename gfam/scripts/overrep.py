@@ -87,15 +87,22 @@ class OverrepresentationAnalysisApp(CommandLineApp):
         self.log.info("Running overrepresentation analysis")
         self.log.info("p-value = %.4f, correction method = %s" % \
                       (self.options.confidence, self.options.correction))
+
         overrep = OverrepresentationAnalyser(self.go_tree, self.go_mapping,
                 confidence = self.options.confidence,
                 min_count = self.options.min_size,
                 correction = self.options.correction)
+        cache = {}
+
         for line in open_anything(input_file):
             parts = line.strip().split("\t")
-            gene_id, arch = parts[0], parts[2].split(";")
-            if arch == ["NO_ASSIGNMENT"]:
+            gene_id, arch = parts[0], tuple(parts[2].split(";"))
+            if arch == ("NO_ASSIGNMENT", ):
                 continue
+
+            if arch not in cache:
+                cache[arch] = overrep.test_group(arch)
+
             print gene_id
             for term, p_value in overrep.test_group(arch):
                 print "  %.4f: %s (%s)" % (p_value, term.id, term.name)

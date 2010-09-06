@@ -192,7 +192,7 @@ The stages and the E-value thresholds are configurable in the
         2009.
 
 .. [#2] Scordis P, Flower DR and Attwood TK. FingerPRINTScan: intelligent
-        searching of the PRITNS motif database. *Bioinformatics*
+        searching of the PRINTS motif database. *Bioinformatics*
         **15**\ (10):799-806, 1999.
 
 .. _pipeline-step-unassigned:

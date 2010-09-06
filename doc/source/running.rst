@@ -142,6 +142,92 @@ follows:
 Output files
 ------------
 
+GFam produces three output files in the output folder specified in the
+`configuration file`. These files are as follows:
+
+``domain_architectures.tab``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A simple tab-separated flat file that contains the inferred domain architecture
+for each sequence in a simple, summarised format. The file is sorted in a way
+such that more frequent domain architectures are placed at the top. Sequences
+having the same domain architecture are sorted according to their IDs.
+
+The file has six columns. The first column is the ID of the sequence (e.g.,
+``AT1G09650.1``), the second is the sequence length (e.g, ``382``). The third
+column contains a summary of the domain architecture of the sequence, where
+domains are ordered according to the starting position, and consecutive domain
+IDs are separated by semicolons (e.g., ``IPR022364;IPR017451``). The InterPro
+domain ID is used whenever possible. Novel domains identified by GFam are
+denoted by ``NOVELxxxxx``, where ``xxxxx`` is a five-digit identifier.  The
+fourth column contains the frequency of this domain architecture (i.e. the
+number of sequences that have the same domain architecture). The fifth column
+is the same as the third, but the exact starting and ending positions of the
+domain are also added in parentheses after the domain ID (e.g.,
+``IPR022364(9-57);IPR017451(112-357)``). The sixth column contains the
+concatenated human-readable descriptions of the domains (for instance, ``F-box
+domain, Skp2-like;F-box associated interaction domain``).
+
+``domain_architecture_details.txt``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. highlight:: none
+
+This file is the human-readable variant of ``domain_architectures.tab`` (which
+is more suitable for machine parsing). It contains blocks separated by two
+newline characters; each block corresponds to a sequence and has the following
+format::
+
+    AT1G09650.1
+        Primary assignment source: HMMTigr
+        Coverage: 0.772
+        Coverage w/o novel domains: 0.772
+           9-  57: SSF81383 (superfamily, stage: 2) (InterPro ID: IPR022364)
+                   F-box domain, Skp2-like
+         112- 357: TIGR01640 (HMMTigr, stage: 1) (InterPro ID: IPR017451)
+                   F-box associated interaction domain
+
+The first line of each block is unindentend and contains the sequence ID. The
+remaining lines are indented by at least four spaces. The second line contains
+the name of the InterPro data source that was used to come up with the primary
+assignment in :ref:`pipeline-step-preliminary` (see later in :ref:`pipeline`).
+The third and the fourth lines contain the fraction of positions in the
+sequence that are covered by at least one domain; the third line takes into
+account novel domains (``NOVELxxxxx``), while the fourth line does not. The
+remaining lines list the domains themselves along with the data source they
+came from and the stage in which they were selected. For more details about
+the stages, see :ref:`pipeline`.
+
+``overrepresentation_analysis.txt``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This file contains the results of the Gene Ontology overrepresentation analysis
+for the domain architecture of each sequence. Note that since the results of
+the overrepresentation analysis depend only on the domain architecture,
+the results of sequences having the same domain architecture will be completely
+identical.
+
+The file consists of blocks separated by two newlines, and each block
+corresponds to one sequence. Each block has the following format::
+
+    AT1G61040.1
+      0.0009: GO:0016570 (histone modification)
+      0.0009: GO:0016569 (covalent chromatin modification)
+      0.0024: GO:0016568 (chromatin modification)
+      0.0036: GO:0006325 (chromatin organization)
+      0.0049: GO:0051276 (chromosome organization)
+      0.0055: GO:0006352 (transcription initiation)
+      0.0095: GO:0006461 (protein complex assembly)
+      0.0109: GO:0065003 (macromolecular complex assembly)
+      0.0111: GO:0006996 (organelle organization)
+      0.0126: GO:0043933 (macromolecular complex subunit organization)
+
+In each block, the first number is the p-value obtained from the
+overrepresentation analysis, the second column is the GO ID. The name
+corresponding to the GO label is contained in parentheses.  Blocks containing a
+sequence ID only represent sequences with no significant overrepresented GO
+labels in their domain architecture.
+
 Command line options
 --------------------
 
