@@ -190,13 +190,13 @@ format::
 The first line of each block is unindentend and contains the sequence ID. The
 remaining lines are indented by at least four spaces. The second line contains
 the name of the InterPro data source that was used to come up with the primary
-assignment in :ref:`pipeline-step-preliminary` (see later in :ref:`pipeline`).
-The third and the fourth lines contain the fraction of positions in the
-sequence that are covered by at least one domain; the third line takes into
-account novel domains (``NOVELxxxxx``), while the fourth line does not. The
-remaining lines list the domains themselves along with the data source they
-came from and the stage in which they were selected. For more details about
-the stages, see :ref:`pipeline`.
+assignment in :ref:`step 2 of the pipeline <pipeline-step-preliminary>` (see
+more details later in :ref:`pipeline`).  The third and the fourth lines contain
+the fraction of positions in the sequence that are covered by at least one
+domain; the third line takes into account novel domains (``NOVELxxxxx``), while
+the fourth line does not. The remaining lines list the domains themselves along
+with the data source they came from and the stage in which they were selected.
+For more details about the stages, see :ref:`pipeline`.
 
 ``overrepresentation_analysis.txt``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -231,3 +231,77 @@ labels in their domain architecture.
 Command line options
 --------------------
 
+.. highlight:: sh
+
+GFam is started by the master script in ``bin/`` as follows::
+
+    $ bin/gfam
+
+The exact command line syntax is ``bin/gfam [options] [command]``, where
+``command`` is one of the following:
+
+``init``
+    Generates a configuration file for GFam from scratch. The name of the
+    configuration file will be ``gfam.cfg`` by default, but you can change
+    it with the ``-c`` switch. GFam will refuse to overwrite existing
+    configuration files. Example::
+
+        $ bin/gfam -c a_lyrata.cfg init
+
+``run``
+    Runs the whole GFam pipeline. This is the default command.
+
+``clean``
+    Removes the temporary directory used to store the intermediate results.
+    The name of the temporary directory is determined by the ``folder.work``
+    configuration option in the `configuration file`.
+
+    .. WARNING::
+       If the output directory is the same as the temporary directory
+       (``folder.work`` is equal to ``folder.output`` in the configuration),
+       the ``clean`` command will also delete the final results from the output
+       folder!
+
+The default configuration file used is always ``gfam.cfg``, but it can be
+overridden with the ``-c`` switch. For example, the following command will
+clean the work directory specified in ``a_lyrata.cfg``::
+
+    $ bin/gfam -c a_lyrata.cfg clean
+
+The following extra command line switches are also available:
+
+-h, --help                   shows a help message and then exits
+-c FILE, --config-file=FILE  specifies the name of the configuration ``FILE``
+-v, --verbose                enables verbose logging
+-d, --debug                  shows debug messages as well
+-f, --force                  forces the recalculation of the results of
+                             intermediary steps in the GFam pipeline even
+                             when GFam thinks everything is up-to-date.
+
+Besides the master script, there are scripts for re-running individual steps of
+the GFam pipeline. These scripts are separate Python modules in
+``gfam/scripts`` and they correspond to the :ref:`steps of the GFam pipeline
+<pipeline>`. It is unlikely that you will have to run them by hand, but if you
+do, you have to supply the necessary input on the standard input stream of the
+scripts.  For instance, if you want to do some custom filtering on a BLAST
+tabular result file, you can use ``gfam/scripts/blast_filter.py`` as follows::
+
+    $ python -m gfam.scripts.blast_filter -e 1e-5 <input.blast
+
+This will filter ``input.blast`` and remove all entries with an E-value
+larger than 10\ :sup:`-5`. The result will be written to the standard
+output.
+
+You can get a summary of the usage of each script in ``gfam/scripts``
+as follows::
+
+    $ python -m gfam.scripts.blast_filter --help
+
+Of course replace ``blast_filter`` with the name of the script you are
+interested in.  The default values of the command line switches of these
+scripts come from the :ref:`configuration file <config-file>`, and they
+also support ``-c`` to change the name of the configuration file.
+
+In 99.9999% of the cases, you will only have to do ``bin/gfam init``
+to create a new configuration file, ``bin/gfam`` to run the pipeline and
+``bin/gfam clean`` to clean up the results.
