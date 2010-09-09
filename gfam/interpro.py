@@ -48,13 +48,13 @@ class AssignmentReader(object):
         returns a corresponding `Assignment` instance."""
         parts = line.strip().split("\t")
 
-        try:
-            evalue = float(parts[8])
-        except ValueError:
-            evalue = None
-
         if len(parts) < 15:
             parts.extend([None] * (15-len(parts)))
+
+        try:
+            evalue = float(parts[8])
+        except (ValueError, TypeError):
+            evalue = None
 
         if parts[11] == 'NULL' or not parts[11]:
             parts[11] = None
