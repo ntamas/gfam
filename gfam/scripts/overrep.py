@@ -94,19 +94,37 @@ class OverrepresentationAnalysisApp(CommandLineApp):
                 correction = self.options.correction)
         cache = {}
 
+        num_no_annotations = 0
+        num_no_domains = 0
+        total_seqs = 0
+
         for line in open_anything(input_file):
             parts = line.strip().split("\t")
             gene_id, arch = parts[0], tuple(parts[2].split(";"))
+            total_seqs += 1
+
             if arch == ("NO_ASSIGNMENT", ):
+                num_no_domains += 1
+                num_no_annotations += 1
                 continue
 
             if arch not in cache:
                 cache[arch] = overrep.test_group(arch)
 
             print gene_id
-            for term, p_value in overrep.test_group(arch):
+            for term, p_value in cache[arch]:
                 print "  %.4f: %s (%s)" % (p_value, term.id, term.name)
             print
+            if len(cache[arch]) == 0:
+                num_no_annotations += 1
+
+        self.log.info("Total number of sequences processed: %d" % total_seqs)
+        if num_no_annotations:
+            self.log.info("%d sequences have no overrepresented annotations :("
+                    % num_no_annotations)
+        if num_no_domains:
+            self.log.info("%d sequences have no domains at all :(" % num_no_domains)
+
 
 if __name__ == "__main__":
     sys.exit(OverrepresentationAnalysisApp().run())
