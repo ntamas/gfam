@@ -30,7 +30,12 @@ class SeqSlicerApp(CommandLineApp):
 
     When the end position is omitted, the default is the length of
     the sequence. When the start position is also omitted, the whole
-    sequence will be returned.
+    sequence will be returned. Sequence positions are defined by
+    integers starting from 1, that is, the first amino acid at the
+    N-terminus is at position 1. Both the start and end positions are
+    inclusive. If you specify a negative number, this will be interpreted
+    as a position from the C-terminus, that is, position -60 is position
+    60 counted from the C-terminus.
 
     sequences_file must be a sequence database in FASTA format.
     """
@@ -56,6 +61,10 @@ class SeqSlicerApp(CommandLineApp):
                 help="remap sequence IDs using REGEXP",
                 config_key="sequence_id_regexp",
                 dest="sequence_id_regexp")
+        parser.add_option("-k", "--keep-ids", dest="keep_ids",
+                action="store_true",
+                help="keep original sequence IDs even if this will duplicate "
+                     "existing IDs in the output file.")
 
         return parser
 
@@ -109,7 +118,7 @@ class SeqSlicerApp(CommandLineApp):
 
             if record is None:
                 if self.options.ignore_unknown:
-                    self.log.info("Ignoring unknown sequence ID: %s" % seq_id)
+                    self.log.warning("Ignoring unknown sequence ID: %s" % seq_id)
                     continue
                 self.log.fatal("Unknown sequence ID in input file: %s" % seq_id)
                 return 1
@@ -123,7 +132,23 @@ class SeqSlicerApp(CommandLineApp):
                     end = len(record.seq)
                 else:
                     end = int(parts[2])
+
+            if start == 0:
+                self.log.warning("Ignoring sequence ID: %s, "
+                        "requested start position is zero" % seq_id)
+            elif end == 0:
+                self.log.warning("Ignoring sequence ID: %s, "
+                        "requested end position is zero" % seq_id)
+
+            if start < 0:
+                start = len(record.seq) + start + 1
+            if end < 0:
+                end = len(record.seq) + end + 1
+
+            if not self.options.keep_ids:
                 new_id = "%s:%d-%d" % (record.id, start, end)
+            else:
+                new_id = seq_id
 
             new_record = SeqRecord(record.seq[(start-1):end],
                     id=new_id, name=record.name, description="")
