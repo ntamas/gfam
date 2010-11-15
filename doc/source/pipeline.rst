@@ -264,7 +264,8 @@ is then defined as follows:
 
 We calculate the Jaccard similarity of each connected pairs of nodes and keep
 those which have a Jaccard similarity larger than 0.66. This corresponds to
-keeping pairs where roughly 2/3 of their neighbours are shared.
+keeping pairs where roughly 2/3 of their neighbours are shared. The Jaccard
+similarity threshold can be adjusted in the :ref:`configuration file <config-file>`.
 
 Step 6 -- Identification of novel domains
 -----------------------------------------
@@ -281,7 +282,8 @@ characterised in the original input domain assignment file but were filtered in
 Novel domains are given temporary IDs consisting of the string ``NOVEL`` and
 a five-digit numerical identifier; for instance, ``NOVEL00042`` is the 42nd
 novel domain found during this process. Components containing less than four
-sequence fragments are not considered novel domains.
+sequence fragments are not considered novel domains. The size threshold of
+connected components can be adjusted in the :ref:`configuration file <config-file>`.
 
 .. _pipeline-step-consensus:
 
