@@ -180,9 +180,8 @@ class PlotApp(CommandLineApp):
             if self.options.output:
                 figure.savefig(self.options.output)
             else:
-                figure.show()
-                print "Press any key to continue..."
-                raw_input()
+                from matplotlib import pyplot
+                pyplot.show()
 
     def plot_list(self):
         """Lists the names of the available figures"""
@@ -211,18 +210,18 @@ class PlotApp(CommandLineApp):
         """Plots the distribution of domain lengths from each one
         of the data sources"""
 
+        max_length = 750
+
         def trimmed_length(assignment):
             length = assignment.get_assigned_length()
-            if length > 199:
-                length = 199
-            return length
+            return min(length, max_length-1)
 
         histograms = self.calculate_histograms_from_assignments(
             {"length": trimmed_length},
-            bin_size=10
+            bin_size=int(max_length / 25)
         )["length"]
         return self.get_barplot_from_histograms(histograms,
-                xlabel="Domain length", xlim=(0, 200))
+                xlabel="Domain length", xlim=(0, max_length))
 
     def plot_overlap_distribution(self):
         """Plots the distribution of overlaps between domain assignments
