@@ -83,7 +83,11 @@ Command line options
                     Matplotlib_ backends are installed).
 
 --relative          Plot relative frequencies instead of absolute counts on the Y
-                    axis (if that makes sense for the selected plot).
+                    axis (if that makes sense for the selected plot), and use a
+                    line chart instead of a bar chart.
+
+--survival          Plot survival distributions (if that makes sense for the
+                    selected plot), and use a line chart instead of a bar chart.
 
 .. _updating-mappings:
 

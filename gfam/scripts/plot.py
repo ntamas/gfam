@@ -86,6 +86,10 @@ class PlotApp(CommandLineApp):
                 action="store_true",
                 help="plot cumulative distributions (if that makes sense "
                      "for a given plot)")
+        parser.add_option("--survival", dest="survival",
+                action="store_true",
+                help="plot survival distributions (if that makes sense for "
+                     "a given plot)")
         parser.add_option("--relative", dest="relative", action="store_true",
                 help="plot relative frequencies instead of absolute counts "
                      "on the Y axis (if that makes sense for a given plot)")
@@ -137,14 +141,13 @@ class PlotApp(CommandLineApp):
                       for method, func in self.__class__.__dict__.iteritems() \
                       if method.startswith("plot_") and callable(func))
 
-    def get_barplot_from_histograms(self, histograms, xlabel=None,
-            ylabel="Count", xlim=None):
+    def get_barplot_from_histograms(self, histograms, xlabel=None, xlim=None):
         """Given a dict mapping assignment source names to `Histogram`
         instances, creates a nice plot that shows each histogram in a
         separate panel. Returns an instance of a Matplotlib `Figure`.
 
-        `xlabel` and `ylabel` gives the labels for the X and Y axes,
-        respectively.
+        `xlabel` gives the label for the X axis, `xlim` gives the limits
+        of the X axis.
         """
         sources = sorted(k for k in histograms.keys())
 
@@ -156,25 +159,61 @@ class PlotApp(CommandLineApp):
             histogram = histograms[source]
 
             if self.options.cumulative:
+                # Calculate cumulative distribution
                 cumsum = 0
                 points = []
                 for left, _, count in histogram.bins():
                     cumsum += count
                     points.append((left, cumsum))
+            elif self.options.survival:
+                # Calculate survival distribution (1-cumulative)
+                cumsum = histogram.n
+                points = []
+                for left, _, count in histogram.bins():
+                    points.append((left, cumsum))
+                    cumsum -= count
             else:
+                # Use the plain histogram
                 points = [(left, count) for left, _, count in histogram.bins()]
 
             if points:
+                total = histogram.n
+                # Convert to relative values if needed
                 if self.options.relative:
-                    total = points[-1][1]
-                else:
-                    total = sum(y for _, y in points)
-                points = [(x, y/total) for x, y in points]
+                    points = [(x, y/total) for x, y in points]
+                    total = 1.0
+                # For cumulative and survival plots, check the limits of the axes and
+                # add extra bars if necessary
+                if xlim is not None:
+                    min_x, max_x = xlim
+                    if self.options.survival and min_x is not None:
+                        if points[0][0] > min_x:
+                            points.insert(0, (min_x, total))
+                        if points[-1][1] > 0:
+                            points.append((max_x, 0))
+                    elif self.options.cumulative and max_x is not None:
+                        if points[0][1] > 0:
+                            points.insert(0, (min_x, 0))
+                        if points[-1][0] < max_x:
+                            last = points[-1][0] + histogram.bin_width
+                            points.append((max_x, total))
+
+            # Set the label of the Y axis
+            if self.options.relative:
+                ylabel = "Frequency"
+            else:
+                ylabel = "Count"
 
             axes = figure.add_subplot(num_fig_rows, num_fig_cols, idx+1)
             args = zip(*points)
-            args.append(histogram.bin_width)
-            axes.bar(*args)
+            if self.options.cumulative or self.options.survival:
+                # Use simple line plots for cumulative/survival distributions
+                args.append('r-')
+                axes.plot(*args)
+            else:
+                # Use a bar plot for histograms
+                args.append(histogram.bin_width)
+                axes.bar(*args)
             axes.set_title(source.capitalize())
             if idx % num_fig_cols == 0:
                 axes.set_ylabel(ylabel)
@@ -196,6 +235,10 @@ class PlotApp(CommandLineApp):
         if not self.args:
             self.parser.error("please specify at least one figure "
                               "to be plotted")
+
+        if self.options.cumulative and self.options.survival:
+            self.parser.error("--cumulative and --survival are mutually exclusive, "
+                    "please specify only one of them")
 
         if self.options.output:
             _, output_ext = os.path.splitext(self.options.output)
