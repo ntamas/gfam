@@ -86,13 +86,19 @@ class PlotApp(CommandLineApp):
                 action="store_true",
                 help="plot cumulative distributions (if that makes sense "
                      "for a given plot)")
+        parser.add_option("--relative", dest="relative", action="store_true",
+                help="plot relative frequencies instead of absolute counts "
+                     "on the Y axis (if that makes sense for a given plot)")
         parser.add_option("--survival", dest="survival",
                 action="store_true",
                 help="plot survival distributions (if that makes sense for "
                      "a given plot)")
-        parser.add_option("--relative", dest="relative", action="store_true",
-                help="plot relative frequencies instead of absolute counts "
-                     "on the Y axis (if that makes sense for a given plot)")
+        parser.add_option("-t", "--text-mode", dest="text_mode",
+                action="store_true",
+                help="assume text-only mode. Plots will be replaced by "
+                     "ASCII art histograms. This option is assumed to "
+                     "be given if the extension of the output file is "
+                     ".txt")
         return parser
 
     def calculate_histograms_from_assignments(self, funcs, bin_size=1):
@@ -127,6 +133,20 @@ class PlotApp(CommandLineApp):
                     continue
                 result[name][assignment.source].add(value)
         return result
+
+    def get_ascii_art_from_histograms(self, histograms):
+        """Given a dict mapping assignment source names to `Histogram`
+        instances, returns a string containing ASCII art representations of
+        those histograms.
+        """
+        lines = []
+        for label in sorted(histograms.keys()):
+            lines.append(label.capitalize())
+            lines.append("=" * len(label))
+            lines.append("")
+            lines.append(str(histograms[label]))
+            lines.append("")
+        return "\n".join(lines)
 
     def get_assignment_reader(self):
         """Returns an `AssignmentReader` that reads from the assignment
@@ -244,7 +264,9 @@ class PlotApp(CommandLineApp):
             _, output_ext = os.path.splitext(self.options.output)
             if output_ext:
                 output_ext = output_ext[1:].lower()
-            if output_ext != "txt":
+            if output_ext == "txt":
+                self.options.text_mode = True
+            else:
                 matplotlib.use("agg")
         else:
             output_ext = None
@@ -261,17 +283,25 @@ class PlotApp(CommandLineApp):
             method = getattr(self, "plot_%s" % method_name)
             figure = method()
             if figure is None:
+                # No results, just continue
                 continue
-
-            if self.options.output:
-                if output_ext == "txt":
-                    # TODO
-                    pass
+            elif isinstance(figure, basestring):
+                # Did we receive a string? Print it to the output file as is.
+                if self.options.output:
+                    fp = open(self.options.output, "w")
+                    fp.write(figure)
+                    if figure and figure[-1] != '\n':
+                        fp.write('\n')
+                    fp.close()
                 else:
-                    figure.savefig(self.options.output)
+                    sys.stdout.write(figure)
             else:
-                from matplotlib import pyplot
-                pyplot.show()
+                # We have received a Matplotlib figure, plot it
+                if self.options.output:
+                    figure.savefig(self.options.output)
+                else:
+                    from matplotlib import pyplot
+                    pyplot.show()
 
     def plot_list(self):
         """Lists the names of the available figures"""
@@ -297,8 +327,12 @@ class PlotApp(CommandLineApp):
         histograms = self.calculate_histograms_from_assignments(
             {"log_evalue": trimmed_log_evalue}
         )["log_evalue"]
-        return self.get_barplot_from_histograms(histograms,
-                xlabel="log(E-value)", xlim=(-20, 5))
+
+        if self.options.text_mode:
+            return self.get_ascii_art_from_histograms(histograms)
+        else:
+            return self.get_barplot_from_histograms(histograms,
+                    xlabel="log(E-value)", xlim=(-20, 5))
 
     @figure_name("Distribution of domain lengths, sorted by data sources")
     def plot_length_distribution(self):
@@ -315,8 +349,11 @@ class PlotApp(CommandLineApp):
             {"length": trimmed_length},
             bin_size=int(max_length / 25)
         )["length"]
-        return self.get_barplot_from_histograms(histograms,
-                xlabel="Domain length", xlim=(0, max_length))
+        if self.options.text_mode:
+            return self.get_ascii_art_from_histograms(histograms)
+        else:
+            return self.get_barplot_from_histograms(histograms,
+                    xlabel="Domain length", xlim=(0, max_length))
 
     @figure_name("Distribution of overlap lengths, sorted by data sources")
     def plot_overlap_distribution(self):
@@ -347,8 +384,12 @@ class PlotApp(CommandLineApp):
             else:
                 prev_id = assignment.id
                 same_seq_assignments = [assignment]
-        return self.get_barplot_from_histograms(histograms,
-                xlabel="Overlap length", xlim=(0, 100))
+
+        if self.options.text_mode:
+            return self.get_ascii_art_from_histograms(histograms)
+        else:
+            return self.get_barplot_from_histograms(histograms,
+                    xlabel="Overlap length", xlim=(0, 100))
 
 if __name__ == "__main__":
     sys.exit(PlotApp().run())
