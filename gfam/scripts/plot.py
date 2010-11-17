@@ -1,9 +1,12 @@
 """
-Plot script that is used to generate some of the figures in the
-GFam manuscript.
+Plot script that is used to generate figures showing general descriptive
+statistics of E-value distributions, overlap sizes and domain lengths.
 """
 
+from __future__ import division
+
 import matplotlib
+import os
 import sys
 
 from collections import defaultdict
@@ -12,11 +15,21 @@ from gfam.interpro import AssignmentReader
 from gfam.scripts import CommandLineApp
 from gfam.utils import Histogram, open_anything
 from math import ceil, log10
+from textwrap import TextWrapper
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
+
+
+def figure_name(name):
+    """Returns a decorator that assigns a human-readable figure name to a
+    function that generates a plot."""
+    def decorator(func):
+        func.figure_name = name
+        return func
+    return decorator
 
 
 def get_subplot_sizes(num):
@@ -56,10 +69,9 @@ class PlotApp(CommandLineApp):
     """\
     Usage: %prog [options] figure_name [figure_name] ...
 
-    Creates one or more of the figures in the GFam manuscript. figure_name
-    specifies the name of the figure to be plotted. For a list of supported
-    figures, use "list" as the figure name.
-    """
+    Creates one or more figures showing some descriptive statistics of the
+    input data. figure_name specifies the name of the figure to be plotted.
+    For a list of supported figures, use "list" as the figure name.  """
 
     def create_parser(self):
         """Creates the parser that parses the command line options"""
@@ -68,7 +80,15 @@ class PlotApp(CommandLineApp):
                 metavar="FILE", config_key="file.input.iprscan",
                 help="read InterPro domain assignments from FILE")
         parser.add_option("-o", "--output", dest="output", metavar="FILE",
-                help="save the plot to the given FILE")
+                help="save the plot to the given FILE. Supported extensions: "
+                     "png, pdf, jpg, txt")
+        parser.add_option("--cumulative", dest="cumulative",
+                action="store_true",
+                help="plot cumulative distributions (if that makes sense "
+                     "for a given plot)")
+        parser.add_option("--relative", dest="relative", action="store_true",
+                help="plot relative frequencies instead of absolute counts "
+                     "on the Y axis (if that makes sense for a given plot)")
         return parser
 
     def calculate_histograms_from_assignments(self, funcs, bin_size=1):
@@ -113,9 +133,9 @@ class PlotApp(CommandLineApp):
 
     def get_available_figures(self):
         """Returns the list of available figures"""
-        return [method[5:] for method in self.__class__.__dict__ \
-                if method.startswith("plot_") and \
-                callable(getattr(self, method))]
+        return sorted((method[5:], func) \
+                      for method, func in self.__class__.__dict__.iteritems() \
+                      if method.startswith("plot_") and callable(func))
 
     def get_barplot_from_histograms(self, histograms, xlabel=None,
             ylabel="Count", xlim=None):
@@ -134,7 +154,23 @@ class PlotApp(CommandLineApp):
 
         for idx, source in enumerate(sources):
             histogram = histograms[source]
-            points = [(left, count) for left, _, count in histogram.bins()]
+
+            if self.options.cumulative:
+                cumsum = 0
+                points = []
+                for left, _, count in histogram.bins():
+                    cumsum += count
+                    points.append((left, cumsum))
+            else:
+                points = [(left, count) for left, _, count in histogram.bins()]
+
+            if points:
+                if self.options.relative:
+                    total = points[-1][1]
+                else:
+                    total = sum(y for _, y in points)
+                points = [(x, y/total) for x, y in points]
+
             axes = figure.add_subplot(num_fig_rows, num_fig_cols, idx+1)
             args = zip(*points)
             args.append(histogram.bin_width)
@@ -162,12 +198,19 @@ class PlotApp(CommandLineApp):
                               "to be plotted")
 
         if self.options.output:
-            matplotlib.use("agg")
+            _, output_ext = os.path.splitext(self.options.output)
+            if output_ext:
+                output_ext = output_ext[1:].lower()
+            if output_ext != "txt":
+                matplotlib.use("agg")
+        else:
+            output_ext = None
 
         available_figures = self.get_available_figures()
+        figure_names = [name for name, _ in available_figures]
         for arg in self.args:
             try:
-                method_name = match(arg, available_figures)
+                method_name = match(arg, figure_names)
             except ValueError as ex:
                 self.log.warning(ex)
                 continue
@@ -178,17 +221,25 @@ class PlotApp(CommandLineApp):
                 continue
 
             if self.options.output:
-                figure.savefig(self.options.output)
+                if output_ext == "txt":
+                    # TODO
+                    pass
+                else:
+                    figure.savefig(self.options.output)
             else:
                 from matplotlib import pyplot
                 pyplot.show()
 
     def plot_list(self):
         """Lists the names of the available figures"""
-        for method in self.get_available_figures():
+        wrapper = TextWrapper(subsequent_indent = " " * 22,
+                              width = 78)
+        for method, func in self.get_available_figures():
             if method != "list":
-                print method
+                wrapper.initial_indent = ("%-20s " % method).ljust(22)
+                print wrapper.fill(func.figure_name)
 
+    @figure_name("Distribution of log E-values, sorted by data sources")
     def plot_evalue_distribution(self):
         """Plots the distribution of E-values for domains from each one
         of the data sources"""
@@ -206,6 +257,7 @@ class PlotApp(CommandLineApp):
         return self.get_barplot_from_histograms(histograms,
                 xlabel="log(E-value)", xlim=(-20, 5))
 
+    @figure_name("Distribution of domain lengths, sorted by data sources")
     def plot_length_distribution(self):
         """Plots the distribution of domain lengths from each one
         of the data sources"""
@@ -223,6 +275,7 @@ class PlotApp(CommandLineApp):
         return self.get_barplot_from_histograms(histograms,
                 xlabel="Domain length", xlim=(0, max_length))
 
+    @figure_name("Distribution of overlap lengths, sorted by data sources")
     def plot_overlap_distribution(self):
         """Plots the distribution of overlaps between domain assignments
         of the same data source, for each of the data sources."""

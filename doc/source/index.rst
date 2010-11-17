@@ -38,6 +38,7 @@ button on the GitHub_ page.
    intro
    running
    pipeline
+   suppl
    api
 
 Indices and tables
