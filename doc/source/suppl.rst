@@ -38,7 +38,9 @@ figures to an output file::
     $ bin/plot.py -c gfam.cfg -o *outfile*.pdf figurename1 figurename2 ...
 
 The supported output formats include PDF, PNG, JPG and SVG, provided that the
-corresponding Matplotlib_ backends are installed.
+corresponding Matplotlib_ backends are installed. ASCII art representations
+of the histograms may also be printed if the extension of the output file is
+``.txt``.
 
 To get a list of the supported figure names, specify ``list`` in place of the
 figure name::
@@ -80,7 +82,9 @@ Command line options
                     Specify the name of the file to save the plots to. The desired
                     format of the file is inferred from its extension. Supported
                     formats: PNG, JPG, SVG and PDF (assuming that the required
-                    Matplotlib_ backends are installed).
+                    Matplotlib_ backends are installed). You may also use a
+                    `.txt` extension here, which turns on `--text-mode`
+                    automatically.
 
 --relative          Plot relative frequencies instead of absolute counts on the Y
                     axis (if that makes sense for the selected plot), and use a
@@ -88,6 +92,13 @@ Command line options
 
 --survival          Plot survival distributions (if that makes sense for the
                     selected plot), and use a line chart instead of a bar chart.
+
+-t, --text-mode     Print an ASCII art representation of each histogram. This
+                    option is useful if you are sitting at a non-graphical
+                    terminal (e.g., an ssh shell) or if you want to dump the
+                    histograms to a text file that you can analyze later. This
+                    option is turned on automatically if the extension of the
+                    output file is `.txt`.
 
 .. _updating-mappings:
 
