@@ -144,7 +144,7 @@ class PlotApp(CommandLineApp):
             lines.append(label.capitalize())
             lines.append("=" * len(label))
             lines.append("")
-            lines.append(str(histograms[label]))
+            lines.append(histograms[label].to_string(show_counts=True, show_bars=False))
             lines.append("")
         return "\n".join(lines)
 
