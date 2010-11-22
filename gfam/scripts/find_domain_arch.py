@@ -56,6 +56,11 @@ class FindDomainArchitectureApp(CommandLineApp):
                 help="print more details about the domain architecture into FILE",
                 config_key="generated/file.domain_architecture_details",
                 default=None)
+        parser.add_option("--stats",
+                dest="stats", metavar="FILE",
+                help="print genome-level statistics about the domain architectures into FILE",
+                config_key="generated/file.domain_architecture_stats",
+                default=None)
         parser.add_option("-n", "--names",
                 dest="interpro_names_file",
                 metavar="FILE",
@@ -126,6 +131,40 @@ class FindDomainArchitectureApp(CommandLineApp):
                 print "%s\t%d\t%s\t%d\t%s\t%s" % (member, seq.length, arch_str, \
                                               family_length, arch_str_pos, \
                                               arch_desc)
+
+        self.details_file.close()
+
+        if self.options.stats:
+            stats_file = open(self.options.stats, "w")
+
+            total_residues, covered_residues = 0.0, 0
+            for seq in self.seqcat.itervalues():
+                total_residues += seq.length
+                covered_residues += round(seq.coverage() * seq.length)
+
+            all_archs = set(arch for arch, _ in self.domain_archs)
+            num_archs = len(all_archs)
+            if "" in self.domain_archs:
+                num_archs -= 1
+
+            archs_without_novel = set(
+                    tuple(a for a in arch if not a.startswith("NOVEL"))
+                    for arch in all_archs
+            )
+            num_archs_without_novel = len(archs_without_novel)
+
+            print >>stats_file, "Number of sequences: %d" % len(self.seqcat)
+            print >>stats_file, \
+                    "Number of sequences with non-empty domain architecture: %d" %\
+                    sum(len(value) for key, value in self.domain_archs if key)
+            print >>stats_file, \
+                    "Number of non-empty domain architectures: %d" % num_archs
+            print >>stats_file, \
+                    "Number of non-empty domain architectures (ignoring novel domains): %d" % \
+                    num_archs_without_novel
+            print >>stats_file, \
+                    "Fraction of residues covered: %.4f" % (covered_residues / total_residues)
+            stats_file.close()
 
 
     def process_interpro_file(self, interpro_file):

@@ -577,4 +577,7 @@ file.valid_gene_ids=%(folder.work)s/gene_ids.txt
 
 # File containing the detailed final domain architecture for each sequence
 file.domain_architecture_details=%(folder.output)s/domain_architecture_details.txt
+
+# File containing genome-level domain architecture statistics
+file.domain_architecture_stats=%(folder.output)s/domain_architecture_stats.txt
 """

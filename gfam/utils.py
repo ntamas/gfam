@@ -160,8 +160,8 @@ class Histogram(object):
         >>> h << [2,3,2,7,8,5,5,0,7,9]     # Adding more items
         >>> print h
         N = 10, mean +- sd: 4.8000 +- 2.9740
-        [ 0.000,  5.000): ****
-        [ 5.000, 10.000): ******
+        [ 0,  5): **** (4)
+        [ 5, 10): ****** (6)
     """
 
     def __init__(self, bin_width = 1, data = None):
@@ -323,7 +323,7 @@ class Histogram(object):
                 scale = maxval // (max_width-2*num_length-6)
             scale = max(scale, 1)
 
-        result = ["N = %d, mean +- sd: %.4f +- %.4f " % \
+        result = ["N = %d, mean +- sd: %.4f +- %.4f" % \
             (self.n, self.mean, self.sd)]
 
         if show_bars:
@@ -462,8 +462,8 @@ class RunningMean(object):
         so you can use it to add elements as well:
             
           >>> rm=RunningMean()
-          >>> rm << [1,2,3,4]
-          (2.5, 1.6666666666667)
+          >>> rm << [1,2,3,4]           # doctest:+ELLIPSIS
+          (2.5, 1.290994...)
         
         @param values: the element(s) to be added
         @type values: iterable
@@ -655,6 +655,66 @@ class complementerset(object):
         the members of the given iterable."""
         self._set = set(iterable)
 
+    def difference_update(self, *args):
+        """Removes all elements of another set from this set.
+
+        Example::
+
+            >>> s = complementerset([1,2])
+            >>> s.difference_update([4,5])
+            >>> print s
+            complementerset([1, 2, 4, 5])
+            >>> s.difference_update([2], [1,6], [7,5,"spam"])
+            >>> print any(item in s for item in [2,1,6,7,5,"spam",4])
+            False
+        """
+        self._set.update(*args)
+
+    def discard(self, member):
+        """Removes an element from the complementer set if it is a member.
+
+        Example::
+
+            >>> s = complementerset()
+            >>> s.discard(2)
+            >>> print s
+            complementerset([2])
+            >>> s.discard(2)
+            >>> print s
+            complementerset([2])
+        """
+        self._set.add(member)
+
+    def iterexcluded(self):
+        """Iterates over the items excluded from the complementer set.
+        
+        Example::
+            
+            >>> s = complementerset([5, 7, 4])
+            >>> print sorted(list(s.iterexcluded()))
+            [4, 5, 7]
+        """
+        return iter(self._set)
+
+    def remove(self, member):
+        """Removes an element from the complementer set; it must be a member.
+        If the element is not a member, raises a ``KeyError``.
+        
+        Example::
+            
+            >>> s = complementerset()
+            >>> s.remove(2)
+            >>> print s
+            complementerset([2])
+            >>> s.remove(2)
+            Traceback (most recent call last):
+              File "<stdin>", line 4, in ?
+            KeyError: 2
+        """
+        if member in self._set:
+            raise KeyError(member)
+        self._set.add(member)
+
     def __and__(self, other):
         """Example::
 
@@ -685,7 +745,10 @@ class complementerset(object):
             >>> 1 in s
             False
         """
-        return what not in self._set
+        if hasattr(what, "__hash__"):
+            return what not in self._set
+        else:
+            return True
 
     def __eq__(self, other):
         """Example::
@@ -756,9 +819,6 @@ class complementerset(object):
             False
         """
         return self != other and self >= other
-
-    def __hash__(self):
-        return hash(self._set)
 
     def __iand__(self, other):
         """Example::

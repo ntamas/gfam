@@ -18,6 +18,8 @@ except ImportError:
 
 from gfam.enum import Enum
 
+import operator
+
 # pylint: disable-msg=C0103,E1101
 # C0103: invalid name
 # E1101: instance has no 'foo' member. Pylint does not know namedtuple
@@ -270,13 +272,44 @@ class SequenceWithAssignments(object):
         self.assignments.append(assignment)
         return True
 
-    def coverage(self):
+    def coverage(self, sources=None):
         """Returns the coverage of the sequence, i.e. the fraction of residues
-        covered by at least one assignment."""
+        covered by at least one assignment.
+        
+        `sources` specifies the data sources to be included in the coverage
+        calculation. If `None`, all the data sources will be considered; otherwise
+        it must be a set containing the accepted sources."""
         ok = [0] * self.length
-        for a in self.assignments:
-            ok[a.start:(a.end+1)] = [1] * ((a.end+1)-a.start)
+        if sources is None:
+            for a in self.assignments:
+                ok[a.start:(a.end+1)] = [1] * ((a.end+1)-a.start)
+        else:
+            if isinstance(sources, basestring):
+                sources = [sources]
+            for a in self.assignments:
+                if a.source in sources:
+                    ok[a.start:(a.end+1)] = [1] * ((a.end+1)-a.start)
         return sum(ok) / float(self.length)
+
+    def data_sources(self):
+        """Returns the list of data sources that were used in this assignment."""
+        return sorted(set(a.source for a in self.assignments))
+
+    def domain_architecture(self, sources=None):
+        """Returns the domain architecture of the assignment.
+
+        The domain architecture is a list which contains the IDs of the assigned
+        regions (domains) in ascending order of their starting positions. If
+        `sources` is ``None``, all data sources will be considered; otherwise it
+        must be a set or iterable which specifies the data sources to be
+        included in the result.
+        """
+        sorted_assignments = sorted(self.assignments, key=operator.attrgetter("start"))
+        if sources is None:
+            return [a.domain for a in sorted_assignments]
+        if isinstance(sources, basestring):
+            sources = [sources]
+        return [a.domain for a in sorted_assignments if a.source in sources]
 
     def is_completely_unassigned(self, start, end):
         """Checks whether the given region is completely unassigned.
