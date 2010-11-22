@@ -41,12 +41,22 @@ class AssignmentReader(object):
         assignment file and the corresponding raw lines one by one. Each
         object yielded by this generator will be a tuple containing an
         instance of `Assignment` and the corresponding line."""
-        return ((self.parse_line(line), line) for line in self._fp)
+        for line in self._fp:
+            assignment = self.parse_line(line)
+            if assignment is not None:
+                yield assignment, line
 
     def parse_line(self, line):
         """Parses a single line from an InterPro domain assignment file and
         returns a corresponding `Assignment` instance."""
-        parts = line.strip().split("\t")
+        line = line.strip()
+        if not line:
+            return None
+
+        parts = line.split("\t")
+
+        if len(parts) < 7:
+            raise ValueError(repr(line))
 
         if len(parts) < 15:
             parts.extend([None] * (15-len(parts)))
