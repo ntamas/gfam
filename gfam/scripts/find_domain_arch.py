@@ -147,21 +147,38 @@ class FindDomainArchitectureApp(CommandLineApp):
             if "" in self.domain_archs:
                 num_archs -= 1
 
-            archs_without_novel = set(
-                    tuple(a for a in arch if not a.startswith("NOVEL"))
-                    for arch in all_archs
-            )
+            def exclude_novel_domains(domain_architecture):
+                """Excludes novel domains from a domain architecture and returns
+                the filtered domain architecture as a tuple."""
+                return tuple(a for a in domain_architecture if not a.startswith("NOVEL"))
+
+            archs_without_novel = set(exclude_novel_domains(arch)
+                    for arch in all_archs)
+            archs_without_novel.remove(())
             num_archs_without_novel = len(archs_without_novel)
 
-            print >>stats_file, "Number of sequences: %d" % len(self.seqcat)
-            print >>stats_file, \
-                    "Number of sequences with non-empty domain architecture: %d" %\
+            num_seqs_with_nonempty_domain_arch = \
                     sum(len(value) for key, value in self.domain_archs if key)
+            num_seqs_with_nonempty_nonnovel_domain_arch = \
+                    sum(len(value) for key, value in self.domain_archs
+                            if key and not any(a.startswith("NOVEL") for a in key))
+
             print >>stats_file, \
                     "Number of non-empty domain architectures: %d" % num_archs
             print >>stats_file, \
                     "Number of non-empty domain architectures (ignoring novel domains): %d" % \
                     num_archs_without_novel
+            print >>stats_file
+            print >>stats_file, "Number of sequences: %d" % len(self.seqcat)
+            print >>stats_file, \
+                    "Sequences with non-empty domain architecture: %d (%.4f%%)" %\
+                    (num_seqs_with_nonempty_domain_arch,
+                     100.0 * num_seqs_with_nonempty_domain_arch / len(self.seqcat))
+            print >>stats_file, \
+                    "Sequences with non-empty domain architecture and no novel domains: %d (%.4f%%)" %\
+                    (num_seqs_with_nonempty_nonnovel_domain_arch,
+                     100.0 * num_seqs_with_nonempty_nonnovel_domain_arch / len(self.seqcat))
+            print >>stats_file
             print >>stats_file, \
                     "Fraction of residues covered: %.4f" % (covered_residues / total_residues)
             stats_file.close()

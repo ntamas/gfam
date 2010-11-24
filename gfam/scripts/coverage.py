@@ -4,6 +4,7 @@ import optparse
 import sys
 
 from collections import defaultdict
+from gfam import fasta
 from gfam.assignment import SequenceWithAssignments
 from gfam.interpro import AssignmentReader
 from gfam.scripts import CommandLineApp
@@ -36,12 +37,15 @@ class SequenceLevelOutputFormatter(object):
     to the command line options).
     """
 
+    def __init__(self, app):
+        self.app = app
+
     def process_assignments(self, seq):
         for source in seq.data_sources():
             cov = seq.coverage(sources=[source])
-            print "%s\t%d\t%s\t%d\t%.4f" % (name, len(seq), source, round(len(seq)*cov), cov)
+            print "%s\t%d\t%s\t%d\t%.4f" % (seq.name, len(seq), source, round(len(seq)*cov), cov)
         cov = seq.coverage()
-        print "%s\t%d\tALL\t%d\t%.4f" % (name, len(seq), round(len(seq)*cov), cov)
+        print "%s\t%d\tALL\t%d\t%.4f" % (seq.name, len(seq), round(len(seq)*cov), cov)
 
     def finish(self):
         pass
@@ -63,7 +67,8 @@ class GenomeLevelOutputFormatter(object):
           
     ALL as a data source name denotes the union of all data sources."""
 
-    def __init__(self):
+    def __init__(self, app):
+        self.app = app
         self.families_by_source = defaultdict(set)
         self.num_sequences_by_source = defaultdict(int)
         self.total_covered_by_source = defaultdict(int)
@@ -88,11 +93,23 @@ class GenomeLevelOutputFormatter(object):
 
     def finish(self):
         sources = set(self.num_sequences_by_source.iterkeys())
+        if self.app.options.sequences_file is not None:
+            total_seqs = len(self.app.valid_sequence_ids)
+            total_seq_length = self.app.total_sequence_length
+        else:
+            total_seqs = self.num_sequences_by_source["ALL"]
+            total_seq_length = self.total_residues
+
+        total_seqs = float(total_seqs)
+        total_seq_length = float(total_seq_length)
+
+        print "Source\t#sequences\t#families\tSequence coverage\tResidue coverage"
         for source in sorted(sources):
             num_seqs = self.num_sequences_by_source[source]
             num_families = len(self.families_by_source[source])
-            print "%s\t%d\t%d\t%.4f" % (source, num_seqs, num_families,
-                    self.total_covered_by_source[source] / self.total_residues)
+            print "%s\t%d\t%d\t%.4f\t%.4f" % (source, num_seqs, num_families,
+                    self.num_sequences_by_source[source] / total_seqs,
+                    self.total_covered_by_source[source] / total_seq_length)
 
 
 class CoverageApp(CommandLineApp):
@@ -112,16 +129,15 @@ class CoverageApp(CommandLineApp):
                 metavar="SOURCE", help="use the given assignment source",
                 config_key="analysis:coverage/include_sources",
                 action="append", default=[])
+        parser.add_option("-S", "--sequences",
+                dest="sequences_file", metavar="FILE",
+                help="FASTA file containing all the sequences of the representative gene model",
+                config_key="file.input.sequences", default=None)
         parser.add_option("-x", "--exclude", dest="exclude_sources",
                 metavar="SOURCE",
                 help="ignore the given assignment source",
                 config_key="analysis:coverage/untrusted_sources",
                 action="append", default=[])
-        parser.add_option("-g", "--gene-ids", dest="gene_id_file",
-                metavar="FILE", help="only consider those gene IDs which "+
-                   "are present in the list in the given FILE",
-                config_key="generated/file.valid_gene_ids",
-                default=None)
         parser.add_option("--totals", dest="print_totals", action="store_true",
                 help="print genome-level statistics instead of sequence-level "
                      "statistics",
@@ -133,14 +149,18 @@ class CoverageApp(CommandLineApp):
         """Runs the application"""
 
         # Load valid sequence IDs (if necessary)
-        if self.options.gene_id_file:
-            self.log.info("Loading sequence IDs from %s..." % \
-                          self.options.gene_id_file)
+        if self.options.sequences_file:
+            self.log.info("Loading sequences from %s..." % self.options.sequences_file)
+
+            self.total_sequence_length = 0
             self.valid_sequence_ids = set()
-            for line in open_anything(self.options.gene_id_file):
-                self.valid_sequence_ids.add(line.strip())
+            parser = fasta.Parser(open_anything(self.options.sequences_file))
+            for seq in parser:
+                self.valid_sequence_ids.add(seq.id)
+                self.total_sequence_length += len(seq.seq)
         else:
             self.valid_sequence_ids = complementerset()
+            self.total_sequence_length = None
 
         # Find which sources will be allowed
         if not self.options.include_sources:
@@ -159,9 +179,9 @@ class CoverageApp(CommandLineApp):
         for arg in self.args:
             # Set up the output formatter
             if self.options.print_totals:
-                self.output_formatter = GenomeLevelOutputFormatter()
+                self.output_formatter = GenomeLevelOutputFormatter(self)
             else:
-                self.output_formatter = SequenceLevelOutputFormatter()
+                self.output_formatter = SequenceLevelOutputFormatter(self)
             # Process the file
             self.process_infile(arg)
             # Print the results

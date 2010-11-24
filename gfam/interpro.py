@@ -34,7 +34,10 @@ class AssignmentReader(object):
         """A generator that yields the assignments in the InterPro domain
         assignment file one by one. Each object yielded by this generator
         will be an instance of `Assignment`."""
-        return (self.parse_line(line) for line in self._fp)
+        for line in self._fp:
+            assignment = self.parse_line(line)
+            if assignment is not None:
+                yield assignment
 
     def assignments_and_lines(self):
         """A generator that yields the assignments in the InterPro domain

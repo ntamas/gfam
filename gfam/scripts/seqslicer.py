@@ -71,7 +71,6 @@ class SeqSlicerApp(CommandLineApp):
     def load_sequences(self, seq_file):
         """Loads the sequences from the given sequence file in FASTA format"""
         self.log.info("Loading sequences from %s..." % seq_file)
-        self.seqs = {}
 
         parser = fasta.Parser(open_anything(seq_file))
         parser = fasta.regexp_remapper(parser,
