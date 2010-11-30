@@ -74,6 +74,9 @@ class FindUnassignedApp(CommandLineApp):
     def run_real(self):
         AssignmentOverlapChecker.max_overlap = self.options.max_overlap
 
+        if self.options.min_fragment_length < 1:
+            self.log.warning("minimum fragment length is not positive, assuming 1")
+            self.options.min_fragment_length = 1
         self.set_sequence_id_regexp(self.options.sequence_id_regexp)
         self.process_sequences_file(self.options.sequences_file)
 

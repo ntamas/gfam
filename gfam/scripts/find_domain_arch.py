@@ -12,6 +12,7 @@ import sys
 from gfam.assignment import AssignmentOverlapChecker, SequenceWithAssignments
 from gfam.interpro import InterPro, InterProNames
 from gfam.scripts import CommandLineApp
+from gfam.utils import redirected
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -159,28 +160,39 @@ class FindDomainArchitectureApp(CommandLineApp):
 
             num_seqs_with_nonempty_domain_arch = \
                     sum(len(value) for key, value in self.domain_archs if key)
+            num_seqs_with_nonempty_domain_arch_ignore_novel = \
+                    sum(len(value) for key, value in self.domain_archs
+                        if exclude_novel_domains(key) in archs_without_novel)
             num_seqs_with_nonempty_nonnovel_domain_arch = \
                     sum(len(value) for key, value in self.domain_archs
                             if key and not any(a.startswith("NOVEL") for a in key))
 
-            print >>stats_file, \
-                    "Number of non-empty domain architectures: %d" % num_archs
-            print >>stats_file, \
-                    "Number of non-empty domain architectures (ignoring novel domains): %d" % \
-                    num_archs_without_novel
-            print >>stats_file
-            print >>stats_file, "Number of sequences: %d" % len(self.seqcat)
-            print >>stats_file, \
-                    "Sequences with non-empty domain architecture: %d (%.4f%%)" %\
-                    (num_seqs_with_nonempty_domain_arch,
-                     100.0 * num_seqs_with_nonempty_domain_arch / len(self.seqcat))
-            print >>stats_file, \
-                    "Sequences with non-empty domain architecture and no novel domains: %d (%.4f%%)" %\
-                    (num_seqs_with_nonempty_nonnovel_domain_arch,
-                     100.0 * num_seqs_with_nonempty_nonnovel_domain_arch / len(self.seqcat))
-            print >>stats_file
-            print >>stats_file, \
-                    "Fraction of residues covered: %.4f" % (covered_residues / total_residues)
+            with redirected(stdout=stats_file):
+                print "Domain architectures"
+                print "===================="
+                print ""
+                print "Non-empty: %d" % num_archs
+                print "Non-empty (when ignoring novel domains): %d" % num_archs_without_novel
+                print ""
+                print "Sequences"
+                print "========="
+                print ""
+                print "Total: %d" % len(self.seqcat)
+                print "With at least one domain: %d (%.4f%%)" %\
+                        (num_seqs_with_nonempty_domain_arch,
+                         100.0 * num_seqs_with_nonempty_domain_arch / len(self.seqcat))
+                print "With at least one non-novel domain: %d (%.4f%%)" %\
+                        (num_seqs_with_nonempty_domain_arch_ignore_novel,
+                         100.0 * num_seqs_with_nonempty_domain_arch_ignore_novel / len(self.seqcat))
+                print "With at least one domain and no novel domains: %d (%.4f%%)" %\
+                        (num_seqs_with_nonempty_nonnovel_domain_arch,
+                         100.0 * num_seqs_with_nonempty_nonnovel_domain_arch / len(self.seqcat))
+                print ""
+                print "Residues"
+                print "========"
+                print ""
+                print "Total: %d" % total_residues
+                print "Covered: %d (%.4f%%)" % (covered_residues, 100.0*covered_residues/total_residues)
             stats_file.close()
 
 
