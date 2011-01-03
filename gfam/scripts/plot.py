@@ -81,7 +81,7 @@ class PlotApp(CommandLineApp):
                 help="read InterPro domain assignments from FILE")
         parser.add_option("-o", "--output", dest="output", metavar="FILE",
                 help="save the plot to the given FILE. Supported extensions: "
-                     "png, pdf, jpg, txt")
+                     "png, pdf, eps, txt")
         parser.add_option("--cumulative", dest="cumulative",
                 action="store_true",
                 help="plot cumulative distributions (if that makes sense "
@@ -237,7 +237,7 @@ class PlotApp(CommandLineApp):
             axes.set_title(source.capitalize())
             if idx % num_fig_cols == 0:
                 axes.set_ylabel(ylabel)
-            if idx / num_fig_cols == num_fig_rows-1:
+            if int(idx / num_fig_cols) == num_fig_rows-1:
                 axes.set_xlabel(xlabel)
             if xlim:
                 axes.set_xlim(xlim)
