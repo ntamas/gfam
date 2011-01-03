@@ -12,7 +12,7 @@ import sys
 from gfam.assignment import AssignmentOverlapChecker, SequenceWithAssignments
 from gfam.interpro import InterPro, InterProNames
 from gfam.scripts import CommandLineApp
-from gfam.utils import redirected
+from gfam.utils import complementerset, redirected
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -138,10 +138,13 @@ class FindDomainArchitectureApp(CommandLineApp):
         if self.options.stats:
             stats_file = open(self.options.stats, "w")
 
-            total_residues, covered_residues = 0.0, 0
+            total_residues, covered_residues, covered_residues_nonnovel = 0.0, 0, 0
+            nonnovel_sources = complementerset(["Novel"])
+
             for seq in self.seqcat.itervalues():
                 total_residues += seq.length
                 covered_residues += round(seq.coverage() * seq.length)
+                covered_residues_nonnovel += round(seq.coverage(sources=nonnovel_sources) * seq.length)
 
             all_archs = set(arch for arch, _ in self.domain_archs)
             num_archs = len(all_archs)
@@ -193,6 +196,7 @@ class FindDomainArchitectureApp(CommandLineApp):
                 print ""
                 print "Total: %d" % total_residues
                 print "Covered: %d (%.4f%%)" % (covered_residues, 100.0*covered_residues/total_residues)
+                print "Covered by non-novel: %d (%.4f%%)" % (covered_residues_nonnovel, 100.0*covered_residues_nonnovel/total_residues)
             stats_file.close()
 
 
