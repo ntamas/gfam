@@ -138,7 +138,7 @@ class FindDomainArchitectureApp(CommandLineApp):
         if self.options.stats:
             stats_file = open(self.options.stats, "w")
 
-            total_residues, covered_residues = 0.0, 0
+            total_residues, covered_residues, covered_residues_nonnovel = 0.0, 0, 0
             for seq in self.seqcat.itervalues():
                 total_residues += seq.length
                 covered_residues += round(seq.coverage() * seq.length)
@@ -167,6 +167,11 @@ class FindDomainArchitectureApp(CommandLineApp):
                     sum(len(value) for key, value in self.domain_archs
                             if key and not any(a.startswith("NOVEL") for a in key))
 
+            sources = complementerset(["NOVEL"])
+            for seq in self.seqcat.itervalues():
+                seq = self.seqcat[member]
+                covered_residues_nonnovel += seq.coverage(sources=sources) * seq.length
+
             with redirected(stdout=stats_file):
                 print "Domain architectures"
                 print "===================="
@@ -193,6 +198,7 @@ class FindDomainArchitectureApp(CommandLineApp):
                 print ""
                 print "Total: %d" % total_residues
                 print "Covered: %d (%.4f%%)" % (covered_residues, 100.0*covered_residues/total_residues)
+                print "Covered by non-novel: %d (%.4f%%)" % (covered_residues_nonnovel, 100.0*covered_residues_nonnovel/total_residues)
             stats_file.close()
 
 

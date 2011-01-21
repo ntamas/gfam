@@ -69,13 +69,13 @@ class InterProCoverageApp(CommandLineApp):
                 domain = assignment.domain
             domain_ids[assignment.source].add(domain)
 
-        print "Source\tUnknown\tTotal\tPercentage"
+        print "Source\tInInterPro\tNotInInterPro\tTotal\tPercentage"
         for source in sorted(domain_ids):
             ids = domain_ids[source]
             total = len(ids)
             unknown = sum(1 for item in ids if item not in mapper)
             percentage = 100.0 * unknown / total
-            print "%s\t%d\t%d\t%.2f%%" % (source, unknown, total, percentage)
+            print "%s\t%d\t%d\t%d\t%.2f%%" % (source, total-unknown, unknown, total, percentage)
 
 
 if __name__ == "__main__":

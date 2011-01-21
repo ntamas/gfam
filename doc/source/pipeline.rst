@@ -221,7 +221,7 @@ length thresholds are configurable. For the analysis of *A.thaliana* and
 Step 4 -- All-against-all BLAST comparison and filtering
 --------------------------------------------------------
 
-This step uses the external `NCBI BLAST` executables (namely ``formatdb`` and
+This step uses the external ``NCBI BLAST`` executables (namely ``formatdb`` and
 ``blastall``) to determine pairwise similarity scores between the unassigned
 sequence fragments. First, a database is created from all sequence fragments
 using ``formatdb`` in a temporary folder, then a BLAST query is run on the

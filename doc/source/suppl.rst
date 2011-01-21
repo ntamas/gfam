@@ -83,7 +83,7 @@ Command line options
                     format of the file is inferred from its extension. Supported
                     formats: PNG, JPG, SVG and PDF (assuming that the required
                     Matplotlib_ backends are installed). You may also use a
-                    `.txt` extension here, which turns on `--text-mode`
+                    ``.txt`` extension here, which turns on `--text-mode`
                     automatically.
 
 --relative          Plot relative frequencies instead of absolute counts on the Y
@@ -98,7 +98,7 @@ Command line options
                     terminal (e.g., an ssh shell) or if you want to dump the
                     histograms to a text file that you can analyze later. This
                     option is turned on automatically if the extension of the
-                    output file is `.txt`.
+                    output file is ``.txt``.
 
 .. _updating-mappings:
 

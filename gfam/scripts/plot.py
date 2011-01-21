@@ -268,6 +268,9 @@ class PlotApp(CommandLineApp):
                 self.options.text_mode = True
             else:
                 matplotlib.use("agg")
+                matplotlib.rcParams["axes.labelsize"] = "smaller"
+                matplotlib.rcParams["xtick.labelsize"] = "smaller"
+                matplotlib.rcParams["ytick.labelsize"] = "smaller"
         else:
             output_ext = None
 
@@ -339,7 +342,7 @@ class PlotApp(CommandLineApp):
         """Plots the distribution of domain lengths from each one
         of the data sources"""
 
-        max_length = 750
+        max_length = 600
 
         def trimmed_length(assignment):
             length = assignment.get_assigned_length()
