@@ -446,7 +446,7 @@ util.blastall=%(folder.blast)s
 # If it is not empty, it must be a valid Python regular expression
 # with a *named* group "id" that matches the gene ID that is used
 # in the IPRScan output. If you don't know what named groups are,
-# check the documentation of the Python `re` module.
+# check the documentation of the Python ``re`` module.
 sequence_id_regexp=
 
 # Which assignment sources NOT to trust from InterPro? (space separated)
