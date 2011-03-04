@@ -55,12 +55,13 @@ Besides the data files, the following mapping files are also needed:
 
 **The Gene Ontology**
     This file contains the `Gene Ontology`_ in OBO format, and it is
-    required only for the `overrepresentation analysis`_ step. The latest
-    version of the file can be obtained from the homepage of the
-    `Gene Ontology`_ project.
+    required only for the `label assignment`_ and `overrepresentation analysis`_
+    steps. The latest version of the file can be obtained from the homepage of
+    the `Gene Ontology`_ project.
 
 .. _EBI: ftp://ftp.ebi.ac.uk/pub/databases/interpro/ParentChildTreeFile.txt
 .. _Gene Ontology: http://www.geneontology.org
+.. _label assignment: pipeline-step-label-assignment
 .. _overrepresentation analysis: pipeline-step-overrep
 
 GFam accepts uncompressed files or files compressed with ``gzip`` or ``bzip2``
@@ -100,7 +101,7 @@ follows:
 Output files
 ------------
 
-GFam produces three output files in the output folder specified in the
+GFam produces four output files in the output folder specified in the
 `configuration file`. These files are as follows:
 
 ``domain_architectures.tab``
@@ -155,6 +156,11 @@ domain; the third line takes into account novel domains (``NOVELxxxxx``), while
 the fourth line does not. The remaining lines list the domains themselves along
 with the data source they came from and the stage in which they were selected.
 For more details about the stages, see :ref:`pipeline`.
+
+``assigned_labels.txt``
+^^^^^^^^^^^^^^^^^^^^^^^
+
+TODO
 
 ``overrepresentation_analysis.txt``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

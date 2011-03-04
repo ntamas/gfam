@@ -306,8 +306,24 @@ primary data source for the sequence, the coverage of the sequence with and
 without novel domains, and also the number of the stage in which each domain
 was selected into the consensus assignment.
 
+.. _pipeline-step-label-assignment:
+
 Step 8 -- Functional label assignment
 -------------------------------------
+
+This step tries to assign a functional label to every sequence by looking at
+the list of its domains and collecting the corresponding Gene Ontology terms
+using a mapping file that assigns Gene Ontology terms to InterPro IDs. Such
+a file can be obtained from the InterPro2GO_ project. For each sequence, the
+collected Gene Ontology terms are filtered such that only those terms are kept
+which are either leaf terms (i.e. they have no descendants in the GO tree) or
+none of their descendants are included in the set of collected terms. These
+terms are then written in decreasing order of specificity to an output file,
+where specificity is assessed by the number of domains a given term is assigned
+to in the InterPro2GO_ mapping file; terms assigned to a smaller number of
+domains are considered more specific.
+
+.. _InterPro2GO: http://www.geneontology.org/external2go/interpro2go
 
 .. _pipeline-step-overrep:
 
