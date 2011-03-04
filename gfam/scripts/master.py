@@ -551,7 +551,7 @@ correction=fdr
 
 # The minimum number of annotated domains a GO term must have in order
 # to be considered in the overrepresentation analysis
-min_term_size=5
+min_term_size=1
 
 [analysis:coverage]
 

@@ -102,7 +102,7 @@ class OverrepresentationAnalyser(object):
         self.tree = tree
         self.mapping = self._propagate_go_term_ancestors(mapping)
         self.confidence = float(confidence)
-        self.min_count = max(0, int(min_count))
+        self.min_count = max(1, int(min_count))
         self.correction = correction
 
     def _propagate_go_term_ancestors(self, mapping):

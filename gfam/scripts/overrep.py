@@ -57,7 +57,7 @@ class OverrepresentationAnalysisApp(CommandLineApp):
                 help="use the given correction METHOD for multiple "
                      "hypothesis testing. Default: %default ")
         parser.add_option("-s", "--min-size", dest="min_size",
-                metavar="SIZE", default=5,
+                metavar="SIZE", default=1,
                 config_key="analysis:overrep/min_term_size",
                 help="don't test for overrepresentation of GO terms "
                      "with less than SIZE annotations. Default: %default")
@@ -109,10 +109,22 @@ class OverrepresentationAnalysisApp(CommandLineApp):
                 continue
 
             if arch not in cache:
-                cache[arch] = overrep.test_group(arch)
+                all_terms = set()
+                for domain in arch:
+                    all_terms.update(overrep.mapping.get_left(domain, []))
+                for path in overrep.tree.paths_to_root(*list(all_terms)):
+                    all_terms.difference_update(path[1:])
+                all_terms = sorted(all_terms, key =
+                        lambda x: len(overrep.mapping.get_right(x, [])))
+                cache[arch] = (all_terms, overrep.test_group(arch))
 
             print gene_id
-            for term, p_value in cache[arch]:
+            print "  == Associated GO terms =="
+            for term in cache[arch][0]:
+                print "  %s (%s)" % (term.id, term.name)
+
+            print "  == Overrepresentation analysis =="
+            for term, p_value in cache[arch][1]:
                 print "  %.4f: %s (%s)" % (p_value, term.id, term.name)
             print
             if len(cache[arch]) == 0:
