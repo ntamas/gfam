@@ -14,14 +14,15 @@ Overview of a GFam analysis
 
 GFam infers annotations for sequences by first finding a consensus domain
 architecture for each step, then collecting Gene Ontology terms for each domain
-in a given domain architecture, and performing a Gene Ontology
-overrepresentation analysis on the terms to determine whether a domain
-architecture is annotated by some GO terms that occur more frequently than
-expected by random chance. Out of these three steps, the calculation of the
-consensus domain architecture is the most complicated one, as GFam has to
-account for not only the known domain assignments from InterPro, but also
-for the possible existence of novel, previously uncharacterised domains.
-The whole pipeline can be broken to eight steps as follows:
+in a given domain architecture, and selecting a few more specific ones.
+Optionally, a Gene Ontology overrepresentation analysis can also be performed
+on the terms to determine whether some GO terms occur more frequently in a given
+domain architecture than expected by random chance. Out of these three steps,
+the calculation of the consensus domain architecture is the most complicated
+one, as GFam has to account for not only the known domain assignments from
+InterPro, but also for the possible existence of novel, previously
+uncharacterised domains.  The whole pipeline can be broken to 8+1 steps as
+follows:
 
 1. Extracting valid gene IDs from the sequence file.
 
@@ -49,7 +50,10 @@ The whole pipeline can be broken to eight steps as follows:
 7. Calculating the consensus domain architecture by merging the
    preliminary domain architecture with the newly detected novel domains.
 
-8. Conducting a Gene Ontology overrepresentation analysis on each of
+8. Selecting a functional label for each of the domain architectures based
+   on a mapping between InterPro domains and Gene Ontology terms.
+
+9. Conducting a Gene Ontology overrepresentation analysis on each of
    the sequences and their domain architectures to derive the final
    annotations.
 
@@ -302,16 +306,19 @@ primary data source for the sequence, the coverage of the sequence with and
 without novel domains, and also the number of the stage in which each domain
 was selected into the consensus assignment.
 
-.. _pipeline-step-overrep:
-
-Step 8 -- Overrepresentation analysis
+Step 8 -- Functional label assignment
 -------------------------------------
 
-This final step conducts a `Gene Ontology`_ overrepresentation analysis on the
-domain architecture of the sequences given in the input file. For each sequence,
-we find the Gene Ontology terms corresponding to each of the domains in the
-consensus domain architecture of the sequence, and check each term using a
-hypergeometric test to determine whether it is overrepresented within the
+.. _pipeline-step-overrep:
+
+Step 9 -- Overrepresentation analysis
+-------------------------------------
+
+This optional step conducts a `Gene Ontology`_ overrepresentation analysis on
+the domain architecture of the sequences given in the input file. For each
+sequence, we find the Gene Ontology terms corresponding to each of the domains
+in the consensus domain architecture of the sequence, and check each term using
+a hypergeometric test to determine whether it is overrepresented within the
 annotations of the sequence domains or not.
 
 During the overrepresentation analysis, *multiple* hypergeometric tests are
@@ -324,12 +331,6 @@ the false discovery rate (FDR) using the Benjamini-Hochberg method.
 The result of the overrepresentation analysis is saved into a human-readable
 text file that lists the overrepresented Gene Ontology terms in increasing
 order of p-values for each sequence.
-
-For the analysis of *A.thaliana* and *A.lyrata* sequences, we used the
-Benjamini-Hochberg method to control the FDR. The overall p-value threshold
-of the overrepresentation test was set to 0.05. Gene Ontology terms annotated
-to less than five domains were ignored as these terms have a very high
-probability of coming up as significant even by chance.
 
 .. _Gene Ontology: http://www.geneontology.org
 

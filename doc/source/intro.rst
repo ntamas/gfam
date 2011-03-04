@@ -5,16 +5,18 @@ What is GFam?
 -------------
 
 GFam (or ``gfam``) is a Python module to aid the automatic annotation of gene
-families based on consensus domain architecture. ``gfam`` started out as a
+families based on consensus domain architectures. ``gfam`` started out as a
 collection of loosely coupled Python scripts that process the output of
 ``iprscan`` (a tool to obtain domain assignments of individual genes from
 InterPro) and conduct some analyses using BLAST to detect novel, previously
 uncharacterised domains. The original domains and the detected novel domain
 candidates are then used to create a consensus domain assignment for each gene
 sequence. Genes are then finally assigned to families based on their domain
-architectures, and a Gene Ontology overrepresentation analysis is conducted on
-the GO annotations of individual domains in the same sequence to come up with a
-set of functional labels for each sequence.
+architectures. Finally, the tool derives functional labels for families based
+on the Gene Ontology and an assignment between InterPro domains and Gene
+Ontology terms. Optionally, a Gene Ontology overrepresentation analysis can also
+be conducted on the GO annotations of individual domains in the same sequence to
+reinforce the functional labels.
 
 Requirements
 ------------

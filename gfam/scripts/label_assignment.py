@@ -1,32 +1,32 @@
 #!/usr/bin/env python
-"""Gene Ontology overrepresentation analysis application"""
+"""Gene Ontology label assignment application"""
 
 import optparse
 import sys
 
 from collections import defaultdict
 from gfam.go import Tree as GOTree
-from gfam.go.overrepresentation import OverrepresentationAnalyser
 from gfam.interpro import InterPro2GOMapping
 from gfam.scripts import CommandLineApp
 from gfam.utils import open_anything
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
-__copyright__ = "Copyright (c) 2010, Tamas Nepusz"
+__copyright__ = "Copyright (c) 2011, Tamas Nepusz"
 __license__ = "GPL"
 
-class OverrepresentationAnalysisApp(CommandLineApp):
+class LabelAssignmentApp(CommandLineApp):
     """\
     Usage: %prog [options] [go_tree_file] [go_mapping_file] [input_file]
 
-    Conducts a Gene Ontology overrepresentation analysis on the
-    domain architecture of the sequences given in the input file.
+    Assigns a few Gene Ontology labels to each sequence given in the input file
+    based on their domain architecture and a mapping file that associates
+    functional labels to domains.
 
     go_tree_file must represent the Gene Ontology tree in OBO format.
 
     go_mapping_file establishes the mapping between InterPro domain IDs
-    and Gene Ontology IDs.
+    and GO labels.
 
     Each line in the input file must be in a tab-separated format
     where the first column contains the sequence ID and the
@@ -35,36 +35,14 @@ class OverrepresentationAnalysisApp(CommandLineApp):
     used directly.
     """
 
-    short_name = "overrep"
+    short_name = "label_assignment"
 
     def __init__(self, *args, **kwds):
-        super(OverrepresentationAnalysisApp, self).__init__(*args, **kwds)
+        super(LabelAssignmentApp, self).__init__(*args, **kwds)
         self.go_tree = None
 
-    def create_parser(self):
-        """Creates the command line parser for this application"""
-        parser = super(OverrepresentationAnalysisApp, self).create_parser()
-        parser.add_option("-p", "--confidence", dest="confidence",
-                metavar="PVALUE",
-                help="set the p-value cutoff to the given PVALUE. "
-                     "Default: %default",
-                config_key="analysis:overrep/confidence",
-                default=0.05, type=float)
-        parser.add_option("--correction", dest="correction",
-                metavar="METHOD", default="fdr",
-                choices=("none", "bonferroni", "sidak", "fdr"),
-                config_key="analysis:overrep/correction",
-                help="use the given correction METHOD for multiple "
-                     "hypothesis testing. Default: %default ")
-        parser.add_option("-s", "--min-size", dest="min_size",
-                metavar="SIZE", default=1,
-                config_key="analysis:overrep/min_term_size",
-                help="don't test for overrepresentation of GO terms "
-                     "with less than SIZE annotations. Default: %default")
-        return parser
-
     def run_real(self):
-        """Runs the overrepresentation analysis application"""
+        """Runs the label assignment application"""
         if len(self.args) != 3:
             self.error("expected exactly three input file names")
 
@@ -84,14 +62,7 @@ class OverrepresentationAnalysisApp(CommandLineApp):
     def process_file(self, input_file):
         """Processes the given input file that contains the domain
         architectures."""
-        self.log.info("Running overrepresentation analysis")
-        self.log.info("p-value = %.4f, correction method = %s" % \
-                      (self.options.confidence, self.options.correction))
 
-        overrep = OverrepresentationAnalyser(self.go_tree, self.go_mapping,
-                confidence = self.options.confidence,
-                min_count = self.options.min_size,
-                correction = self.options.correction)
         cache = {}
 
         num_no_annotations = 0
@@ -109,11 +80,18 @@ class OverrepresentationAnalysisApp(CommandLineApp):
                 continue
 
             if arch not in cache:
-                cache[arch] = overrep.test_group(arch)
+                all_terms = set()
+                for domain in arch:
+                    all_terms.update(self.go_mapping.get_left(domain, []))
+                for path in self.go_tree.paths_to_root(*list(all_terms)):
+                    all_terms.difference_update(path[1:])
+                all_terms = sorted(all_terms, key =
+                        lambda x: len(self.go_mapping.get_right(x, [])))
+                cache[arch] = all_terms
 
             print gene_id
-            for term, p_value in cache[arch]:
-                print "  %.4f: %s (%s)" % (p_value, term.id, term.name)
+            for term in cache[arch]:
+                print "  %s (%s)" % (term.id, term.name)
             print
 
             if len(cache[arch]) == 0:
@@ -121,11 +99,11 @@ class OverrepresentationAnalysisApp(CommandLineApp):
 
         self.log.info("Total number of sequences processed: %d" % total_seqs)
         if num_no_annotations:
-            self.log.info("%d sequences have no overrepresented annotations :("
+            self.log.info("Could not assign functional label to %d sequences :("
                     % num_no_annotations)
         if num_no_domains:
             self.log.info("%d sequences have no domains at all :(" % num_no_domains)
 
 
 if __name__ == "__main__":
-    sys.exit(OverrepresentationAnalysisApp().run())
+    sys.exit(LabelAssignmentApp().run())

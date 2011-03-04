@@ -214,6 +214,10 @@ class GFamMasterScript(CommandLineApp):
         depends=assignment_source_filter, cca
         infile=assignment_source_filter, cca
 
+        [label_assignment]
+        depends=file.mapping.gene_ontology, file.mapping.interpro2go, find_domain_arch
+        infile=file.mapping.gene_ontology, file.mapping.interpro2go, find_domain_arch
+
         [overrep]
         depends=file.mapping.gene_ontology, file.mapping.interpro2go, find_domain_arch
         infile=file.mapping.gene_ontology, file.mapping.interpro2go, find_domain_arch
@@ -346,6 +350,13 @@ class GFamMasterScript(CommandLineApp):
         shutil.copy(self.modula.storage_engine.get_filename("find_domain_arch"),
                 outfile)
         self.log.info("Exported domain architectures to %s." % outfile)
+
+        # Run and export the label assignment
+        outfile = os.path.join(outfolder, "assigned_labels.txt") 
+        self.modula.run("label_assignment", force=self.options.force)
+        shutil.copy(self.modula.storage_engine.get_filename("label_assignment"),
+                outfile)
+        self.log.info("Exported label assignment to %s." % outfile)
 
         # Run and export the overrepresentation analysis
         outfile = os.path.join(outfolder, "overrepresentation_analysis.txt") 
@@ -534,6 +545,11 @@ only_linked=1
 
 # A novel domain occur in at least this number of sequences
 min_novel_domain_size=4
+
+[analysis:label_assignment]
+
+# Empty section, this script has no individual parameters to tune, but
+# this might change in the future
 
 [analysis:overrep]
 
