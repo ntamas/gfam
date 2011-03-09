@@ -68,4 +68,6 @@ __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
 
+__version__ = "1.0"
+
 import gfam.fasta as fasta
