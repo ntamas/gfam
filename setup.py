@@ -17,6 +17,7 @@ params["version"] = "1.0"
 params["description"] = "Genome Families"
 
 params["packages"] = find_packages(exclude='tests')
+params["scripts"] = ["bin/gfam"]
 
 setup(**params)
 

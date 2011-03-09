@@ -1,0 +1,9 @@
+include bin/*.py
+include bin/*.pl
+recursive-include doc *
+prune doc/build
+
+include ez_setup.py
+include gfam.cfg
+include MANIFEST.in
+include README.rst
