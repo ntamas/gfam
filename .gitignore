@@ -1,6 +1,8 @@
 *.pyc
 .*.swp
 data/*
+dist/*
+ms/*
 work/*
 work_*/*
 *.egg-info
