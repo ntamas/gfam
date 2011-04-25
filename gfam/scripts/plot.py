@@ -32,6 +32,27 @@ def figure_name(name):
     return decorator
 
 
+def friendly_source_name(name):
+    """Returns the "friendly" name of a data source in an InterPro file,
+    with proper capitalization. E.g., for ``"hmmpfam"``, this function
+    returns ``HMMPfam``."""
+    known_names = dict(
+            blastprodom="BlastProDom",
+            fprintscan="FPrintScan",
+            gene3d="Gene3D",
+            hamap="HAMAP",
+            hmmpir="HMMPIR",
+            hmmpanther="HMMPanther",
+            hmmpfam="HMMPfam",
+            hmmsmart="HMMSmart",
+            hmmtigr="HMMTigr",
+            patternscan="PatternScan",
+            profilescan="ProfileScan",
+            superfamily="Superfamily"
+    )
+    return known_names.get(name.lower(), name)
+
+
 def get_subplot_sizes(num):
     """Assuming that a figure should have `num` subplots, calculates
     how many subplots should be in one row and how many rows should
@@ -141,7 +162,7 @@ class PlotApp(CommandLineApp):
         """
         lines = []
         for label in sorted(histograms.keys()):
-            lines.append(label.capitalize())
+            lines.append(friendly_source_name(label))
             lines.append("=" * len(label))
             lines.append("")
             lines.append(histograms[label].to_string(show_counts=True, show_bars=False))
@@ -234,7 +255,7 @@ class PlotApp(CommandLineApp):
                 # Use a bar plot for histograms
                 args.append(histogram.bin_width)
                 axes.bar(*args)
-            axes.set_title(source.capitalize())
+            axes.set_title(friendly_source_name(source))
             if idx % num_fig_cols == 0:
                 axes.set_ylabel(ylabel)
             if int(idx / num_fig_cols) == num_fig_rows-1:
