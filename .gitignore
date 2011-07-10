@@ -2,6 +2,7 @@
 .*.swp
 data/*
 dist/*
+log/*
 ms/*
 work/*
 work_*/*

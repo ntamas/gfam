@@ -45,10 +45,10 @@ def friendly_source_name(name):
             hmmpanther="HMMPanther",
             hmmpfam="HMMPfam",
             hmmsmart="HMMSmart",
-            hmmtigr="HMMTigr",
+            hmmtigr="HMMTIGR",
             patternscan="PatternScan",
             profilescan="ProfileScan",
-            superfamily="Superfamily"
+            superfamily="SUPERFAMILY"
     )
     return known_names.get(name.lower(), name)
 

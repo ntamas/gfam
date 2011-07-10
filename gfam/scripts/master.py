@@ -384,6 +384,10 @@ file.input.iprscan=
 # A FASTA file containing all the sequences being analysed
 file.input.sequences=
 
+# Log file to store why given sequences have been rejected during the
+# filtering of the input IPRScan file. Feel free to leave it empty.
+file.log.iprscan_exclusions=
+
 # A file containing the Gene Ontology in OBO format
 file.mapping.gene_ontology=data/gene_ontology.obo
 

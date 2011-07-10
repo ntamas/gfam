@@ -67,6 +67,10 @@ class AssignmentSourceFilterApp(CommandLineApp):
                    "are present in the list in the given FILE",
                 config_key="generated/file.valid_gene_ids",
                 default=None)
+        parser.add_option("--log-exclusions", dest="exclusions_log_file",
+                metavar="FILE", help="log excluded sequences to the given FILE "
+                   "for debugging purposes", default=None,
+                config_key="DEFAULT/file.log.iprscan_exclusions")
         parser.add_option("--max-overlap", metavar="SIZE",
                 help="sets the maximum overlap size allowed between "
                      "assignments of the same data source. Default: %default",
@@ -94,6 +98,13 @@ class AssignmentSourceFilterApp(CommandLineApp):
         else:
             self.valid_sequence_ids = complementerset()
 
+        if self.options.exclusions_log_file:
+            self.log.info("Logging excluded sequences to %s." %
+                    self.options.exclusions_log_file)
+            self.exclusion_log = open(self.options.exclusions_log_file, "a+")
+        else:
+            self.exclusion_log = None
+
         self.ignored = set()
         for ignored_source in self.options.ignored:
             parts = ignored_source.split()
@@ -115,6 +126,13 @@ class AssignmentSourceFilterApp(CommandLineApp):
 
         reader = AssignmentReader(fname)
         for assignment, line in reader.assignments_and_lines():
+            if assignment.id != current_id:
+                if current_id is not None:
+                    for row in self.filter_assignments(current_id, assignments_by_source):
+                        print row
+                current_id = assignment.id
+                assignments_by_source = defaultdict(list)
+
             if assignment.source in self.ignored:
                 continue
             if assignment.id not in valid_ids:
@@ -122,11 +140,6 @@ class AssignmentSourceFilterApp(CommandLineApp):
             if assignment.evalue is not None and \
                     not evalue_filter.is_acceptable(assignment):
                 continue
-            if assignment.id != current_id:
-                for row in self.filter_assignments(current_id, assignments_by_source):
-                    print row
-                current_id = assignment.id
-                assignments_by_source = defaultdict(list)
             assignments_by_source[assignment.source].append((assignment, line))
 
         for row in self.filter_assignments(current_id, assignments_by_source):
@@ -140,6 +153,8 @@ class AssignmentSourceFilterApp(CommandLineApp):
         """
 
         if not assignments_by_source:
+            self.log_exclusion(name, "no assignments in the input data file "
+                    "passed the filters")
             return []
 
         # Determine the length of the sequence (and check that the length is
@@ -152,7 +167,8 @@ class AssignmentSourceFilterApp(CommandLineApp):
                    for assignment, _ in assignments):
                 self.log.warning("Sequence %s has multiple assignments with "
                                  "different sequence lengths in the "
-                                 "input file, skipping")
+                                 "input file, skipping" % name)
+                self.log_exclusion(name, "ambiguous sequence length in input file")
                 return []
 
         # Initially, the result is empty
@@ -228,6 +244,10 @@ class AssignmentSourceFilterApp(CommandLineApp):
                 row = row + "\t" * (13-tab_count)
             result.append("%s\t%s" % (row, idx_to_stage[idx]))
 
+        if not result:
+            self.log_exclusion(name, "no assignments were selected after executing "
+                    "all the stages")
+
         return result
 
     def get_stages_from_config(self):
@@ -285,6 +305,17 @@ class AssignmentSourceFilterApp(CommandLineApp):
 
         return result
 
+    def log_exclusion(self, name, reason):
+        """Adds an entry to the exclusions log file, noting that the
+        sequence with the given `name` was excluded from further consideration
+        because of the given `reason`.
+
+        This method works only if an exclusion log file was specified when
+        calling the application.
+        """
+        if self.exclusion_log is None:
+            return
+        self.exclusion_log.write("%s: %s\n" % (name, reason))
 
 
 if __name__ == "__main__":
