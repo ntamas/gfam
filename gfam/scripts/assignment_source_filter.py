@@ -127,24 +127,19 @@ class AssignmentSourceFilterApp(CommandLineApp):
         reader = AssignmentReader(fname)
         for assignment, line in reader.assignments_and_lines():
             if assignment.id != current_id:
-                if current_id is not None:
-                    for row in self.filter_assignments(current_id, assignments_by_source):
-                        print row
+                self.filter_and_print_assignments(current_id, assignments_by_source)
                 current_id = assignment.id
                 assignments_by_source = defaultdict(list)
 
             if assignment.source in self.ignored:
-                continue
-            if assignment.id not in valid_ids:
                 continue
             if assignment.evalue is not None and \
                     not evalue_filter.is_acceptable(assignment):
                 continue
             assignments_by_source[assignment.source].append((assignment, line))
 
-        for row in self.filter_assignments(current_id, assignments_by_source):
-            print row
-
+        # ...and the last batch
+        self.filter_and_print_assignments(current_id, assignments_by_source)
 
     def filter_assignments(self, name, assignments_by_source):
         """Given a sequence name and its assignments ordered in a dict by
@@ -249,6 +244,18 @@ class AssignmentSourceFilterApp(CommandLineApp):
                     "all the stages")
 
         return result
+
+    def filter_and_print_assignments(self, name, assignments_by_source):
+        """Filters and prints the list of assignments of the gene with the
+        given `name`. `assignments_by_source` must contain the list of
+        domain assignments, sorted by data source."""
+        if name is None:
+            return
+        if name not in self.valid_sequence_ids:
+            self.log_exclusion(name, "not in the list of valid gene IDs")
+            return
+        for row in self.filter_assignments(name, assignments_by_source):
+            print row
 
     def get_stages_from_config(self):
         """Turns to the configuration file specified at startup to
