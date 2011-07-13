@@ -140,5 +140,5 @@ doctest: genfiles
 
 sync: html latexpdf
 	rsync -avz -e ssh --delete $(BUILDDIR)/html/ tamas@aspasia.cs.rhul.ac.uk:www/live/development/gfam/doc/
-	scp $(BUILDDIR)/latex/GFam.pdf tamas@aspasia.cs.rhul.ac.uk:www/live/development/gfam/doc/gfam-manual-1.0.pdf
+	scp $(BUILDDIR)/latex/GFam.pdf tamas@aspasia.cs.rhul.ac.uk:www/live/development/gfam/doc/gfam-manual-1.1.pdf
 
