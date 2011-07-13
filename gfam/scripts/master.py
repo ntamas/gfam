@@ -471,6 +471,15 @@ untrusted_sources=HAMAP PatternScan FPrintScan Seg Coil
 # same data source
 max_overlap=20
 
+# Hint on the number of CPU cores to use during the analysis. Currently
+# the BLAST invocation uses this hint to select the number of threads
+# used by BLAST to speed up calculations.
+#
+# The default value is 1 since it is not possible to auto-detect the
+# number of CPU cores in a platform independent way. Feel free to raise this
+# value if your computer has multiple CPU cores.
+num_cpu_cores=1
+
 [analysis:iprscan_filter]
 
 # E-value thresholds to use when processing the initial InterPro file.

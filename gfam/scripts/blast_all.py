@@ -45,6 +45,12 @@ class AllAgainstAllBLASTApp(CommandLineApp):
                 "is passed on intact to blastall. Default: %default",
                 config_key="analysis:allblast/output_format"
         )
+        parser.add_option("-a", dest="num_threads", default=1,
+                type=int, metavar="N",
+                help="instruct BLAST to use N threads. This option "
+                "is passed on intact to blastall. Default: %default",
+                config_key="analysis:allblast/num_cpu_cores"
+        )
         parser.add_option("-o", dest="output_file", metavar="FILE",
                 help="send the BLAST output to FILE. This option "
                 "is passed on intact to blastall if present.",
@@ -183,6 +189,7 @@ class AllAgainstAllBLASTApp(CommandLineApp):
         args.extend(["-p", self.options.blast_tool])
         args.extend(["-d", "database", "-i", sequence_file])
         args.extend(["-m", str(self.options.blast_output_format)])
+        args.extend(["-a", str(self.options.num_threads)])
         if self.options.output_file:
             args.extend(["-o", self.options.output_file])
 
