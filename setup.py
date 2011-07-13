@@ -13,7 +13,7 @@ from setuptools import setup, find_packages
 
 params = {}
 params["name"] = "gfam"
-params["version"] = "1.0"
+params["version"] = "1.1"
 params["description"] = "Genome Families"
 
 params["packages"] = find_packages(exclude='tests')
