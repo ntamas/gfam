@@ -1,0 +1,106 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+
+<svg width="867" height="270" version="1.1"
+xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink">
+
+<defs>
+<linearGradient id="bottom-face-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" style="stop-color:rgb(0,160,0);stop-opacity:1"/>
+<stop offset="100%" style="stop-color:rgb(32,192,32);stop-opacity:1"/>
+</linearGradient>
+
+<linearGradient id="top-face-highlight" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" style="stop-color:rgb(255,255,255);stop-opacity:0.8"/>
+<stop offset="100%" style="stop-color:rgb(255,255,255);stop-opacity:0"/>
+</linearGradient>
+
+<linearGradient id="reflection-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" style="stop-color:white;stop-opacity:0.4"/>
+<stop offset="20%" style="stop-color:white;stop-opacity:1.0"/>
+</linearGradient>
+
+<linearGradient id="top-face-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" style="stop-color:rgb(64,192,64);stop-opacity:1"/>
+<stop offset="100%" style="stop-color:rgb(0,180,0);stop-opacity:1"/>
+</linearGradient>
+
+<linearGradient id="background" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" style="stop-color:rgb(64,64,64);stop-opacity:1"/>
+<stop offset="50%" style="stop-color:rgb(0,0,0);stop-opacity:1"/>
+</linearGradient>
+
+<g id="text-on-box">
+      <svg
+         version="1.0"
+         width="150"
+         height="110"
+         id="svg2">
+		 <g style="stroke-width:3">
+			 <line x1="20" y1="15" x2="130" y2="15" />
+             <rect x="30" y="10" width="30" height="10" rx="2" ry="2" />
+             <rect x="70" y="10" width="50" height="10" rx="2" ry="2" />
+
+			 <line x1="10" y1="55" x2="140" y2="55" />
+             <rect x="50" y="50" width="80" height="10" rx="2" ry="2" />
+
+			 <line x1="0" y1="95" x2="150" y2="95" />
+             <rect x="10" y="90" width="20" height="10" rx="2" ry="2" />
+             <rect x="50" y="90" width="10" height="10" rx="2" ry="2" />
+             <rect x="90" y="90" width="50" height="10" rx="2" ry="2" />
+		 </g>
+      </svg>
+</g>
+
+</defs>
+
+<g transform="scale(2)">
+
+<rect x="0" y="0" width="100%" height="100%" fill="white" stroke="white" stroke-width="1"/>
+
+<g transform="translate(4 4) scale(1.2)">
+  <g id="box">
+    <!-- Upper face and highlight -->
+    <path d="M 2.5 63.5 L 12.5 12.5 Q 15 0 20 0 L 80 0 Q 85 0 87.5 12.5 L 97.5 63.5 Q 100 75 97.5 75 L 2.5 75 Q 0 75 2.5 63.5 z" style="fill: url(#top-face-gradient)"/>
+    <path d="M 7.5 37.5 Q 30 25 50 37.5 T 92.5 37.5 L 87.5 12.5 Q 85 0 80 0 L 20 0 Q 15 0 12.5 12.5 z" style="fill: url(#top-face-highlight)"/>
+    <g style="stroke-linejoin:round; stroke-width: 1; stroke: #009900">
+      <!-- Bottom face gradient -->
+      <polygon points="2.5,75 97.5,75 80,96 20,96" style="fill: url(#bottom-face-gradient)"/>
+      <!-- Upper face outline -->
+      <path d="M 2.5 75 Q 0 75 2.5 63.5 L 12.5 12.5 Q 15 0 20 0 L 80 0 Q 85 0 87.5 12.5 L 97.5 63.5 Q 100 75 97.5 75" fill="none" stroke="#33aa33"/>
+<!--
+      <path d="M 15 0 L 85 0" fill="none" stroke="#ff4444"/>
+-->
+      <path d="M 97.5 75 L 80 96" fill="none" stroke="#22a022"/>
+    </g>
+
+    <!-- Text on box -->
+	<g transform="translate(-7 0)">
+	<g style="fill: white" filter="url(#drop-shadow)" transform="matrix(0.5526135,0,0,0.5526135,16.542951,6.1526616)">
+	  <g style="opacity: 0.3">
+        <use xlink:href="#text-on-box" x="1" y="1" fill="white" stroke="white" />
+		<use xlink:href="#text-on-box" x="-1" y="-1" fill="black" stroke="black" />
+	  </g>
+	  <use xlink:href="#text-on-box" x="0" y="0" stroke="white" />
+    </g>
+	</g>
+
+	<!-- Caption -->
+	<g style="font-family: DistrictThin; fill: #888888">
+		<text x="110" y="17" font-size="24"><tspan style="fill: #000">g</tspan> e n e</text>
+		<text x="112" y="44" font-size="24"><tspan style="fill: #000">f</tspan> a m i l y</text>
+		<text x="110" y="69" font-size="24"><tspan style="fill: #000">a</tspan> n n o t a t i o n &#160;&amp;</text>
+		<text x="110" y="94" font-size="24"><tspan style="fill: #000">m</tspan> a i n t e n a n c e</text>
+	</g>
+  </g>
+
+  <!-- Reflection -->
+  <use x="0" y="0" xlink:href="#box" transform="rotate(180) translate(-100 -192)"/>
+  <rect x="-10" y="96" width="120" height="60" style="fill: url(#reflection-gradient)"/>
+</g>
+
+</g>
+
+</svg>

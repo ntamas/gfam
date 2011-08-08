@@ -170,11 +170,6 @@ class FindDomainArchitectureApp(CommandLineApp):
                     sum(len(value) for key, value in self.domain_archs
                             if key and not any(a.startswith("NOVEL") for a in key))
 
-            sources = complementerset(["NOVEL"])
-            for seq in self.seqcat.itervalues():
-                seq = self.seqcat[member]
-                covered_residues_nonnovel += seq.coverage(sources=sources) * seq.length
-
             with redirected(stdout=stats_file):
                 print "Domain architectures"
                 print "===================="

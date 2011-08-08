@@ -11,3 +11,4 @@ domain_architectures.zip
 doc/source/generated/*.inc
 doc/build
 gfam_*.cfg
+etc/logo/png/*

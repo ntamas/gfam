@@ -48,7 +48,7 @@ exclude_patterns = 'source/generated/*.rst'
 
 # General information about the project.
 project = u'GFam'
-copyright = u'2010, Tam\u00b4s Nepusz, Rajkumar Sasidharan'
+copyright = u'2010-2011, Tam\u00e1s Nepusz, Rajkumar Sasidharan'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -228,8 +228,8 @@ man_pages = [
 # Bibliographic Dublin Core info.
 epub_title = u'GFam'
 epub_author = u'Tamas Nepusz, Rajkumar Sasidharan'
-epub_publisher = u'Tamas Nepusz, Rajkumar Sasidharan'
-epub_copyright = u'2010, Tamas Nepusz, Rajkumar Sasidharan'
+epub_publisher = u'Tam\u00e1s Nepusz, Rajkumar Sasidharan'
+epub_copyright = u'2010-2011, Tam\u00e1s Nepusz, Rajkumar Sasidharan'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
