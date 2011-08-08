@@ -186,7 +186,7 @@ htmlhelp_basename = 'GFamdoc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'GFam.tex', u'GFam Documentation',
-   u'Tamas Nepusz, Rajkumar Sasidharan', 'manual'),
+   u'Tam\u00e1s Nepusz, Rajkumar Sasidharan', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -219,7 +219,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'gfam', u'GFam Documentation',
-     [u'Tamas Nepusz, Rajkumar Sasidharan'], 1)
+     [u'Tam\u00e1s Nepusz, Rajkumar Sasidharan'], 1)
 ]
 
 
@@ -227,7 +227,7 @@ man_pages = [
 
 # Bibliographic Dublin Core info.
 epub_title = u'GFam'
-epub_author = u'Tamas Nepusz, Rajkumar Sasidharan'
+epub_author = u'Tam\u00e1s Nepusz, Rajkumar Sasidharan'
 epub_publisher = u'Tam\u00e1s Nepusz, Rajkumar Sasidharan'
 epub_copyright = u'2010-2011, Tam\u00e1s Nepusz, Rajkumar Sasidharan'
 

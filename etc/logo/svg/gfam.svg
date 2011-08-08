@@ -88,7 +88,7 @@ xmlns:xlink="http://www.w3.org/1999/xlink">
 	</g>
 
 	<!-- Caption -->
-	<g style="font-family: DistrictThin; fill: #888888">
+	<g style="fill: #888888">
 		<text x="110" y="17" font-size="24"><tspan style="fill: #000">g</tspan> e n e</text>
 		<text x="112" y="44" font-size="24"><tspan style="fill: #000">f</tspan> a m i l y</text>
 		<text x="110" y="69" font-size="24"><tspan style="fill: #000">a</tspan> n n o t a t i o n &#160;&amp;</text>

@@ -6,9 +6,9 @@
 GFam -- Automatic annotation of gene families
 =============================================
 
-.. image:: figures/gfam_270x84.png
-   :height: 84px
-   :width: 270px
+.. image:: figures/gfam_logo.*
+   :height: 63pt
+   :width: 202.5pt
    :alt: GFam logo
    :align: center
 

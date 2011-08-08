@@ -12,3 +12,4 @@ doc/source/generated/*.inc
 doc/build
 gfam_*.cfg
 etc/logo/png/*
+etc/logo/pdf/*
