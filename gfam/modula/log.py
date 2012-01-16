@@ -39,13 +39,18 @@ class ColoredConsoleHandler(logging.StreamHandler):
         """Initializes the handler and checks whether colored output is available"""
         logging.StreamHandler.__init__(self, *args, **kwds)
         if ColoredConsoleHandler._has_colors is None:
+            has_colors = True
             try:
                 import curses
-                curses.initscr()
-                has_colors = curses.has_colors()
-                curses.endwin()
             except ImportError:
                 has_colors = False
+            if has_colors:
+                try:
+                    curses.initscr()
+                    has_colors = curses.has_colors()
+                    curses.endwin()
+                except curses.error:
+                    has_colors = False
             ColoredConsoleHandler._has_colors = has_colors
         self.uses_colors = has_colors
 
