@@ -221,7 +221,7 @@ class FindDomainArchitectureApp(CommandLineApp):
             domain_name = "NOVEL%05d" % idx
             idx += 1
             for id in ids:
-                seq_id, limits = id.split(":")
+                seq_id, _, limits = id.rpartition(":")
                 start, end = map(int, limits.split("-"))
                 self.seqcat[seq_id].assign_(start, end, domain_name)
         f.close()
