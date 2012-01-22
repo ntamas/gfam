@@ -254,8 +254,13 @@ class FindDomainArchitectureApp(CommandLineApp):
                 seq2 = SequenceWithAssignments(seq.name, seq.length)
                 seq2.assignments = [assignment for assignment in assignments \
                                     if assignment.source != "Novel"]
+                sources = sorted(set(assignment.source \
+                        for assignment in assignments \
+                        if assignment.source != "Novel"))
 
                 print >>self.details_file, "    Primary assignment source:", primary_source
+                print >>self.details_file, "    Number of data sources used:", len(sources)
+                print >>self.details_file, "    Data sources: %s" % ", ".join(sources)
                 print >>self.details_file, "    Coverage: %.3f" % seq.coverage()
                 print >>self.details_file, "    Coverage w/o novel domains: %.3f" % seq2.coverage()
                 for assignment in assignments:
