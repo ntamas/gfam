@@ -139,6 +139,6 @@ doctest: genfiles
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 sync: html latexpdf
-	rsync -avz -e ssh --delete $(BUILDDIR)/html/ tamas@aspasia.cs.rhul.ac.uk:www/live/development/gfam/doc/1.1/
-	scp $(BUILDDIR)/latex/GFam.pdf tamas@aspasia.cs.rhul.ac.uk:www/live/development/gfam/doc/1.1/gfam-manual-1.1.pdf
+	rsync -avz -e ssh --delete $(BUILDDIR)/html/ tamas@stafflinux.cs.rhul.ac.uk:www/live/development/gfam/doc/1.1/
+	scp $(BUILDDIR)/latex/GFam.pdf tamas@stafflinux.cs.rhul.ac.uk:www/live/development/gfam/doc/1.1/gfam-manual-1.1.pdf
 

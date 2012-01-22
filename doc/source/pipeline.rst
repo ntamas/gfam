@@ -264,12 +264,13 @@ itself and *i*'s neighbours in the graph. The Jaccard similarity of *i* and *j*
 is then defined as follows:
 
 .. math::
-   \sigma_{ij} = \frac{\Gamma_i \cap \Gamma_j}{\Gamma_i \cup \Gamma_j}
+   \sigma_{ij} = \frac{| \Gamma_i \cap \Gamma_j |}{|\Gamma_i \cup \Gamma_j|}
 
-We calculate the Jaccard similarity of each connected pairs of nodes and keep
-those which have a Jaccard similarity larger than 0.66. This corresponds to
-keeping pairs where roughly 2/3 of their neighbours are shared. The Jaccard
-similarity threshold can be adjusted in the :ref:`configuration file <config-file>`.
+where :math:`| \dots |` denotes the size of a set.  We calculate the Jaccard
+similarity of each connected pairs of nodes and keep those which have a Jaccard
+similarity larger than 0.66. This corresponds to keeping pairs where roughly
+2/3 of their neighbours are shared. The Jaccard similarity threshold can be
+adjusted in the :ref:`configuration file <config-file>`.
 
 Step 6 -- Identification of novel domains
 -----------------------------------------
