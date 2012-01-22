@@ -139,6 +139,8 @@ format::
 
     AT1G09650.1
         Primary assignment source: HMMTigr
+        Number of data sources used: 2
+        Data sources: superfamily, HMMTigr
         Coverage: 0.772
         Coverage w/o novel domains: 0.772
            9-  57: SSF81383 (superfamily, stage: 2) (InterPro ID: IPR022364)
@@ -150,12 +152,14 @@ The first line of each block is unindentend and contains the sequence ID. The
 remaining lines are indented by at least four spaces. The second line contains
 the name of the InterPro data source that was used to come up with the primary
 assignment in :ref:`step 2 of the pipeline <pipeline-step-preliminary>` (see
-more details later in :ref:`pipeline`).  The third and the fourth lines contain
-the fraction of positions in the sequence that are covered by at least one
-domain; the third line takes into account novel domains (``NOVELxxxxx``), while
-the fourth line does not. The remaining lines list the domains themselves along
-with the data source they came from and the stage in which they were selected.
-For more details about the stages, see :ref:`pipeline`.
+more details later in :ref:`pipeline`), followed by the number of data sources
+used to construct the final assignment, and of course the data sources
+themselves. The fifth and sixth lines contain the fraction of positions in the
+sequence that are covered by at least one domain; the fifth line takes into
+account novel domains (``NOVELxxxxx``), while the sixth line does not. The
+remaining lines list the domains themselves along with the data source they
+came from and the stage in which they were selected.  For more details about
+the stages, see :ref:`pipeline`.
 
 ``assigned_labels.txt``
 ^^^^^^^^^^^^^^^^^^^^^^^
