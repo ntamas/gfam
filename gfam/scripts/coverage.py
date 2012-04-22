@@ -76,7 +76,6 @@ class GenomeLevelOutputFormatter(object):
 
     def process_assignments(self, seq):
         self.total_residues += len(seq)
-
         for source in seq.data_sources():
             family = tuple(seq.domain_architecture(sources=[source]))
             self.num_sequences_by_source[source] += 1
@@ -133,6 +132,10 @@ class CoverageApp(CommandLineApp):
                 dest="sequences_file", metavar="FILE",
                 help="FASTA file containing all the sequences of the representative gene model",
                 config_key="file.input.sequences", default=None)
+        parser.add_option("-r", "--seq-id-regexp", metavar="REGEXP",
+                help="remap sequence IDs using REGEXP",
+                config_key="sequence_id_regexp",
+                dest="sequence_id_regexp")
         parser.add_option("-x", "--exclude", dest="exclude_sources",
                 metavar="SOURCE",
                 help="ignore the given assignment source",
@@ -155,6 +158,7 @@ class CoverageApp(CommandLineApp):
             self.total_sequence_length = 0
             self.valid_sequence_ids = set()
             parser = fasta.Parser(open_anything(self.options.sequences_file))
+            parser = fasta.regexp_remapper(parser, self.options.sequence_id_regexp)
             for seq in parser:
                 self.valid_sequence_ids.add(seq.id)
                 self.total_sequence_length += len(seq.seq)
