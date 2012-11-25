@@ -14,7 +14,7 @@ from gfam.scripts import CommandLineApp
 from gfam.assignment import AssignmentOverlapChecker, SequenceWithAssignments
 from gfam.utils import open_anything
 
-__author__  = "Tamas Nepusz"
+__authors__  = "Tamas Nepusz, Alfonso E. Romero"
 __email__   = "tamas@cs.rhul.ac.uk"
 __copyright__ = "Copyright (c) 2010, Tamas Nepusz"
 __license__ = "GPL"
@@ -116,8 +116,10 @@ class FindUnassignedApp(CommandLineApp):
                 if end-start+1 < self.options.min_fragment_length:
                     continue
                 print "%s\t%d\t%d" % (seqID, start, end)
+        maximum = max(self.options.min_length, self.options.min_fragment_length)
         for seqID in set(self.seq_ids_to_length.keys()) - set(self.seqcat.keys()):
-            print "%s\t1\t%d" % (seqID, self.seq_ids_to_length[seqID])
+            if self.seq_ids_to_length[seqID] >= maximum:
+                print "%s\t1\t%d" % (seqID, self.seq_ids_to_length[seqID])
 
     def set_sequence_id_regexp(self, regexp):
         self.sequence_id_regexp = regexp
