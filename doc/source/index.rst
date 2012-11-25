@@ -16,13 +16,15 @@ This is the documentation of ``gfam``, a Python module to aid the automatic
 annotation of gene families based on consensus domain architecture, written
 by `Tamás Nepusz`_.
 
-GFam has no official publication yet, but there will soon be one. You are
-kindly asked to cite the webpage of GFam until an official GFam publication
-comes out:
+GFam is free and open-source. If you use GFam in your research, please cite
+the corresponding publication as follows:
 
-  | **GFam: a platform for automatic annotation of gene families**
-  | Tamás Nepusz, Rajkumar Sasidharan, David Swarbreck, Eva Huala and
-  | Alberto Paccanaro. <http://github.com/ntamas/gfam>
+  | Sasidharan R, Nepusz T, Swarbreck D, Huala E and Paccanaro A:
+  | **GFam: a platform for automatic annotation of gene families**.
+  | *Nucleic Acids Research*, Advance Access, 2012.
+  | doi:`10.1093/nar/gks631`_.
+
+.. _10.1093/nar/gks631: http://nar.oxfordjournals.org/content/early/2012/07/11/nar.gks631.full
 
 GFam can generally be considered stable. We have used it successfully to
 annotate the whole genome of *Arabidopsis thaliana* and *Arabidopsis lyrata*.
