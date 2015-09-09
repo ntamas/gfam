@@ -162,7 +162,7 @@ class AllAgainstAllBLASTApp(CommandLineApp):
         """
         self.log.info("Invoking formatdb...")
 
-        args = ["-n", "database", "-i", sequence_file, "-o", "F"]
+        args = ["-n", "database", "-i", sequence_file, "-p", "T", "-o", "F"]
         args = self.get_blast_cmdline("formatdb", args)
         if not args:
             self.log.fatal("cannot find formatdb in %s" % self.options.formatdb_path)
