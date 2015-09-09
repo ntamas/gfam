@@ -158,7 +158,7 @@ class FindDomainArchitectureApp(CommandLineApp):
 
             archs_without_novel = set(exclude_novel_domains(arch)
                     for arch in all_archs)
-            archs_without_novel.remove(())
+            archs_without_novel.discard(())
             num_archs_without_novel = len(archs_without_novel)
 
             num_seqs_with_nonempty_domain_arch = \
