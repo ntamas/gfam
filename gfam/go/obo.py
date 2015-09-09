@@ -173,13 +173,22 @@ class Parser(object):
                         finished = True
                 line = " ".join(lines)
             else:
-                try:
-                    # Search for a trailing comment
-                    comment_char = line.rindex("!")
-                    line = line[0:comment_char].strip()
-                except ValueError:
-                    # No comment, fine
-                    pass
+                in_quotes = False
+                escape = False
+                comment_char_index = None
+                for index, char in enumerate(line):
+                    if escape:
+                        escape = False
+                        continue
+                    if char == '"':
+                        in_quotes = not in_quotes
+                    elif char == '\\' and in_quotes:
+                        escape = True
+                    elif char == '!' and not in_quotes:
+                        comment_char_index = index
+                        break
+                if comment_char_index is not None:
+                    line = line[0:comment_char_index].strip()
 
             yield line
 
