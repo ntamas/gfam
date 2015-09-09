@@ -152,7 +152,7 @@ class GFamMasterScript(CommandLineApp):
 
     short_name = "gfam"
 
-    def __init__(self, *args, **kwds): 
+    def __init__(self, *args, **kwds):
         super(GFamMasterScript, self).__init__(*args, **kwds)
         self.modula = None
         self.config = None
@@ -342,7 +342,12 @@ class GFamMasterScript(CommandLineApp):
     def do_run(self):
         """Runs the whole GFam pipeline"""
         # Get the output folder name
-        outfolder = self.config.get("DEFAULT", "folder.work")
+        outfolder = os.path.abspath(self.config.get("DEFAULT", "folder.output"))
+
+        # Create the output folder if needed
+        if outfolder and not os.path.isdir(outfolder):
+            self.modula.logger.warning("Creating output folder: %s" % outfolder)
+            os.makedirs(outfolder)
 
         # Run and export the inferred domain architectures
         outfile = os.path.join(outfolder, "domain_architectures.tab")
@@ -352,14 +357,14 @@ class GFamMasterScript(CommandLineApp):
         self.log.info("Exported domain architectures to %s." % outfile)
 
         # Run and export the label assignment
-        outfile = os.path.join(outfolder, "assigned_labels.txt") 
+        outfile = os.path.join(outfolder, "assigned_labels.txt")
         self.modula.run("label_assignment", force=self.options.force)
         shutil.copy(self.modula.storage_engine.get_filename("label_assignment"),
                 outfile)
         self.log.info("Exported label assignment to %s." % outfile)
 
         # Run and export the overrepresentation analysis
-        outfile = os.path.join(outfolder, "overrepresentation_analysis.txt") 
+        outfile = os.path.join(outfolder, "overrepresentation_analysis.txt")
         self.modula.run("overrep", force=self.options.force)
         shutil.copy(self.modula.storage_engine.get_filename("overrep"), outfile)
         self.log.info("Exported overrepresentation analysis to %s." % outfile)

@@ -28,7 +28,7 @@ def init(configuration=".", \
          storage_engine_factory=DiskStorageEngine,
          debug=False):
     """Initializes the Modula engine
-    
+
     `configuration` is either a `Configuration` instance or the name of the
     directory containing the module configuration file.
 
@@ -59,8 +59,9 @@ def init_project(rootdir):
         os.mkdir(rootdir)
 
     for dir in ["lib", "figures", "modules", "storage"]:
-        d = os.path.join(rootdir, dir) 
-        if not os.path.isdir(d): os.mkdir(d)
+        d = os.path.join(rootdir, dir)
+        if not os.path.isdir(d):
+            os.mkdir(d)
 
     f = os.path.join(rootdir, "modules.cfg")
     if not os.path.isfile(f):
