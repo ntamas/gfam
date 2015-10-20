@@ -49,7 +49,7 @@ class ColoredConsoleHandler(logging.StreamHandler):
                     curses.initscr()
                     has_colors = curses.has_colors()
                     curses.endwin()
-                except curses.error:
+                except:
                     has_colors = False
             ColoredConsoleHandler._has_colors = has_colors
         self.uses_colors = has_colors
