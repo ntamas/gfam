@@ -261,6 +261,13 @@ class GFamMasterScript(CommandLineApp):
 
         config = ConfigParser()
         config.read([config_file])
+
+        # If we haven't specified a temporary folder, create one
+        if not config.has_option("DEFAULT", "folder.tmp"):
+            outfolder = config.get("DEFAULT", "folder.work")
+            config.set("DEFAULT", "folder.tmp",
+                       os.path.abspath(os.path.join(outfolder, "tmp")))
+
         return config
 
     def run_real(self):
@@ -299,13 +306,23 @@ class GFamMasterScript(CommandLineApp):
     @needs_config
     def do_clean(self):
         """Clears the temporary directory used for intermediate results."""
-        # Get the output folder name
-        outfolder = self.config.get("DEFAULT", "folder.work")
+        # Get the output and temporary folder name
+        folders_to_remove = [
+            self.config.get("DEFAULT", "folder.tmp"),
+            self.config.get("DEFAULT", "folder.work")
+        ]
+        folders_to_remove = [
+            folder for folder in folders_to_remove
+            if folder is not None and os.path.isdir(folder)
+        ]
 
-        # Remove the folder
-        self.log.info("Removing temporary folder: %s" % outfolder)
-        shutil.rmtree(outfolder)
-        self.log.info("Temporary folder removed successfully.")
+        # Remove the folders that exist
+        for folder in folders_to_remove:
+            self.log.info("Removing temporary folder: %s" % folder)
+            shutil.rmtree(folder)
+
+        # Done.
+        self.log.info("Temporary folders removed successfully.")
 
     def do_init(self):
         """Initializes a configuration file in the current directory."""
@@ -419,6 +436,9 @@ folder.work=work
 
 # The output folder in which to put the final results
 folder.output=work
+
+# The temporary folder in which to put temporary files
+folder.tmp=work/tmp
 
 ###########################################################################
 ## External utilities used by GFam                                       ##

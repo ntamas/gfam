@@ -14,9 +14,8 @@ import os
 import subprocess
 import sys
 
-from gfam import fasta
 from gfam.scripts import CommandLineApp
-from gfam.utils import open_anything, search_file, temporary_dir
+from gfam.utils import search_file, temporary_dir
 
 __author__  = "Tamas Nepusz"
 __email__   = "tamas@cs.rhul.ac.uk"
@@ -70,6 +69,11 @@ class AllAgainstAllBLASTApp(CommandLineApp):
         parser.add_option("--blastall-path", dest="blastall_path",
                 help="uses PATH as the path to the blastall executable",
                 config_key="utilities/util.blastall", metavar="PATH"
+        )
+        parser.add_option("--temporary-dir", dest="temporary_dir",
+                help="uses PATH as a temporary directory. When omitted, "
+                     "the default temporary directory of the system is used",
+                config_key="folder.tmp", metavar="PATH"
         )
 
         return parser
@@ -145,8 +149,15 @@ class AllAgainstAllBLASTApp(CommandLineApp):
         """Processes the given sequence file"""
         self.log.info("Processing file: %s..." % sequence_file)
         sequence_file = os.path.abspath(sequence_file)
+        tmp_dir = self.options.temporary_dir
 
-        with temporary_dir(change=True) as dirname:
+        if tmp_dir is not None:
+            tmp_dir = os.path.abspath(tmp_dir)
+
+        if not os.path.exists(tmp_dir):
+            os.makedirs(tmp_dir)
+
+        with temporary_dir(change=True, dir=tmp_dir) as dirname:
             self.log.debug("Using temporary directory: %s" % dirname)
             ok = self.run_formatdb(sequence_file)
             ok = ok and self.run_blastall(sequence_file)
