@@ -81,6 +81,13 @@ class GFamCalculation(CalculationModule):
         else:
             stdin = None
 
+        if "use_temporary_dir" in self.parameters:
+            value = int(self.parameters["use_temporary_dir"])
+            if value:
+                tmpdir = modula.storage_engine.get_temporary_folder(self.name)
+                if tmpdir is not None:
+                    args.extend(["--temporary-dir", tmpdir])
+
         out_fname = modula.storage_engine.get_filename(self.name)
         stdout = modula.storage_engine.get_result_stream(self, mode="wb")
         try:
@@ -196,6 +203,7 @@ class GFamMasterScript(CommandLineApp):
         depends=seqslicer
         infile=seqslicer
         switch.0=-o blast_all
+        use_temporary_dir=1
 
         [blast_filter]
         depends=blast_all, seqslicer
@@ -262,12 +270,6 @@ class GFamMasterScript(CommandLineApp):
         config = ConfigParser()
         config.read([config_file])
 
-        # If we haven't specified a temporary folder, create one
-        if not config.has_option("DEFAULT", "folder.tmp"):
-            outfolder = config.get("DEFAULT", "folder.work")
-            config.set("DEFAULT", "folder.tmp",
-                       os.path.abspath(os.path.join(outfolder, "tmp")))
-
         return config
 
     def run_real(self):
@@ -308,7 +310,6 @@ class GFamMasterScript(CommandLineApp):
         """Clears the temporary directory used for intermediate results."""
         # Get the output and temporary folder name
         folders_to_remove = [
-            self.config.get("DEFAULT", "folder.tmp"),
             self.config.get("DEFAULT", "folder.work")
         ]
         folders_to_remove = [
@@ -436,9 +437,6 @@ folder.work=work
 
 # The output folder in which to put the final results
 folder.output=work
-
-# The temporary folder in which to put temporary files
-folder.tmp=work/tmp
 
 ###########################################################################
 ## External utilities used by GFam                                       ##

@@ -83,6 +83,13 @@ class AbstractStorageEngine(object):
         else:
             return self.get_source(module_or_source, *args, **kwds)
 
+    def get_temporary_folder(self, module):
+        """Retrieves the name of a temporary folder that a given module
+        may use. The temporary folder is not guaranteed to exist; it is the
+        responsibility of the module to create it if needed. The entire
+        folder will be removed when the execution of the module finishes."""
+        raise NotImplementedError
+    
     def store(self, module, parameters, result):
         """Stores the result of the given module with the given parameter
         set."""
@@ -146,6 +153,9 @@ class DiskStorageEngine(AbstractStorageEngine):
         except OSError, ex:
             raise NotFoundError(module, fname, ex)
 
+    def get_temporary_folder(self, module):
+        return os.path.join(self.storage_dir, "_tmp", module)
+    
     def store(self, module, result):
         """Stores the result of the given module with the given parameter
         set on the disk. `module` must be an instance of

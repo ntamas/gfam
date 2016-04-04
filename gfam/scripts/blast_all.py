@@ -73,7 +73,7 @@ class AllAgainstAllBLASTApp(CommandLineApp):
         parser.add_option("--temporary-dir", dest="temporary_dir",
                 help="uses PATH as a temporary directory. When omitted, "
                      "the default temporary directory of the system is used",
-                config_key="folder.tmp", metavar="PATH"
+                metavar="PATH"
         )
 
         return parser
@@ -154,7 +154,7 @@ class AllAgainstAllBLASTApp(CommandLineApp):
         if tmp_dir is not None:
             tmp_dir = os.path.abspath(tmp_dir)
 
-        if not os.path.exists(tmp_dir):
+        if tmp_dir and not os.path.exists(tmp_dir):
             os.makedirs(tmp_dir)
 
         with temporary_dir(change=True, dir=tmp_dir) as dirname:
