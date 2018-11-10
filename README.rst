@@ -16,6 +16,8 @@ to ``gfam``, please consider using `ConSAT`_ instead.
 The original documentation of ``gfam`` follows from here for historical
 purposes.
 
+.. _`ConSAT`: https://github.com/alfonsoeromero/ConSAT
+
 Introduction
 ============
 
