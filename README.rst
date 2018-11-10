@@ -7,6 +7,18 @@ Automatic annotation of gene families
 
 :Author: Tamás Nepusz, Rajkumar Sasidharan, Alberto Paccanaro
 
+Archival notice
+===============
+
+``gfam`` is now archived and has been superseded by `ConSAT`_. If you are new
+to ``gfam``, please consider using `ConSAT`_ instead.
+
+The original documentation of ``gfam`` follows from here for historical
+purposes.
+
+Introduction
+============
+
 This is the documentation of ``gfam``, a Python module to aid the automatic
 annotation of gene families based on consensus domain architecture. ``gfam``
 started out as a collection of loosely coupled Python scripts that process the
